@@ -1,0 +1,16 @@
+{
+  "name": "investment-platform",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Investment & VIP Management Platform",
+  "main": "index.html",
+  "scripts": {
+    "build": "echo 'No build step'",
+    "lint": "echo 'Lint skipped'"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "2.39.0",
+    "zod": "3.22.4",
+    "node-fetch": "2.6.7"
+  }
+}

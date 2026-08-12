@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RoyalVest — Withdraw</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+  <meta name="theme-color" content="#071a3d">
+
+<style data-royalvest-theme>
+  :root {
+    --rv-ink: #030a19;
+    --rv-midnight: #071a3d;
+    --rv-blue: #12376a;
+    --rv-blue-soft: #1c4d83;
+    --rv-gold: #e8ba4f;
+    --rv-yellow: #f5d46e;
+    --rv-green: #6fd55e;
+    --rv-white: #f7f4eb;
+    --rv-muted: #a7b8d3;
+    --rv-line: rgba(232, 186, 79, .22);
+    --rv-panel: rgba(10, 31, 70, .86);
+    --rv-display: "Fraunces", Georgia, serif;
+    --rv-body: "Inter", system-ui, sans-serif;
+    --rv-shadow: 0 22px 70px rgba(0, 0, 0, .26);
+  }
+
+  html { background: var(--rv-ink) !important; scroll-behavior: smooth; }
+  body.rv-shell {
+    min-height: 100vh;
+    color: var(--rv-white) !important;
+    background:
+      radial-gradient(circle at 84% 0%, rgba(23, 72, 136, .30), transparent 32rem),
+      radial-gradient(circle at 8% 42%, rgba(111, 213, 94, .05), transparent 28rem),
+      linear-gradient(135deg, var(--rv-ink) 0%, var(--rv-midnight) 56%, #0b2554 100%) !important;
+    font-family: var(--rv-body) !important;
+  }
+  body.rv-shell::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    opacity: .16;
+    background-image: linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px);
+    background-size: 64px 64px;
+    mask-image: linear-gradient(to bottom, black, transparent 78%);
+    z-index: 0;
+  }
+  body.rv-shell > * { position: relative; z-index: 1; }
+  body.rv-shell a { color: var(--rv-yellow); }
+  body.rv-shell p, body.rv-shell li { color: var(--rv-muted); }
+  body.rv-shell h1, body.rv-shell h2, body.rv-shell h3, body.rv-shell h4, body.rv-shell h5,
+  body.rv-shell .mkt-heading, body.rv-shell .page-hero-mkt h1 { font-family: var(--rv-display) !important; color: var(--rv-white) !important; letter-spacing: -.02em; }
+  body.rv-shell .mkt-eyebrow, body.rv-shell .eyebrow, body.rv-shell .section-label, body.rv-shell .page-hero-mkt .eyebrow { color: var(--rv-yellow) !important; letter-spacing: .16em; text-transform: uppercase; font-weight: 700; }
+
+  body.rv-shell .floating-header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: rgba(3, 10, 25, .88) !important;
+    border-bottom: 1px solid var(--rv-line) !important;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, .18);
+    backdrop-filter: blur(22px);
+  }
+  body.rv-shell .header-container { max-width: 1320px; min-height: 82px; padding: 0 1.4rem; }
+  body.rv-shell .brand { gap: .7rem; text-decoration: none; }
+  body.rv-shell .brand-mark {
+    display: grid; place-items: center; width: 42px; height: 48px; border: 1px solid var(--rv-gold);
+    border-radius: 48% 48% 45% 45% / 42% 42% 58% 58%; background: linear-gradient(155deg, rgba(232,186,79,.28), rgba(4,16,42,.95) 52%);
+    color: var(--rv-yellow) !important; font-family: var(--rv-display) !important; font-size: 1.3rem; font-weight: 700;
+    box-shadow: inset 0 0 0 3px rgba(232,186,79,.08), 0 8px 22px rgba(0,0,0,.22);
+  }
+  body.rv-shell .brand-name { color: var(--rv-white) !important; font-family: var(--rv-display) !important; font-size: 1.35rem; font-weight: 600; }
+  body.rv-shell .brand-copy { display: grid; gap: .12rem; }
+  body.rv-shell .brand-tag { color: var(--rv-yellow); font-size: .56rem; letter-spacing: .18em; text-transform: uppercase; white-space: nowrap; }
+  body.rv-shell #main-nav { gap: .3rem; }
+  body.rv-shell .nav-link { color: var(--rv-muted) !important; border-radius: 999px; transition: color .18s ease, background .18s ease, transform .18s ease; }
+  body.rv-shell .nav-link:hover, body.rv-shell .nav-dropdown.open > .nav-link { color: var(--rv-white) !important; background: rgba(232,186,79,.10) !important; }
+  body.rv-shell .dropdown-menu { background: #071a3d !important; border: 1px solid var(--rv-line) !important; box-shadow: var(--rv-shadow); }
+  body.rv-shell .dropdown-menu a { color: var(--rv-muted) !important; }
+  body.rv-shell .dropdown-menu a:hover { color: var(--rv-yellow) !important; background: rgba(232,186,79,.08) !important; }
+  body.rv-shell .btn { border-radius: 999px !important; font-family: var(--rv-body) !important; font-weight: 700; letter-spacing: .02em; transition: transform .18s ease, box-shadow .18s ease, background .18s ease; }
+  body.rv-shell .btn:active { transform: scale(.97); }
+  body.rv-shell .btn-primary, body.rv-shell .btn-success, body.rv-shell button[type="submit"] { background: linear-gradient(135deg, var(--rv-yellow), var(--rv-gold)) !important; border-color: var(--rv-yellow) !important; color: #081a38 !important; box-shadow: 0 10px 28px rgba(232,186,79,.18); }
+  body.rv-shell .btn-primary:hover, body.rv-shell button[type="submit"]:hover { box-shadow: 0 14px 34px rgba(232,186,79,.28); transform: translateY(-1px); }
+  body.rv-shell .btn-outline { color: var(--rv-yellow) !important; border: 1px solid rgba(232,186,79,.42) !important; background: rgba(7,26,61,.36) !important; }
+
+  body.rv-shell .hero-mkt, body.rv-shell .page-hero-mkt, body.rv-shell .hero, body.rv-shell .dashboard-hero {
+    position: relative; overflow: hidden; border-bottom: 1px solid var(--rv-line);
+    background: linear-gradient(120deg, rgba(3,10,25,.97), rgba(7,26,61,.80) 68%, rgba(18,55,106,.54));
+  }
+  body.rv-shell .hero-mkt::after, body.rv-shell .page-hero-mkt::after, body.rv-shell .dashboard-hero::after {
+    content: ""; position: absolute; right: 4%; bottom: -5rem; width: 18rem; height: 18rem; border: 1px solid rgba(232,186,79,.24); transform: rotate(45deg); box-shadow: 0 0 0 20px rgba(232,186,79,.035), 0 0 0 40px rgba(232,186,79,.02); pointer-events: none;
+  }
+  body.rv-shell .hero-mkt-inner, body.rv-shell .page-hero-mkt-inner { position: relative; z-index: 1; }
+  body.rv-shell .hero-mkt h1 { max-width: 780px; font-size: clamp(2.5rem, 7vw, 5.8rem) !important; line-height: .98; }
+  body.rv-shell .hero-mkt h1::first-line { color: var(--rv-white); }
+  body.rv-shell .hero-mkt p, body.rv-shell .page-hero-mkt p { max-width: 650px; color: var(--rv-muted) !important; }
+  body.rv-shell .hero-proof-dot { background: var(--rv-green) !important; box-shadow: 0 0 0 5px rgba(111,213,94,.10); }
+  body.rv-shell .trust-strip { background: rgba(7,26,61,.78) !important; border-top: 1px solid var(--rv-line); border-bottom: 1px solid var(--rv-line); }
+  body.rv-shell .trust-card { border-right: 1px solid rgba(232,186,79,.18) !important; }
+  body.rv-shell .trust-number, body.rv-shell .tier-roi { color: var(--rv-yellow) !important; }
+  body.rv-shell .trust-label { color: var(--rv-muted) !important; }
+  body.rv-shell .mkt-section, body.rv-shell .card, body.rv-shell .quote-card, body.rv-shell .panel, body.rv-shell .form-card,
+  body.rv-shell .auth-card, body.rv-shell .auth-shell-card, body.rv-shell .dashboard-card, body.rv-shell .stat-card,
+  body.rv-shell .content-card, body.rv-shell .settings-card, body.rv-shell .profile-card {
+    background: linear-gradient(155deg, rgba(12,38,82,.88), rgba(4,15,37,.92)) !important;
+    border: 1px solid rgba(232,186,79,.18) !important; box-shadow: 0 14px 38px rgba(0,0,0,.16); border-radius: 18px;
+  }
+  body.rv-shell .mkt-section.is-tinted { background: rgba(12,38,82,.42) !important; }
+  body.rv-shell .feature-row, body.rv-shell .step-row { border-color: rgba(232,186,79,.18) !important; }
+  body.rv-shell .feature-mark, body.rv-shell .step-num { background: linear-gradient(145deg, var(--rv-gold), var(--rv-yellow)) !important; color: #071a3d !important; }
+  body.rv-shell input, body.rv-shell select, body.rv-shell textarea { background: rgba(3,10,25,.72) !important; color: var(--rv-white) !important; border-color: rgba(232,186,79,.25) !important; }
+  body.rv-shell input::placeholder, body.rv-shell textarea::placeholder { color: #7890b2 !important; }
+  body.rv-shell label, body.rv-shell .form-label { color: var(--rv-muted) !important; }
+  body.rv-shell .badge, body.rv-shell .status-badge, body.rv-shell .tier-ribbon { background: rgba(111,213,94,.14) !important; color: var(--rv-green) !important; border-color: rgba(111,213,94,.32) !important; }
+  body.rv-shell .mkt-footer { margin-top: 3rem; background: #020814 !important; border-top: 1px solid var(--rv-line); }
+  body.rv-shell .mkt-footer-bottom { color: #7890b2 !important; border-top-color: rgba(232,186,79,.14) !important; }
+  body.rv-shell .cta-band { background: linear-gradient(135deg, rgba(18,55,106,.9), rgba(7,26,61,.92)) !important; border: 1px solid rgba(232,186,79,.32) !important; box-shadow: var(--rv-shadow); }
+  body.rv-shell .mobile-menu { background: #04102a !important; border-left: 1px solid var(--rv-line); }
+  body.rv-shell .mobile-menu-header { border-bottom-color: rgba(232,186,79,.18) !important; }
+  body.rv-shell .mobile-link, body.rv-shell .mobile-accordion-toggle { color: var(--rv-muted) !important; }
+  body.rv-shell .tab-bar { background: rgba(3,10,25,.94) !important; border-top: 1px solid var(--rv-line) !important; backdrop-filter: blur(18px); }
+  body.rv-shell .tab-item { color: #8fa5c2 !important; }
+  body.rv-shell .tab-item.is-active { color: var(--rv-yellow) !important; }
+  body.rv-shell .rv-ambient-line { max-width: 1320px; height: 1px; margin: 0 auto; background: linear-gradient(90deg, transparent, var(--rv-gold), transparent); opacity: .65; }
+  @media (max-width: 760px) {
+    body.rv-shell .header-container { min-height: 72px; padding: 0 1rem; }
+    body.rv-shell .brand-mark { width: 34px; height: 40px; }
+    body.rv-shell .brand-name { font-size: 1.1rem; }
+    body.rv-shell .brand-tag { font-size: .46rem; letter-spacing: .11em; }
+    body.rv-shell .hero-mkt h1 { font-size: clamp(2.35rem, 14vw, 4rem) !important; }
+    body.rv-shell .trust-strip { grid-template-columns: repeat(2, 1fr) !important; }
+    body.rv-shell .trust-card { border-bottom: 1px solid rgba(232,186,79,.18) !important; }
+  }
+</style>
+</head>
+<body class="rv-shell">
+  <div id="header-container"></div>
+<div class="rv-page-marker" aria-hidden="true">ROYALVEST / WHERE STOCKS MEETS INVESTMENTS</div>
+
+  <div class="section dashboard-page" style="max-width:640px;">
+
+    <div class="page-header">
+      <div class="dashboard-eyebrow">Wallet</div>
+      <h2>Withdraw funds</h2>
+      <p class="text-muted" style="margin-bottom:0;">Send money from your wallet to your bank account.</p>
+    </div>
+
+    <div id="hours-banner-wrap" class="mb-2"></div>
+
+    <!-- Balance summary -->
+    <div class="balance-card animate-fade" id="balance-card" style="display:none;">
+      <div class="balance-card-top">
+        <span class="balance-label">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
+          Available to withdraw
+        </span>
+        <div class="balance-amount currency-ngn" id="available-balance">0</div>
+      </div>
+      <div class="balance-sub-grid">
+        <div class="balance-sub">
+          <span class="balance-sub-label">Minimum request</span>
+          <span class="balance-sub-value currency-ngn">1,000</span>
+        </div>
+        <div class="balance-sub">
+          <span class="balance-sub-label">Payout method</span>
+          <span class="balance-sub-value">Bank transfer</span>
+        </div>
+        <div class="balance-sub">
+          <span class="balance-sub-label">Withdrawal hours</span>
+          <span class="balance-sub-value">Mon–Sat, 10am–5pm</span>
+        </div>
+      </div>
+    </div>
+
+    <div id="error-alert" class="alert alert-danger" style="display:none;"></div>
+
+    <!-- Withdrawal form -->
+    <form id="withdraw-form" class="card form-card">
+
+      <div class="form-section-label">Amount</div>
+      <div class="quick-chips" id="amount-presets" style="flex-wrap:wrap;">
+        <button type="button" class="quick-chip" data-amount="1000">₦1,000</button>
+        <button type="button" class="quick-chip" data-amount="3000">₦3,000</button>
+        <button type="button" class="quick-chip" data-amount="5000">₦5,000</button>
+        <button type="button" class="quick-chip" data-amount="10000">₦10,000</button>
+        <button type="button" class="quick-chip" data-amount="20000">₦20,000</button>
+        <button type="button" class="quick-chip" data-amount="30000">₦30,000</button>
+        <button type="button" class="quick-chip" data-amount="50000">₦50,000</button>
+      </div>
+      <input type="hidden" id="amount" required>
+      <div class="field-hint">Choose one of the fixed withdrawal amounts above.</div>
+
+      <div class="form-section-label">Payout account</div>
+
+      <div class="form-group">
+        <label class="form-label">Bank</label>
+        <div class="combo" id="bank-combo">
+          <button type="button" class="combo-toggle form-input" id="combo-toggle" aria-haspopup="listbox" aria-expanded="false">
+            <span class="combo-toggle-left">
+              <span class="combo-toggle-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M4 21V9l8-6 8 6v12"/><path d="M9 21v-6h6v6"/></svg>
+              </span>
+              <span class="combo-toggle-label is-placeholder" id="combo-toggle-label">Select your bank</span>
+            </span>
+            <svg class="combo-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="combo-panel" id="combo-panel" hidden>
+            <input type="text" class="combo-search" id="combo-search" placeholder="Search bank name…">
+            <div class="combo-list" id="combo-list"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Account Number</label>
+        <input id="account_number" class="form-input" required maxlength="10" inputmode="numeric" placeholder="0123456789">
+      </div>
+      <div class="form-group" style="margin-bottom:0;">
+        <label class="form-label">Account Name</label>
+        <input id="account_name" class="form-input" required placeholder="As it appears on your bank account">
+      </div>
+
+      <div class="summary-card" id="summary-card" style="display:none;">
+        <div class="summary-row"><span>You're withdrawing</span><span class="currency-ngn" id="summary-amount">0</span></div>
+        <div class="summary-row"><span>To</span><span id="summary-account">—</span></div>
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-block" id="withdraw-submit-btn" style="margin-top:1.5rem;">
+        Request Withdrawal
+      </button>
+      <div class="submit-note">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        <span>Requests are reviewed and paid out manually by our team. Funds leave your wallet balance immediately once submitted.</span>
+      </div>
+    </form>
+
+    <!-- History -->
+    <h3 class="mt-3 mb-2" style="font-family:var(--font-display);">Withdrawal History</h3>
+    <div class="card" id="history">
+      <div class="history-empty"><span class="text-muted">Loading…</span></div>
+    </div>
+
+  </div>
+
+  <div id="footer-container"></div>
+  <script src="/assets/js/components.js"></script>
+  <script src="/assets/js/bank-list.js"></script>
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+    const supabase = createClient(
+      'https://jytmnukzvxirnafukbck.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp5dG1udWt6dnhpcm5hZnVrYmNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQxNjQ3MjUsImV4cCI6MjA5OTc0MDcyNX0.ZvGUPTW7dJ3UxL2N1TW0lBCe3H4559HaUEhks7vEbEw'
+    );
+    window.supabase = supabase;
+
+    async function checkAuth() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) window.location.href = 'login.html';
+      return user;
+    }
+
+    function showError(msg) {
+      const el = document.getElementById('error-alert');
+      el.textContent = msg;
+      el.style.display = 'block';
+      el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+    function clearError() {
+      document.getElementById('error-alert').style.display = 'none';
+    }
+
+    // ---------- Bank combobox ----------
+    let selectedBank = null; // { code, name }
+    const comboEl = document.getElementById('bank-combo');
+    const toggleEl = document.getElementById('combo-toggle');
+    const toggleLabelEl = document.getElementById('combo-toggle-label');
+    const panelEl = document.getElementById('combo-panel');
+    const searchEl = document.getElementById('combo-search');
+    const listEl = document.getElementById('combo-list');
+
+    function renderBankOptions(filter) {
+      const banks = window.NGN_BANKS || [];
+      const q = (filter || '').trim().toLowerCase();
+      const filtered = q ? banks.filter(b => b.name.toLowerCase().includes(q)) : banks;
+
+      if (filtered.length === 0) {
+        listEl.innerHTML = '<div class="combo-empty">No bank matches your search.</div>';
+        return;
+      }
+      listEl.innerHTML = filtered.map(b => `
+        <button type="button" class="combo-option${selectedBank?.code === b.code ? ' is-selected' : ''}" data-code="${b.code}" data-name="${b.name}">
+          ${b.name}
+        </button>
+      `).join('');
+    }
+
+    function openCombo() {
+      comboEl.classList.add('is-open');
+      panelEl.hidden = false;
+      toggleEl.setAttribute('aria-expanded', 'true');
+      renderBankOptions('');
+      searchEl.value = '';
+      setTimeout(() => searchEl.focus(), 0);
+    }
+    function closeCombo() {
+      comboEl.classList.remove('is-open');
+      panelEl.hidden = true;
+      toggleEl.setAttribute('aria-expanded', 'false');
+    }
+
+    toggleEl.addEventListener('click', () => {
+      panelEl.hidden ? openCombo() : closeCombo();
+    });
+    searchEl.addEventListener('input', () => renderBankOptions(searchEl.value));
+    listEl.addEventListener('click', (e) => {
+      const btn = e.target.closest('.combo-option');
+      if (!btn) return;
+      selectedBank = { code: btn.dataset.code, name: btn.dataset.name };
+      toggleLabelEl.textContent = btn.dataset.name;
+      toggleLabelEl.classList.remove('is-placeholder');
+      closeCombo();
+      updateSummary();
+    });
+    document.addEventListener('click', (e) => {
+      if (!comboEl.contains(e.target)) closeCombo();
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeCombo();
+    });
+
+    // ---------- Fixed amount presets ----------
+    let currentBalance = 0;
+    document.querySelectorAll('#amount-presets .quick-chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        document.getElementById('amount').value = chip.dataset.amount;
+        document.querySelectorAll('#amount-presets .quick-chip').forEach(c => c.classList.remove('is-active'));
+        chip.classList.add('is-active');
+        updateSummary();
+      });
+    });
+    document.getElementById('account_number').addEventListener('input', updateSummary);
+    document.getElementById('account_name').addEventListener('input', updateSummary);
+
+    function updateSummary() {
+      const amount = +document.getElementById('amount').value || 0;
+      const accountNumber = document.getElementById('account_number').value.trim();
+      const accountName = document.getElementById('account_name').value.trim();
+      const summaryCard = document.getElementById('summary-card');
+
+      if (amount > 0 && selectedBank && accountNumber && accountName) {
+        document.getElementById('summary-amount').textContent = amount.toLocaleString();
+        document.getElementById('summary-account').textContent = `${accountName} · ${selectedBank.name} · ${accountNumber}`;
+        summaryCard.style.display = 'block';
+      } else {
+        summaryCard.style.display = 'none';
+      }
+    }
+
+    // ---------- Balance + KYC gate ----------
+    // Mirrors the server-side check in finance.js — client-side is just
+    // for a clear message; the server is the real authority.
+    function isWithdrawalWindowOpen() {
+      const now = new Date();
+      const watHour = (now.getUTCHours() + 1) % 24;
+      const watDay = new Date(now.getTime() + 60 * 60 * 1000).getUTCDay();
+      return watDay >= 1 && watDay <= 6 && watHour >= 10 && watHour < 17;
+    }
+
+    async function loadBalanceAndGate(user) {
+      const { data: wallet } = await supabase.from('wallets').select('balance').eq('user_id', user.id).single();
+      const { data: pendingRows } = await supabase.from('withdrawals').select('amount').eq('user_id', user.id).eq('status', 'pending');
+      const pendingTotal = (pendingRows || []).reduce((sum, r) => sum + Number(r.amount), 0);
+
+      currentBalance = (wallet?.balance || 0) - pendingTotal;
+      document.getElementById('available-balance').textContent = currentBalance.toLocaleString();
+      document.getElementById('balance-card').style.display = 'block';
+
+      document.querySelectorAll('#amount-presets .quick-chip').forEach(chip => {
+        chip.disabled = Number(chip.dataset.amount) > currentBalance;
+      });
+
+      if (!isWithdrawalWindowOpen()) {
+        document.getElementById('hours-banner-wrap').innerHTML = `
+          <div class="alert alert-info kyc-banner">
+            <span>Withdrawals are only available Monday–Saturday, 10am–5pm. Please come back during those hours.</span>
+          </div>`;
+        document.getElementById('withdraw-form').style.display = 'none';
+        return;
+      }
+
+      const { data: tierProfile } = await supabase.from('profiles').select('task_tier').eq('id', user.id).single();
+      if (!tierProfile || tierProfile.task_tier === 'newbie') {
+        document.getElementById('hours-banner-wrap').innerHTML = `
+          <div class="alert alert-danger kyc-banner">
+            <span>Only VIP members can withdraw funds.</span>
+            <a href="/investments.html" class="btn btn-sm btn-primary">Upgrade Now</a>
+          </div>`;
+        document.getElementById('withdraw-form').style.display = 'none';
+        return;
+      }
+    }
+
+    // ---------- Submit ----------
+    async function callFinanceApi(action, body) {
+      const { data: { session } } = await supabase.auth.getSession();
+      const res = await fetch(`/api/finance?action=${action}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session?.access_token}`,
+        },
+        body: JSON.stringify(body || {}),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || 'Request failed');
+      return json;
+    }
+
+    document.getElementById('withdraw-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      clearError();
+
+      const amount = +document.getElementById('amount').value;
+      const account_number = document.getElementById('account_number').value.trim();
+      const account_name = document.getElementById('account_name').value.trim();
+
+      if (!selectedBank) return showError('Please select your bank.');
+      if (!amount) return showError('Please choose a withdrawal amount.');
+      if (amount > currentBalance) return showError('That amount is more than your available balance.');
+
+      const btn = document.getElementById('withdraw-submit-btn');
+      btn.disabled = true;
+      btn.textContent = 'Submitting…';
+
+      try {
+        await callFinanceApi('createWithdrawal', {
+          amount,
+          bank_code: selectedBank.code,
+          bank_name: selectedBank.name,
+          account_number,
+          account_name
+        });
+        alert('Withdrawal request submitted!');
+        location.reload();
+      } catch (err) {
+        showError(err.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Request Withdrawal';
+      }
+    });
+
+    // ---------- History ----------
+    function statusBadge(status) {
+      if (status === 'approved') return '<span class="badge badge-success">Paid</span>';
+      if (status === 'rejected') return '<span class="badge badge-danger">Rejected</span>';
+      return '<span class="badge badge-warning">Pending</span>';
+    }
+
+    async function loadHistory(user) {
+      const { data } = await supabase.from('withdrawals').select('*').eq('user_id', user.id).order('created_at', { ascending: false });
+      const container = document.getElementById('history');
+
+      if (!data || data.length === 0) {
+        container.innerHTML = `
+          <div class="history-empty">
+            <span class="history-empty-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
+            </span>
+            <strong>No withdrawals yet</strong>
+            <span>Your requests will show up here once you submit one.</span>
+          </div>`;
+        return;
+      }
+
+      container.innerHTML = data.map(w => `
+        <div class="txn-row">
+          <span class="txn-icon" style="background:#EFEDF5;color:var(--clr-purple-ink);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
+          </span>
+          <div class="txn-body">
+            <div class="txn-title currency-ngn">${Number(w.amount).toLocaleString()}</div>
+            <div class="txn-date">${w.bank_details?.bank_name || ''} · ${w.bank_details?.account_number || ''} · ${new Date(w.created_at).toLocaleDateString()}</div>
+          </div>
+          ${statusBadge(w.status)}
+        </div>
+      `).join('');
+    }
+
+    checkAuth().then(async (user) => {
+      if (!user) return;
+      await loadBalanceAndGate(user);
+      await loadHistory(user);
+    });
+  </script>
+</body>
+          </html>
+        

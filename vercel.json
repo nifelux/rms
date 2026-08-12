@@ -1,0 +1,16 @@
+{
+  "functions": {
+    "api/*.js": {
+      "memory": 512,
+      "maxDuration": 10
+    }
+  },
+  "outputDirectory": ".",
+  "buildCommand": "",
+  "crons": [
+    {
+      "path": "/api/investment?action=triggerDailyIncome",
+      "schedule": "0 0 * * *"
+    }
+  ]
+}
