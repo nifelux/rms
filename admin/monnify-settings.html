@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en" class="dark-theme">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RoyalVest — Where stocks meets Investments.</title>
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <meta name="theme-color" content="#071a3d">
+
+<style data-royalvest-theme>
+  :root {
+    --rv-ink: #030a19;
+    --rv-midnight: #071a3d;
+    --rv-blue: #12376a;
+    --rv-blue-soft: #1c4d83;
+    --rv-gold: #e8ba4f;
+    --rv-yellow: #f5d46e;
+    --rv-green: #6fd55e;
+    --rv-white: #f7f4eb;
+    --rv-muted: #a7b8d3;
+    --rv-line: rgba(232, 186, 79, .22);
+    --rv-panel: rgba(10, 31, 70, .86);
+    --rv-display: "Fraunces", Georgia, serif;
+    --rv-body: "Inter", system-ui, sans-serif;
+    --rv-shadow: 0 22px 70px rgba(0, 0, 0, .26);
+  }
+
+  html { background: var(--rv-ink) !important; scroll-behavior: smooth; }
+  body.rv-shell {
+    min-height: 100vh;
+    color: var(--rv-white) !important;
+    background:
+      radial-gradient(circle at 84% 0%, rgba(23, 72, 136, .30), transparent 32rem),
+      radial-gradient(circle at 8% 42%, rgba(111, 213, 94, .05), transparent 28rem),
+      linear-gradient(135deg, var(--rv-ink) 0%, var(--rv-midnight) 56%, #0b2554 100%) !important;
+    font-family: var(--rv-body) !important;
+  }
+  body.rv-shell::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    opacity: .16;
+    background-image: linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px);
+    background-size: 64px 64px;
+    mask-image: linear-gradient(to bottom, black, transparent 78%);
+    z-index: 0;
+  }
+  body.rv-shell > * { position: relative; z-index: 1; }
+  body.rv-shell a { color: var(--rv-yellow); }
+  body.rv-shell p, body.rv-shell li { color: var(--rv-muted); }
+  body.rv-shell h1, body.rv-shell h2, body.rv-shell h3, body.rv-shell h4, body.rv-shell h5,
+  body.rv-shell .mkt-heading, body.rv-shell .page-hero-mkt h1 { font-family: var(--rv-display) !important; color: var(--rv-white) !important; letter-spacing: -.02em; }
+  body.rv-shell .mkt-eyebrow, body.rv-shell .eyebrow, body.rv-shell .section-label, body.rv-shell .page-hero-mkt .eyebrow { color: var(--rv-yellow) !important; letter-spacing: .16em; text-transform: uppercase; font-weight: 700; }
+
+  body.rv-shell .floating-header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: rgba(3, 10, 25, .88) !important;
+    border-bottom: 1px solid var(--rv-line) !important;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, .18);
+    backdrop-filter: blur(22px);
+  }
+  body.rv-shell .header-container { max-width: 1320px; min-height: 82px; padding: 0 1.4rem; }
+  body.rv-shell .brand { gap: .7rem; text-decoration: none; }
+  body.rv-shell .brand-mark {
+    display: grid; place-items: center; width: 42px; height: 48px; border: 1px solid var(--rv-gold);
+    border-radius: 48% 48% 45% 45% / 42% 42% 58% 58%; background: linear-gradient(155deg, rgba(232,186,79,.28), rgba(4,16,42,.95) 52%);
+    color: var(--rv-yellow) !important; font-family: var(--rv-display) !important; font-size: 1.3rem; font-weight: 700;
+    box-shadow: inset 0 0 0 3px rgba(232,186,79,.08), 0 8px 22px rgba(0,0,0,.22);
+  }
+  body.rv-shell .brand-name { color: var(--rv-white) !important; font-family: var(--rv-display) !important; font-size: 1.35rem; font-weight: 600; }
+  body.rv-shell .brand-copy { display: grid; gap: .12rem; }
+  body.rv-shell .brand-tag { color: var(--rv-yellow); font-size: .56rem; letter-spacing: .18em; text-transform: uppercase; white-space: nowrap; }
+  body.rv-shell #main-nav { gap: .3rem; }
+  body.rv-shell .nav-link { color: var(--rv-muted) !important; border-radius: 999px; transition: color .18s ease, background .18s ease, transform .18s ease; }
+  body.rv-shell .nav-link:hover, body.rv-shell .nav-dropdown.open > .nav-link { color: var(--rv-white) !important; background: rgba(232,186,79,.10) !important; }
+  body.rv-shell .dropdown-menu { background: #071a3d !important; border: 1px solid var(--rv-line) !important; box-shadow: var(--rv-shadow); }
+  body.rv-shell .dropdown-menu a { color: var(--rv-muted) !important; }
+  body.rv-shell .dropdown-menu a:hover { color: var(--rv-yellow) !important; background: rgba(232,186,79,.08) !important; }
+  body.rv-shell .btn { border-radius: 999px !important; font-family: var(--rv-body) !important; font-weight: 700; letter-spacing: .02em; transition: transform .18s ease, box-shadow .18s ease, background .18s ease; }
+  body.rv-shell .btn:active { transform: scale(.97); }
+  body.rv-shell .btn-primary, body.rv-shell .btn-success, body.rv-shell button[type="submit"] { background: linear-gradient(135deg, var(--rv-yellow), var(--rv-gold)) !important; border-color: var(--rv-yellow) !important; color: #081a38 !important; box-shadow: 0 10px 28px rgba(232,186,79,.18); }
+  body.rv-shell .btn-primary:hover, body.rv-shell button[type="submit"]:hover { box-shadow: 0 14px 34px rgba(232,186,79,.28); transform: translateY(-1px); }
+  body.rv-shell .btn-outline { color: var(--rv-yellow) !important; border: 1px solid rgba(232,186,79,.42) !important; background: rgba(7,26,61,.36) !important; }
+
+  body.rv-shell .hero-mkt, body.rv-shell .page-hero-mkt, body.rv-shell .hero, body.rv-shell .dashboard-hero {
+    position: relative; overflow: hidden; border-bottom: 1px solid var(--rv-line);
+    background: linear-gradient(120deg, rgba(3,10,25,.97), rgba(7,26,61,.80) 68%, rgba(18,55,106,.54));
+  }
+  body.rv-shell .hero-mkt::after, body.rv-shell .page-hero-mkt::after, body.rv-shell .dashboard-hero::after {
+    content: ""; position: absolute; right: 4%; bottom: -5rem; width: 18rem; height: 18rem; border: 1px solid rgba(232,186,79,.24); transform: rotate(45deg); box-shadow: 0 0 0 20px rgba(232,186,79,.035), 0 0 0 40px rgba(232,186,79,.02); pointer-events: none;
+  }
+  body.rv-shell .hero-mkt-inner, body.rv-shell .page-hero-mkt-inner { position: relative; z-index: 1; }
+  body.rv-shell .hero-mkt h1 { max-width: 780px; font-size: clamp(2.5rem, 7vw, 5.8rem) !important; line-height: .98; }
+  body.rv-shell .hero-mkt h1::first-line { color: var(--rv-white); }
+  body.rv-shell .hero-mkt p, body.rv-shell .page-hero-mkt p { max-width: 650px; color: var(--rv-muted) !important; }
+  body.rv-shell .hero-proof-dot { background: var(--rv-green) !important; box-shadow: 0 0 0 5px rgba(111,213,94,.10); }
+  body.rv-shell .trust-strip { background: rgba(7,26,61,.78) !important; border-top: 1px solid var(--rv-line); border-bottom: 1px solid var(--rv-line); }
+  body.rv-shell .trust-card { border-right: 1px solid rgba(232,186,79,.18) !important; }
+  body.rv-shell .trust-number, body.rv-shell .tier-roi { color: var(--rv-yellow) !important; }
+  body.rv-shell .trust-label { color: var(--rv-muted) !important; }
+  body.rv-shell .mkt-section, body.rv-shell .card, body.rv-shell .quote-card, body.rv-shell .panel, body.rv-shell .form-card,
+  body.rv-shell .auth-card, body.rv-shell .auth-shell-card, body.rv-shell .dashboard-card, body.rv-shell .stat-card,
+  body.rv-shell .content-card, body.rv-shell .settings-card, body.rv-shell .profile-card {
+    background: linear-gradient(155deg, rgba(12,38,82,.88), rgba(4,15,37,.92)) !important;
+    border: 1px solid rgba(232,186,79,.18) !important; box-shadow: 0 14px 38px rgba(0,0,0,.16); border-radius: 18px;
+  }
+  body.rv-shell .mkt-section.is-tinted { background: rgba(12,38,82,.42) !important; }
+  body.rv-shell .feature-row, body.rv-shell .step-row { border-color: rgba(232,186,79,.18) !important; }
+  body.rv-shell .feature-mark, body.rv-shell .step-num { background: linear-gradient(145deg, var(--rv-gold), var(--rv-yellow)) !important; color: #071a3d !important; }
+  body.rv-shell input, body.rv-shell select, body.rv-shell textarea { background: rgba(3,10,25,.72) !important; color: var(--rv-white) !important; border-color: rgba(232,186,79,.25) !important; }
+  body.rv-shell input::placeholder, body.rv-shell textarea::placeholder { color: #7890b2 !important; }
+  body.rv-shell label, body.rv-shell .form-label { color: var(--rv-muted) !important; }
+  body.rv-shell .badge, body.rv-shell .status-badge, body.rv-shell .tier-ribbon { background: rgba(111,213,94,.14) !important; color: var(--rv-green) !important; border-color: rgba(111,213,94,.32) !important; }
+  body.rv-shell .mkt-footer { margin-top: 3rem; background: #020814 !important; border-top: 1px solid var(--rv-line); }
+  body.rv-shell .mkt-footer-bottom { color: #7890b2 !important; border-top-color: rgba(232,186,79,.14) !important; }
+  body.rv-shell .cta-band { background: linear-gradient(135deg, rgba(18,55,106,.9), rgba(7,26,61,.92)) !important; border: 1px solid rgba(232,186,79,.32) !important; box-shadow: var(--rv-shadow); }
+  body.rv-shell .mobile-menu { background: #04102a !important; border-left: 1px solid var(--rv-line); }
+  body.rv-shell .mobile-menu-header { border-bottom-color: rgba(232,186,79,.18) !important; }
+  body.rv-shell .mobile-link, body.rv-shell .mobile-accordion-toggle { color: var(--rv-muted) !important; }
+  body.rv-shell .tab-bar { background: rgba(3,10,25,.94) !important; border-top: 1px solid var(--rv-line) !important; backdrop-filter: blur(18px); }
+  body.rv-shell .tab-item { color: #8fa5c2 !important; }
+  body.rv-shell .tab-item.is-active { color: var(--rv-yellow) !important; }
+  body.rv-shell .rv-ambient-line { max-width: 1320px; height: 1px; margin: 0 auto; background: linear-gradient(90deg, transparent, var(--rv-gold), transparent); opacity: .65; }
+  @media (max-width: 760px) {
+    body.rv-shell .header-container { min-height: 72px; padding: 0 1rem; }
+    body.rv-shell .brand-mark { width: 34px; height: 40px; }
+    body.rv-shell .brand-name { font-size: 1.1rem; }
+    body.rv-shell .brand-tag { font-size: .46rem; letter-spacing: .11em; }
+    body.rv-shell .hero-mkt h1 { font-size: clamp(2.35rem, 14vw, 4rem) !important; }
+    body.rv-shell .trust-strip { grid-template-columns: repeat(2, 1fr) !important; }
+    body.rv-shell .trust-card { border-bottom: 1px solid rgba(232,186,79,.18) !important; }
+  }
+</style>
+</head>
+<body class="rv-shell">
+  <nav class="navbar"><div class="logo"><strong>Admin Panel</strong></div><a href="../dashboard.html">User Site</a></nav>
+  <div class="flex">
+    <aside class="sidebar">
+      <ul class="sidebar-nav">
+        <li><a href="index.html">Dashboard</a></li>
+        <li><a href="users.html">Users</a></li>
+        <li><a href="deposits.html">Deposits</a></li>
+        <li><a href="withdrawals.html">Withdrawals</a></li>
+        <li><a href="products.html">Products</a></li>
+        <li><a href="support.html">Support</a></li>
+        <li><a href="kyc.html">KYC</a></li>
+        <li><a href="reports.html">Reports</a></li>
+        <li><a href="settings.html">Settings</a></li>
+        <li><a href="logs.html">Logs</a></li>
+      </ul>
+    </aside>
+    <main style="flex:1; padding:2rem;">
+      <h2>Monnify Integration (Future)</h2>
+      <div class="card">
+        <p>Configure Monnify API credentials. Set <code>enabled: true</code> when ready to activate.</p>
+        <div class="form-group"><label>API Key</label><input id="api-key" class="form-input" type="password"></div>
+        <div class="form-group"><label>Secret Key</label><input id="secret-key" class="form-input" type="password"></div>
+        <div class="form-group"><label><input id="enabled" type="checkbox"> Enable Monnify</label></div>
+        <button class="btn btn-primary" onclick="save()">Save Monnify Settings</button>
+      </div>
+    </main>
+  </div>
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+    const supabase = createClient('https://jytmnukzvxirnafukbck.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp5dG1udWt6dnhpcm5hZnVrYmNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQxNjQ3MjUsImV4cCI6MjA5OTc0MDcyNX0.ZvGUPTW7dJ3UxL2N1TW0lBCe3H4559HaUEhks7vEbEw');
+    async function getToken() { return (await supabase.auth.getSession()).data.session?.access_token; }
+    (async () => {
+      const token = await getToken();
+      const res = await fetch('/api/admin?action=settingsGet', { headers: { Authorization: `Bearer ${token}` } });
+      const s = await res.json();
+      const mon = s.find(s => s.key === 'monnify')?.value || {};
+      document.getElementById('api-key').value = mon.api_key || '';
+      document.getElementById('secret-key').value = mon.secret_key || '';
+      document.getElementById('enabled').checked = mon.enabled || false;
+    })();
+    window.save = async () => {
+      const token = await getToken();
+      const value = {
+        api_key: document.getElementById('api-key').value,
+        secret_key: document.getElementById('secret-key').value,
+        enabled: document.getElementById('enabled').checked
+      };
+      await fetch('/api/admin?action=settingsUpdate', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify({ key: 'monnify', value }) });
+      alert('Monnify settings saved');
+    };
+  </script>
+</body>
+</html>

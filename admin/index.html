@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="en" class="dark-theme">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RoyalVest — Where stocks meets Investments.</title>
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <style>
+    .admin-view{display:none}
+    .admin-view.is-active{display:block}
+    .sidebar-divider{padding:0.75rem 1rem 0.35rem; font-size:0.72rem; letter-spacing:0.06em; text-transform:uppercase; color:var(--clr-text-secondary); opacity:0.7;}
+    .sidebar-nav a[data-view]{cursor:pointer}
+  </style>
+  <meta name="theme-color" content="#071a3d">
+
+<style data-royalvest-theme>
+  :root {
+    --rv-ink: #030a19;
+    --rv-midnight: #071a3d;
+    --rv-blue: #12376a;
+    --rv-blue-soft: #1c4d83;
+    --rv-gold: #e8ba4f;
+    --rv-yellow: #f5d46e;
+    --rv-green: #6fd55e;
+    --rv-white: #f7f4eb;
+    --rv-muted: #a7b8d3;
+    --rv-line: rgba(232, 186, 79, .22);
+    --rv-panel: rgba(10, 31, 70, .86);
+    --rv-display: "Fraunces", Georgia, serif;
+    --rv-body: "Inter", system-ui, sans-serif;
+    --rv-shadow: 0 22px 70px rgba(0, 0, 0, .26);
+  }
+
+  html { background: var(--rv-ink) !important; scroll-behavior: smooth; }
+  body.rv-shell {
+    min-height: 100vh;
+    color: var(--rv-white) !important;
+    background:
+      radial-gradient(circle at 84% 0%, rgba(23, 72, 136, .30), transparent 32rem),
+      radial-gradient(circle at 8% 42%, rgba(111, 213, 94, .05), transparent 28rem),
+      linear-gradient(135deg, var(--rv-ink) 0%, var(--rv-midnight) 56%, #0b2554 100%) !important;
+    font-family: var(--rv-body) !important;
+  }
+  body.rv-shell::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    opacity: .16;
+    background-image: linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px);
+    background-size: 64px 64px;
+    mask-image: linear-gradient(to bottom, black, transparent 78%);
+    z-index: 0;
+  }
+  body.rv-shell > * { position: relative; z-index: 1; }
+  body.rv-shell a { color: var(--rv-yellow); }
+  body.rv-shell p, body.rv-shell li { color: var(--rv-muted); }
+  body.rv-shell h1, body.rv-shell h2, body.rv-shell h3, body.rv-shell h4, body.rv-shell h5,
+  body.rv-shell .mkt-heading, body.rv-shell .page-hero-mkt h1 { font-family: var(--rv-display) !important; color: var(--rv-white) !important; letter-spacing: -.02em; }
+  body.rv-shell .mkt-eyebrow, body.rv-shell .eyebrow, body.rv-shell .section-label, body.rv-shell .page-hero-mkt .eyebrow { color: var(--rv-yellow) !important; letter-spacing: .16em; text-transform: uppercase; font-weight: 700; }
+
+  body.rv-shell .floating-header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: rgba(3, 10, 25, .88) !important;
+    border-bottom: 1px solid var(--rv-line) !important;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, .18);
+    backdrop-filter: blur(22px);
+  }
+  body.rv-shell .header-container { max-width: 1320px; min-height: 82px; padding: 0 1.4rem; }
+  body.rv-shell .brand { gap: .7rem; text-decoration: none; }
+  body.rv-shell .brand-mark {
+    display: grid; place-items: center; width: 42px; height: 48px; border: 1px solid var(--rv-gold);
+    border-radius: 48% 48% 45% 45% / 42% 42% 58% 58%; background: linear-gradient(155deg, rgba(232,186,79,.28), rgba(4,16,42,.95) 52%);
+    color: var(--rv-yellow) !important; font-family: var(--rv-display) !important; font-size: 1.3rem; font-weight: 700;
+    box-shadow: inset 0 0 0 3px rgba(232,186,79,.08), 0 8px 22px rgba(0,0,0,.22);
+  }
+  body.rv-shell .brand-name { color: var(--rv-white) !important; font-family: var(--rv-display) !important; font-size: 1.35rem; font-weight: 600; }
+  body.rv-shell .brand-copy { display: grid; gap: .12rem; }
+  body.rv-shell .brand-tag { color: var(--rv-yellow); font-size: .56rem; letter-spacing: .18em; text-transform: uppercase; white-space: nowrap; }
+  body.rv-shell #main-nav { gap: .3rem; }
+  body.rv-shell .nav-link { color: var(--rv-muted) !important; border-radius: 999px; transition: color .18s ease, background .18s ease, transform .18s ease; }
+  body.rv-shell .nav-link:hover, body.rv-shell .nav-dropdown.open > .nav-link { color: var(--rv-white) !important; background: rgba(232,186,79,.10) !important; }
+  body.rv-shell .dropdown-menu { background: #071a3d !important; border: 1px solid var(--rv-line) !important; box-shadow: var(--rv-shadow); }
+  body.rv-shell .dropdown-menu a { color: var(--rv-muted) !important; }
+  body.rv-shell .dropdown-menu a:hover { color: var(--rv-yellow) !important; background: rgba(232,186,79,.08) !important; }
+  body.rv-shell .btn { border-radius: 999px !important; font-family: var(--rv-body) !important; font-weight: 700; letter-spacing: .02em; transition: transform .18s ease, box-shadow .18s ease, background .18s ease; }
+  body.rv-shell .btn:active { transform: scale(.97); }
+  body.rv-shell .btn-primary, body.rv-shell .btn-success, body.rv-shell button[type="submit"] { background: linear-gradient(135deg, var(--rv-yellow), var(--rv-gold)) !important; border-color: var(--rv-yellow) !important; color: #081a38 !important; box-shadow: 0 10px 28px rgba(232,186,79,.18); }
+  body.rv-shell .btn-primary:hover, body.rv-shell button[type="submit"]:hover { box-shadow: 0 14px 34px rgba(232,186,79,.28); transform: translateY(-1px); }
+  body.rv-shell .btn-outline { color: var(--rv-yellow) !important; border: 1px solid rgba(232,186,79,.42) !important; background: rgba(7,26,61,.36) !important; }
+
+  body.rv-shell .hero-mkt, body.rv-shell .page-hero-mkt, body.rv-shell .hero, body.rv-shell .dashboard-hero {
+    position: relative; overflow: hidden; border-bottom: 1px solid var(--rv-line);
+    background: linear-gradient(120deg, rgba(3,10,25,.97), rgba(7,26,61,.80) 68%, rgba(18,55,106,.54));
+  }
+  body.rv-shell .hero-mkt::after, body.rv-shell .page-hero-mkt::after, body.rv-shell .dashboard-hero::after {
+    content: ""; position: absolute; right: 4%; bottom: -5rem; width: 18rem; height: 18rem; border: 1px solid rgba(232,186,79,.24); transform: rotate(45deg); box-shadow: 0 0 0 20px rgba(232,186,79,.035), 0 0 0 40px rgba(232,186,79,.02); pointer-events: none;
+  }
+  body.rv-shell .hero-mkt-inner, body.rv-shell .page-hero-mkt-inner { position: relative; z-index: 1; }
+  body.rv-shell .hero-mkt h1 { max-width: 780px; font-size: clamp(2.5rem, 7vw, 5.8rem) !important; line-height: .98; }
+  body.rv-shell .hero-mkt h1::first-line { color: var(--rv-white); }
+  body.rv-shell .hero-mkt p, body.rv-shell .page-hero-mkt p { max-width: 650px; color: var(--rv-muted) !important; }
+  body.rv-shell .hero-proof-dot { background: var(--rv-green) !important; box-shadow: 0 0 0 5px rgba(111,213,94,.10); }
+  body.rv-shell .trust-strip { background: rgba(7,26,61,.78) !important; border-top: 1px solid var(--rv-line); border-bottom: 1px solid var(--rv-line); }
+  body.rv-shell .trust-card { border-right: 1px solid rgba(232,186,79,.18) !important; }
+  body.rv-shell .trust-number, body.rv-shell .tier-roi { color: var(--rv-yellow) !important; }
+  body.rv-shell .trust-label { color: var(--rv-muted) !important; }
+  body.rv-shell .mkt-section, body.rv-shell .card, body.rv-shell .quote-card, body.rv-shell .panel, body.rv-shell .form-card,
+  body.rv-shell .auth-card, body.rv-shell .auth-shell-card, body.rv-shell .dashboard-card, body.rv-shell .stat-card,
+  body.rv-shell .content-card, body.rv-shell .settings-card, body.rv-shell .profile-card {
+    background: linear-gradient(155deg, rgba(12,38,82,.88), rgba(4,15,37,.92)) !important;
+    border: 1px solid rgba(232,186,79,.18) !important; box-shadow: 0 14px 38px rgba(0,0,0,.16); border-radius: 18px;
+  }
+  body.rv-shell .mkt-section.is-tinted { background: rgba(12,38,82,.42) !important; }
+  body.rv-shell .feature-row, body.rv-shell .step-row { border-color: rgba(232,186,79,.18) !important; }
+  body.rv-shell .feature-mark, body.rv-shell .step-num { background: linear-gradient(145deg, var(--rv-gold), var(--rv-yellow)) !important; color: #071a3d !important; }
+  body.rv-shell input, body.rv-shell select, body.rv-shell textarea { background: rgba(3,10,25,.72) !important; color: var(--rv-white) !important; border-color: rgba(232,186,79,.25) !important; }
+  body.rv-shell input::placeholder, body.rv-shell textarea::placeholder { color: #7890b2 !important; }
+  body.rv-shell label, body.rv-shell .form-label { color: var(--rv-muted) !important; }
+  body.rv-shell .badge, body.rv-shell .status-badge, body.rv-shell .tier-ribbon { background: rgba(111,213,94,.14) !important; color: var(--rv-green) !important; border-color: rgba(111,213,94,.32) !important; }
+  body.rv-shell .mkt-footer { margin-top: 3rem; background: #020814 !important; border-top: 1px solid var(--rv-line); }
+  body.rv-shell .mkt-footer-bottom { color: #7890b2 !important; border-top-color: rgba(232,186,79,.14) !important; }
+  body.rv-shell .cta-band { background: linear-gradient(135deg, rgba(18,55,106,.9), rgba(7,26,61,.92)) !important; border: 1px solid rgba(232,186,79,.32) !important; box-shadow: var(--rv-shadow); }
+  body.rv-shell .mobile-menu { background: #04102a !important; border-left: 1px solid var(--rv-line); }
+  body.rv-shell .mobile-menu-header { border-bottom-color: rgba(232,186,79,.18) !important; }
+  body.rv-shell .mobile-link, body.rv-shell .mobile-accordion-toggle { color: var(--rv-muted) !important; }
+  body.rv-shell .tab-bar { background: rgba(3,10,25,.94) !important; border-top: 1px solid var(--rv-line) !important; backdrop-filter: blur(18px); }
+  body.rv-shell .tab-item { color: #8fa5c2 !important; }
+  body.rv-shell .tab-item.is-active { color: var(--rv-yellow) !important; }
+  body.rv-shell .rv-ambient-line { max-width: 1320px; height: 1px; margin: 0 auto; background: linear-gradient(90deg, transparent, var(--rv-gold), transparent); opacity: .65; }
+  @media (max-width: 760px) {
+    body.rv-shell .header-container { min-height: 72px; padding: 0 1rem; }
+    body.rv-shell .brand-mark { width: 34px; height: 40px; }
+    body.rv-shell .brand-name { font-size: 1.1rem; }
+    body.rv-shell .brand-tag { font-size: .46rem; letter-spacing: .11em; }
+    body.rv-shell .hero-mkt h1 { font-size: clamp(2.35rem, 14vw, 4rem) !important; }
+    body.rv-shell .trust-strip { grid-template-columns: repeat(2, 1fr) !important; }
+    body.rv-shell .trust-card { border-bottom: 1px solid rgba(232,186,79,.18) !important; }
+  }
+</style>
+</head>
+<body class="rv-shell">
+  <nav class="navbar"><div class="logo"><strong>Admin Panel</strong></div><a href="../dashboard.html">User Site</a></nav>
+  <div class="flex">
+    <aside class="sidebar">
+      <ul class="sidebar-nav" id="sidebar-nav">
+        <li><a href="#dashboard" data-view="dashboard" class="active">Dashboard</a></li>
+        <li><a href="#users" data-view="users">Users</a></li>
+        <li><a href="#deposits" data-view="deposits">Deposits</a></li>
+        <li><a href="#withdrawals" data-view="withdrawals">Withdrawals</a></li>
+        <li><a href="#task-tiers" data-view="task-tiers">Task Tiers</a></li>
+        <li><a href="#gift-codes" data-view="gift-codes">Gift Codes</a></li>
+        <li><a href="#support" data-view="support">Support</a></li>
+        <li><a href="#logs" data-view="logs">Logs</a></li>
+      </ul>
+      <div class="sidebar-divider">More (separate pages, not yet merged)</div>
+      <ul class="sidebar-nav">
+        <li><a href="reports.html">Reports</a></li>
+        <li><a href="settings.html">Settings</a></li>
+        <li><a href="vip.html">VIP</a></li>
+        <li><a href="roles.html">Roles</a></li>
+        <li><a href="referral-management.html">Referral Management</a></li>
+        <li><a href="website-editor.html">Website Editor</a></li>
+        <li><a href="maintenance.html">Maintenance</a></li>
+        <li><a href="monnify-settings.html">Monnify Settings</a></li>
+        <li><a href="cron-monitor.html">Cron Monitor</a></li>
+        <li><a href="income-distribution.html">Income Distribution</a></li>
+        <li><a href="system-health.html">System Health</a></li>
+        <li><a href="telegram.html">Telegram</a></li>
+        <li><a href="messages.html">Messages</a></li>
+        <li><a href="notifications.html">Notifications</a></li>
+        <li><a href="backup.html">Backup</a></li>
+      </ul>
+    </aside>
+
+    <main style="flex:1; padding:2rem;">
+
+      <!-- ============ DASHBOARD ============ -->
+      <section class="admin-view is-active" id="view-dashboard">
+        <h2>Overview</h2>
+        <div class="widget-grid" id="stats">Loading…</div>
+      </section>
+
+      <!-- ============ USERS ============ -->
+      <section class="admin-view" id="view-users">
+        <h2>Users</h2>
+        <div class="flex gap-2 mb-2">
+          <input type="text" id="user-search" class="form-input" placeholder="Search by name or email" style="flex:1">
+          <button class="btn btn-primary" id="user-search-btn">Search</button>
+        </div>
+        <table id="users-table">
+          <thead><tr><th>Name</th><th>Email</th><th>Balance</th><th>VIP</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody></tbody>
+        </table>
+        <div class="flex gap-2 mt-2" id="users-pagination"></div>
+        <div class="modal-overlay" id="action-modal">
+          <div class="modal-content">
+            <h3 id="modal-title"></h3>
+            <div id="modal-body"></div>
+            <button class="btn btn-primary mt-2" id="modal-close-btn">Close</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ DEPOSITS ============ -->
+      <section class="admin-view" id="view-deposits">
+        <h2>Deposits</h2>
+        <div class="flex gap-2 mb-2">
+          <select id="deposit-status-filter" class="form-select">
+            <option value="pending">Pending</option>
+            <option value="approved">Approved</option>
+            <option value="rejected">Rejected</option>
+          </select>
+          <button class="btn btn-primary" id="deposit-load-btn">Load</button>
+        </div>
+        <table id="deposits-table">
+          <thead><tr><th>User ID</th><th>Amount</th><th>Method</th><th>Sender Name & Bank</th><th>Status</th><th>Action</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </section>
+
+      <!-- ============ WITHDRAWALS ============ -->
+      <section class="admin-view" id="view-withdrawals">
+        <h2>Manual Withdrawal Management</h2>
+        <p class="text-muted mb-2">Review pending requests, send the bank transfer manually, then click Approve to complete.</p>
+        <div class="flex gap-2 mb-2">
+          <select id="wd-status-filter" class="form-select">
+            <option value="pending">Pending</option>
+            <option value="approved">Approved (Paid)</option>
+            <option value="rejected">Rejected</option>
+          </select>
+          <button class="btn btn-primary" id="wd-load-btn">Load</button>
+        </div>
+        <div id="wd-error-alert" class="alert alert-danger" style="display:none;"></div>
+        <table id="withdrawals-table" class="table">
+          <thead><tr><th>User</th><th>Amount</th><th>Bank Details</th><th>Status</th><th>Date</th><th>Action</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </section>
+
+      <!-- ============ TASK TIERS ============ -->
+      <section class="admin-view" id="view-task-tiers">
+        <h2>Task Tiers</h2>
+        <p class="text-muted mb-2">Newbie + VIP1–6. Price, tasks/day, and pay/task are editable — key and order are fixed, since the "next tier" upgrade logic depends on the sequence staying stable.</p>
+        <div id="tier-form-error" class="alert alert-danger" style="display:none;"></div>
+        <table id="task-tiers-table">
+          <thead><tr><th>Tier</th><th>Price (₦)</th><th>Tasks/Day</th><th>Pay/Task (₦)</th><th>Daily Earning</th><th></th></tr></thead>
+          <tbody><tr><td colspan="6">Loading…</td></tr></tbody>
+        </table>
+      </section>
+
+      <!-- ============ GIFT CODES ============ -->
+      <section class="admin-view" id="view-gift-codes">
+        <h2>Gift Codes</h2>
+        <div id="gift-form-error" class="alert alert-danger" style="display:none;"></div>
+        <form id="gift-form" class="card mb-2">
+          <div class="form-group"><input id="gift-code" class="form-input" placeholder="Code (e.g. WELCOME2026)" required></div>
+          <div class="form-group"><input id="gift-amount" type="number" min="1" step="0.01" class="form-input" placeholder="Amount (₦)" required></div>
+          <div class="form-group"><input id="gift-max-uses" type="number" min="1" class="form-input" placeholder="Max Uses" value="1"></div>
+          <button id="gift-submit-btn" class="btn btn-primary">Create Gift Code</button>
+        </form>
+        <table id="gift-table"><thead><tr><th>Code</th><th>Amount</th><th>Used</th><th>Status</th><th>Actions</th></tr></thead><tbody><tr><td colspan="5">Loading…</td></tr></tbody></table>
+      </section>
+
+      <!-- ============ SUPPORT ============ -->
+      <section class="admin-view" id="view-support">
+        <h2>Support Tickets</h2>
+        <div id="tickets">Loading…</div>
+      </section>
+
+      <!-- ============ LOGS ============ -->
+      <section class="admin-view" id="view-logs">
+        <h2>Activity &amp; Audit Logs</h2>
+        <div class="flex gap-2 mb-2">
+          <select id="log-type" class="form-select">
+            <option value="activity">Activity Logs</option>
+            <option value="audit">Audit Logs</option>
+          </select>
+          <button class="btn btn-primary" id="log-load-btn">Load</button>
+        </div>
+        <div id="log-entries"></div>
+      </section>
+
+    </main>
+  </div>
+
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+    const supabase = createClient(
+      'https://jytmnukzvxirnafukbck.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp5dG1udWt6dnhpcm5hZnVrYmNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQxNjQ3MjUsImV4cCI6MjA5OTc0MDcyNX0.ZvGUPTW7dJ3UxL2N1TW0lBCe3H4559HaUEhks7vEbEw'
+    );
+    window.supabase = supabase;
+
+    // ============================================================
+    // Shared helpers
+    // ============================================================
+    async function getToken() {
+      return (await supabase.auth.getSession()).data.session?.access_token;
+    }
+
+    function escapeHtml(str) {
+      const div = document.createElement('div');
+      div.textContent = str ?? '';
+      return div.innerHTML;
+    }
+
+    async function apiCall(base, action, options = {}) {
+      const token = await getToken();
+      const res = await fetch(`/api/${base}?action=${action}`, {
+        ...options,
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}`, ...(options.headers || {}) }
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || `Request failed (${res.status})`);
+      return data;
+    }
+
+    async function checkAdmin() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) { window.location.href = '../login.html'; return null; }
+      const { data: profile } = await supabase.from('profiles').select('is_admin').eq('id', user.id).single();
+      if (!profile?.is_admin) { window.location.href = '../dashboard.html'; return null; }
+      return user;
+    }
+
+    // ============================================================
+    // View router — hash-based, no page reloads between sections
+    // ============================================================
+    const VIEWS = ['dashboard', 'users', 'deposits', 'withdrawals', 'task-tiers', 'gift-codes', 'support', 'logs'];
+    const VIEW_LOADERS = {
+      dashboard: loadDashboard,
+      users: () => loadUsers(),
+      deposits: loadDeposits,
+      withdrawals: loadWithdrawals,
+      'task-tiers': loadTaskTiers,
+      'gift-codes': loadGiftCodes,
+      support: loadSupportTickets,
+      logs: loadLogs
+    };
+
+    function showView(view) {
+      if (!VIEWS.includes(view)) view = 'dashboard';
+      document.querySelectorAll('.admin-view').forEach(el => el.classList.remove('is-active'));
+      document.getElementById(`view-${view}`)?.classList.add('is-active');
+      document.querySelectorAll('#sidebar-nav a[data-view]').forEach(a => {
+        a.classList.toggle('active', a.dataset.view === view);
+      });
+      VIEW_LOADERS[view]?.();
+    }
+
+    document.getElementById('sidebar-nav').addEventListener('click', (e) => {
+      const link = e.target.closest('a[data-view]');
+      if (!link) return;
+      e.preventDefault();
+      window.location.hash = link.dataset.view;
+    });
+    window.addEventListener('hashchange', () => showView(location.hash.slice(1)));
+
+    // ============================================================
+    // Dashboard
+    // ============================================================
+    async function loadDashboard() {
+      const el = document.getElementById('stats');
+      const data = await apiCall('admin', 'stats');
+      el.innerHTML = `
+        <div class="card stat-card"><div class="stat-value">${data.totalUsers}</div><div class="stat-label">Total Users</div></div>
+        <div class="card stat-card"><div class="stat-value">₦${(data.totalDeposits||0).toLocaleString()}</div><div class="stat-label">Total Deposits</div></div>
+        <div class="card stat-card"><div class="stat-value">₦${(data.totalWithdrawals||0).toLocaleString()}</div><div class="stat-label">Total Withdrawals</div></div>
+        <div class="card stat-card"><div class="stat-value">${data.activeInvestments||0}</div><div class="stat-label">Active Investments</div></div>
+      `;
+    }
+
+    // ============================================================
+    // Users
+    // ============================================================
+    let usersPage = 0;
+    async function loadUsers(search = '') {
+      const token = await getToken();
+      const res = await fetch(`/api/admin?action=users&page=${usersPage}&limit=15&search=${encodeURIComponent(search)}`, { headers: { Authorization: `Bearer ${token}` } });
+      const { data, count } = await res.json();
+      const tbody = document.querySelector('#users-table tbody');
+      tbody.innerHTML = (data || []).map(u => `
+        <tr>
+          <td>${escapeHtml(u.full_name || 'N/A')}</td>
+          <td>${escapeHtml(u.email)}</td>
+          <td>₦${(u.wallets?.balance || 0).toLocaleString()}</td>
+          <td>${escapeHtml(u.vip_level)}</td>
+          <td>${u.is_banned ? '<span class="badge badge-danger">Banned</span>' : u.is_frozen ? '<span class="badge badge-warning">Frozen</span>' : '<span class="badge badge-success">Active</span>'}</td>
+          <td class="flex gap-1">
+            <button class="btn btn-sm btn-outline" data-freeze="${u.id}" data-frozen="${u.is_frozen}">${u.is_frozen ? 'Unfreeze' : 'Freeze'}</button>
+            <button class="btn btn-sm btn-danger" data-ban="${u.id}" data-banned="${u.is_banned}">${u.is_banned ? 'Unban' : 'Ban'}</button>
+            <button class="btn btn-sm btn-outline" data-creditdebit="${u.id}">C/D</button>
+            <button class="btn btn-sm btn-outline" data-team="${u.id}" data-team-name="${escapeHtml(u.full_name || u.email)}">Team</button>
+          </td>
+        </tr>
+      `).join('');
+      document.getElementById('users-pagination').innerHTML = `
+        <button class="btn btn-sm" ${usersPage === 0 ? 'disabled' : ''} id="users-prev">Prev</button>
+        <span>Page ${usersPage + 1}</span>
+        <button class="btn btn-sm" ${((data || []).length < 15) ? 'disabled' : ''} id="users-next">Next</button>
+      `;
+    }
+    document.getElementById('user-search-btn').addEventListener('click', () => { usersPage = 0; loadUsers(document.getElementById('user-search').value); });
+    document.querySelector('#view-users').addEventListener('click', async (e) => {
+      if (e.target.id === 'users-prev' && usersPage > 0) { usersPage--; loadUsers(document.getElementById('user-search').value); }
+      if (e.target.id === 'users-next') { usersPage++; loadUsers(document.getElementById('user-search').value); }
+      if (e.target.id === 'modal-close-btn') document.getElementById('action-modal').classList.remove('active');
+
+      const freezeId = e.target.dataset.freeze;
+      const banId = e.target.dataset.ban;
+      const cdId = e.target.dataset.creditdebit;
+      const teamId = e.target.dataset.team;
+
+      if (freezeId) {
+        const action = e.target.dataset.frozen === 'true' ? 'unfreezeUser' : 'freezeUser';
+        await apiCall('admin', action, { method: 'POST', body: JSON.stringify({ user_id: freezeId }) });
+        loadUsers(document.getElementById('user-search').value);
+      }
+      if (banId) {
+        const action = e.target.dataset.banned === 'true' ? 'unbanUser' : 'banUser';
+        await apiCall('admin', action, { method: 'POST', body: JSON.stringify({ user_id: banId }) });
+        loadUsers(document.getElementById('user-search').value);
+      }
+      if (teamId) {
+        document.getElementById('modal-title').textContent = `${e.target.dataset.teamName}'s Team`;
+        document.getElementById('modal-body').innerHTML = '<p class="text-muted">Loading…</p>';
+        document.getElementById('action-modal').classList.add('active');
+        try {
+          const result = await apiCall('admin', `getUserTeam&user_id=${teamId}`);
+          const { team, total_team_deposits, team_size } = result;
+          if (!team || team.length === 0) {
+            document.getElementById('modal-body').innerHTML = '<p class="text-muted">This user hasn\'t referred anyone yet.</p>';
+          } else {
+            document.getElementById('modal-body').innerHTML = `
+              <p class="text-muted mb-2">${team_size} referred user${team_size === 1 ? '' : 's'} · ₦${total_team_deposits.toLocaleString()} total deposited by the team</p>
+              <table class="table">
+                <thead><tr><th>Name</th><th>Email</th><th>VIP</th><th>Deposited</th><th>Balance</th><th>Joined</th></tr></thead>
+                <tbody>
+                  ${team.map(m => `
+                    <tr>
+                      <td>${escapeHtml(m.full_name || 'N/A')}</td>
+                      <td>${escapeHtml(m.email)}</td>
+                      <td>${escapeHtml(m.vip_level || 'bronze')}</td>
+                      <td>₦${Number(m.wallets?.total_deposited || 0).toLocaleString()}</td>
+                      <td>₦${Number(m.wallets?.balance || 0).toLocaleString()}</td>
+                      <td>${new Date(m.created_at).toLocaleDateString()}</td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            `;
+          }
+        } catch (err) {
+          document.getElementById('modal-body').innerHTML = `<p class="text-danger">Failed to load team: ${escapeHtml(err.message)}</p>`;
+        }
+      }
+      if (cdId) {
+        document.getElementById('modal-title').textContent = 'Credit / Debit Wallet';
+        document.getElementById('modal-body').innerHTML = `
+          <div class="form-group"><label>Amount (₦)</label><input id="cd-amount" class="form-input" type="number"></div>
+          <div class="form-group"><label>Note</label><input id="cd-note" class="form-input"></div>
+          <button class="btn btn-success" id="cd-credit-btn">Credit</button>
+          <button class="btn btn-danger" id="cd-debit-btn">Debit</button>
+        `;
+        document.getElementById('action-modal').classList.add('active');
+        document.getElementById('cd-credit-btn').onclick = async () => {
+          await apiCall('admin', 'creditWallet', { method: 'POST', body: JSON.stringify({ user_id: cdId, amount: +document.getElementById('cd-amount').value, note: document.getElementById('cd-note').value }) });
+          document.getElementById('action-modal').classList.remove('active');
+          loadUsers(document.getElementById('user-search').value);
+        };
+        document.getElementById('cd-debit-btn').onclick = async () => {
+          await apiCall('admin', 'debitWallet', { method: 'POST', body: JSON.stringify({ user_id: cdId, amount: +document.getElementById('cd-amount').value, note: document.getElementById('cd-note').value }) });
+          document.getElementById('action-modal').classList.remove('active');
+          loadUsers(document.getElementById('user-search').value);
+        };
+      }
+    });
+
+    // ============================================================
+    // Deposits
+    // ============================================================
+    async function loadDeposits() {
+      const status = document.getElementById('deposit-status-filter').value;
+      const data = await apiCall('admin', `depositsList&status=${status}`);
+      const tbody = document.querySelector('#deposits-table tbody');
+      const rows = data.deposits || [];
+      if (rows.length === 0) { tbody.innerHTML = '<tr><td colspan="6" class="text-center">No deposit records found.</td></tr>'; return; }
+      tbody.innerHTML = rows.map(d => `
+        <tr>
+          <td>${d.user_id?.slice(0, 8)}</td>
+          <td>₦${Number(d.amount).toLocaleString()}</td>
+          <td>${escapeHtml(d.payment_method || 'bank_transfer')}</td>
+          <td>${escapeHtml(d.payment_details || d.proof_image_url || 'N/A')}</td>
+          <td><span class="badge">${escapeHtml(d.status)}</span></td>
+          <td>${d.status === 'pending' ? `
+            <button class="btn btn-sm btn-success" data-approve-dep="${d.id}">Approve</button>
+            <button class="btn btn-sm btn-danger" data-reject-dep="${d.id}">Reject</button>
+          ` : '-'}</td>
+        </tr>
+      `).join('');
+    }
+    document.getElementById('deposit-load-btn').addEventListener('click', loadDeposits);
+    document.querySelector('#view-deposits').addEventListener('click', async (e) => {
+      const approveId = e.target.dataset.approveDep;
+      const rejectId = e.target.dataset.rejectDep;
+      if (approveId) {
+        if (!confirm('Approve this deposit and credit user wallet?')) return;
+        await apiCall('admin', 'approveDeposit', { method: 'POST', body: JSON.stringify({ deposit_id: approveId }) });
+        loadDeposits();
+      }
+      if (rejectId) {
+        const reason = prompt('Reason for rejection:');
+        if (reason === null) return;
+        await apiCall('admin', 'rejectDeposit', { method: 'POST', body: JSON.stringify({ deposit_id: rejectId, admin_notes: reason }) });
+        loadDeposits();
+      }
+    });
+
+    // ============================================================
+    // Withdrawals
+    // ============================================================
+    function wdActionCell(w) {
+      if (w.status === 'pending') {
+        return `<button class="btn btn-sm btn-success" data-approve-wd="${w.id}">Mark as Paid</button>
+                <button class="btn btn-sm btn-danger" data-reject-wd="${w.id}">Reject & Refund</button>`;
+      }
+      if (w.status === 'approved') return '<span class="badge badge-success">Completed</span>';
+      if (w.status === 'rejected') return '<span class="badge badge-danger">Refunded</span>';
+      return '';
+    }
+    async function loadWithdrawals() {
+      const errEl = document.getElementById('wd-error-alert');
+      errEl.style.display = 'none';
+      const status = document.getElementById('wd-status-filter').value;
+      const token = await getToken();
+      const res = await fetch(`/api/admin?action=withdrawalsList&status=${status}`, { headers: { Authorization: `Bearer ${token}` } });
+      const data = await res.json();
+      if (!res.ok) { errEl.textContent = data.error || 'Failed to load withdrawals'; errEl.style.display = 'block'; return; }
+      const tbody = document.querySelector('#withdrawals-table tbody');
+      const rows = data.withdrawals || [];
+      tbody.innerHTML = rows.map(w => {
+        const bank = w.bank_details || {};
+        return `
+          <tr>
+            <td><strong>${escapeHtml(w.profiles?.full_name || 'No Name')}</strong><br><small class="text-muted">${escapeHtml(w.profiles?.email || w.user_id?.slice(0, 8))}</small></td>
+            <td><strong>₦${Number(w.amount).toLocaleString()}</strong></td>
+            <td><strong>${escapeHtml(bank.bank_name || 'N/A')}</strong><br><code>${escapeHtml(bank.account_number || '')}</code> (${escapeHtml(bank.account_name || '')})</td>
+            <td><span class="badge badge-${w.status === 'approved' ? 'success' : w.status === 'rejected' ? 'danger' : 'warning'}">${escapeHtml(w.status)}</span></td>
+            <td><small>${new Date(w.created_at).toLocaleDateString()}</small></td>
+            <td>${wdActionCell(w)}</td>
+          </tr>`;
+      }).join('') || '<tr><td colspan="6" class="text-muted">No withdrawals found in this status.</td></tr>';
+    }
+    document.getElementById('wd-load-btn').addEventListener('click', loadWithdrawals);
+    document.querySelector('#view-withdrawals').addEventListener('click', async (e) => {
+      const errEl = document.getElementById('wd-error-alert');
+      const approveId = e.target.dataset.approveWd;
+      const rejectId = e.target.dataset.rejectWd;
+      if (approveId) {
+        if (!confirm('Have you manually transferred this payment to the user?')) return;
+        errEl.style.display = 'none';
+        const token = await getToken();
+        const res = await fetch('/api/admin?action=approveWithdrawal', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify({ withdrawal_id: approveId }) });
+        const json = await res.json();
+        if (!res.ok) { errEl.textContent = json.error || 'Approve failed'; errEl.style.display = 'block'; return; }
+        loadWithdrawals();
+      }
+      if (rejectId) {
+        if (!confirm("Are you sure you want to reject this request? The funds will be refunded back to the user's wallet.")) return;
+        errEl.style.display = 'none';
+        const token = await getToken();
+        const res = await fetch('/api/admin?action=rejectWithdrawal', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify({ withdrawal_id: rejectId }) });
+        const json = await res.json();
+        if (!res.ok) { errEl.textContent = json.error || 'Reject failed'; errEl.style.display = 'block'; return; }
+        loadWithdrawals();
+      }
+    });
+
+    // ============================================================
+    // Task Tiers (goes through /api/admin — task_tiers table)
+    // ============================================================
+    async function loadTaskTiers() {
+      const tbody = document.querySelector('#task-tiers-table tbody');
+      try {
+        const data = await apiCall('admin', 'taskTiersList');
+        if (!data || data.length === 0) { tbody.innerHTML = '<tr><td colspan="6">No tiers configured.</td></tr>'; return; }
+        tbody.innerHTML = data.map(t => `
+          <tr data-tier-id="${t.id}">
+            <td><strong>${escapeHtml(t.name)}</strong></td>
+            <td><input type="number" min="0" step="0.01" class="form-input tier-price" value="${t.price}" style="width:110px;"></td>
+            <td><input type="number" min="1" class="form-input tier-tasks" value="${t.tasks_per_day}" style="width:80px;"></td>
+            <td><input type="number" min="0" step="0.01" class="form-input tier-pay" value="${t.pay_per_task}" style="width:100px;"></td>
+            <td class="tier-daily-total">₦${(t.tasks_per_day * t.pay_per_task).toLocaleString()}</td>
+            <td><button class="btn btn-sm btn-primary" data-save-tier="${t.id}">Save</button></td>
+          </tr>
+        `).join('');
+      } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="6">Failed to load: ${escapeHtml(err.message)}</td></tr>`;
+      }
+    }
+    document.querySelector('#task-tiers-table').addEventListener('input', (e) => {
+      const row = e.target.closest('tr');
+      if (!row) return;
+      const tasks = +row.querySelector('.tier-tasks').value || 0;
+      const pay = +row.querySelector('.tier-pay').value || 0;
+      row.querySelector('.tier-daily-total').textContent = `₦${(tasks * pay).toLocaleString()}`;
+    });
+    document.querySelector('#task-tiers-table').addEventListener('click', async (e) => {
+      const tierId = e.target.dataset.saveTier;
+      if (!tierId) return;
+      const row = e.target.closest('tr');
+      const errorBox = document.getElementById('tier-form-error');
+      errorBox.style.display = 'none';
+      e.target.disabled = true;
+      e.target.textContent = 'Saving…';
+      try {
+        await apiCall('admin', 'updateTaskTier', {
+          method: 'POST',
+          body: JSON.stringify({
+            id: tierId,
+            price: +row.querySelector('.tier-price').value,
+            tasks_per_day: +row.querySelector('.tier-tasks').value,
+            pay_per_task: +row.querySelector('.tier-pay').value
+          })
+        });
+        e.target.textContent = 'Saved ✓';
+        setTimeout(() => { e.target.textContent = 'Save'; e.target.disabled = false; }, 1200);
+      } catch (err) {
+        errorBox.textContent = err.message;
+        errorBox.style.display = 'block';
+        e.target.disabled = false;
+        e.target.textContent = 'Save';
+      }
+    });
+
+    // ============================================================
+    // Gift Codes
+    // ============================================================
+    async function loadGiftCodes() {
+      const tbody = document.querySelector('#gift-table tbody');
+      try {
+        const data = await apiCall('admin', 'giftCodesList');
+        if (!data || data.length === 0) { tbody.innerHTML = '<tr><td colspan="5">No gift codes yet.</td></tr>'; return; }
+        tbody.innerHTML = data.map(g => `
+          <tr>
+            <td>${escapeHtml(g.code)}</td>
+            <td>₦${Number(g.amount).toLocaleString()}</td>
+            <td>${g.current_uses}/${g.max_uses}</td>
+            <td>${g.is_active ? '<span class="badge badge-success">Active</span>' : '<span class="badge">Inactive</span>'}</td>
+            <td><button class="btn btn-sm ${g.is_active ? 'btn-danger' : 'btn-success'}" data-toggle-gift="${g.id}">${g.is_active ? 'Deactivate' : 'Reactivate'}</button></td>
+          </tr>
+        `).join('');
+      } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="5">Failed to load: ${escapeHtml(err.message)}</td></tr>`;
+      }
+    }
+    document.querySelector('#gift-table tbody').addEventListener('click', async (e) => {
+      const id = e.target.dataset.toggleGift;
+      if (!id) return;
+      e.target.disabled = true;
+      try { await apiCall('admin', 'toggleGiftCode', { method: 'POST', body: JSON.stringify({ id }) }); loadGiftCodes(); }
+      catch (err) { alert(err.message); e.target.disabled = false; }
+    });
+    document.getElementById('gift-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const errorBox = document.getElementById('gift-form-error');
+      const submitBtn = document.getElementById('gift-submit-btn');
+      errorBox.style.display = 'none';
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Creating…';
+      try {
+        await apiCall('admin', 'createGiftCode', {
+          method: 'POST',
+          body: JSON.stringify({
+            code: document.getElementById('gift-code').value,
+            amount: +document.getElementById('gift-amount').value,
+            max_uses: +document.getElementById('gift-max-uses').value || 1
+          })
+        });
+        e.target.reset();
+        document.getElementById('gift-max-uses').value = 1;
+        loadGiftCodes();
+      } catch (err) {
+        errorBox.textContent = err.message;
+        errorBox.style.display = 'block';
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Create Gift Code';
+      }
+    });
+
+    // ============================================================
+    // Support
+    // ============================================================
+    async function loadSupportTickets() {
+      const data = await apiCall('support', 'listAll');
+      document.getElementById('tickets').innerHTML = data.map(t => `
+        <div class="card mb-2">
+          <strong>${escapeHtml(t.subject)}</strong> (${escapeHtml(t.status)})
+          <p>${escapeHtml(t.message)}</p>
+          <textarea id="reply-${t.id}" class="form-textarea mb-1" placeholder="Reply..."></textarea>
+          <button class="btn btn-sm btn-primary" data-reply-ticket="${t.id}">Reply</button>
+        </div>
+      `).join('');
+    }
+    document.getElementById('tickets').addEventListener('click', async (e) => {
+      const ticketId = e.target.dataset.replyTicket;
+      if (!ticketId) return;
+      const msg = document.getElementById(`reply-${ticketId}`).value;
+      await apiCall('support', 'adminReply', { method: 'POST', body: JSON.stringify({ ticket_id: ticketId, message: msg }) });
+      loadSupportTickets();
+    });
+
+    // ============================================================
+    // Logs
+    // ============================================================
+    async function loadLogs() {
+      const type = document.getElementById('log-type').value;
+      const action = type === 'activity' ? 'activityLogs' : 'auditLogs';
+      const data = await apiCall('admin', action);
+      document.getElementById('log-entries').innerHTML = data.map(l => `
+        <div class="card mb-1">
+          <small>${new Date(l.created_at).toLocaleString()}</small> – <strong>${escapeHtml(l.action)}</strong>
+          ${l.details ? '<pre style="font-size:0.8rem">' + escapeHtml(JSON.stringify(l.details, null, 2)) + '</pre>' : ''}
+        </div>
+      `).join('');
+    }
+    document.getElementById('log-load-btn').addEventListener('click', loadLogs);
+
+    // ============================================================
+    // Boot
+    // ============================================================
+    (async () => {
+      const user = await checkAdmin();
+      if (!user) return;
+      showView(location.hash.slice(1) || 'dashboard');
+    })();
+  </script>
+</body>
+</html>
