@@ -1,0 +1,28 @@
+<style data-royalvest-header>
+  .rv-header-meta { display:flex; align-items:center; gap:.45rem; margin-left:auto; margin-right:1rem; color:#a7b8d3; font:600 .58rem/1.2 "Inter",system-ui,sans-serif; letter-spacing:.16em; text-transform:uppercase; }
+  .rv-header-meta::before { content:""; width:.42rem; height:.42rem; border-radius:50%; background:#6fd55e; box-shadow:0 0 0 4px rgba(111,213,94,.10); }
+  .rv-crown { position:absolute; top:-.65rem; left:50%; transform:translateX(-50%); color:#f5d46e; font-size:.78rem; line-height:1; }
+  .rv-crest-wrap { position:relative; display:grid; place-items:center; }
+</style>
+<header class="floating-header">
+  <div class="header-container">
+    <a href="/index.html" class="brand" aria-label="RoyalVest home">
+      <span class="brand-mark rv-crest-wrap"><span class="rv-crown">♛</span>R</span>
+      <span class="brand-copy"><span class="brand-name">RoyalVest</span><span class="brand-tag">Where stocks meets Investments.</span></span>
+    </a>
+    <span class="rv-header-meta">Private workspace</span>
+    <nav id="main-nav" class="nav-links" aria-label="Primary navigation"></nav>
+    <button class="mobile-toggle" id="mobile-toggle-btn" aria-label="Open menu" aria-expanded="false">
+      <span class="hamburger"><span></span><span></span><span></span></span>
+    </button>
+  </div>
+</header>
+
+<div class="mobile-overlay" id="mobile-overlay"></div>
+<nav id="mobile-menu" class="mobile-menu" aria-hidden="true" aria-label="Mobile navigation">
+  <div class="mobile-menu-header">
+    <span class="brand-copy"><span class="brand-name">RoyalVest</span><span class="brand-tag">Private workspace</span></span>
+    <button id="mobile-close-btn" class="mobile-close" aria-label="Close menu">&times;</button>
+  </div>
+  <div id="mobile-menu-content" class="mobile-menu-content"></div>
+</nav>
