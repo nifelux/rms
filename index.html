@@ -146,7 +146,7 @@
 <section class="hero-mkt">
   <div class="hero-mkt-inner">
     <h1>Build a portfolio with a point of view.</h1>
-    <p>Diversified, long-term investment products with transparent daily payouts — built for Nigerians who'd rather compound steadily than gamble on volatility.</p>
+    <p>Diversified, long-term plans with transparent daily payouts — built for Nigerians who'd rather compound steadily than gamble on volatility.</p>
     <div class="hero-mkt-ctas">
       <a href="register.html" class="btn btn-primary btn-lg">Open your RoyalVest</a>
       <a href="#how-it-works" class="btn btn-outline btn-lg">Explore the approach</a>
@@ -193,18 +193,6 @@
   </div>
 </section>
 
-<!-- Products -->
-<section id="invest" class="mkt-section is-tinted">
-  <div class="text-center mb-3">
-    <div class="mkt-eyebrow">Investment Products</div>
-    <h2 class="mkt-heading" style="font-size:clamp(1.6rem,3vw,2.2rem);">Pick a product that fits your goal</h2>
-    <p class="mkt-lede is-centered">Every product states its daily return, duration, and minimum up front — no fine print.</p>
-  </div>
-  <div class="grid-3 mt-3" id="products-container">
-    <div class="card">Loading products…</div>
-  </div>
-</section>
-
 <!-- How it works -->
 <section id="how-it-works" class="mkt-section">
   <div class="text-center mb-3">
@@ -224,18 +212,6 @@
       <span class="step-num">3</span>
       <div><h4>Invest &amp; earn</h4><p>Choose a product and watch daily returns land in your wallet.</p></div>
     </div>
-  </div>
-</section>
-
-<!-- VIP -->
-<section id="vip" class="mkt-section is-tinted">
-  <div class="text-center mb-3">
-    <div class="mkt-eyebrow">VIP Program</div>
-    <h2 class="mkt-heading" style="font-size:clamp(1.6rem,3vw,2.2rem);">The more you grow with us, the more you unlock</h2>
-    <p class="mkt-lede is-centered">Tiers are based on your deposits, active investments, and referrals — higher tiers earn a bigger daily bonus.</p>
-  </div>
-  <div class="grid-3 mt-3" id="vip-container">
-    <div class="card">Loading VIP tiers…</div>
   </div>
 </section>
 
@@ -293,7 +269,7 @@
   <div class="mkt-footer-grid">
     <div class="mkt-footer-brand">
       <a href="/" class="brand"><span class="brand-mark">RV</span><span class="brand-name">RoyalVest</span></a>
-      <p>Secure, long-term investment products with transparent daily returns.</p>
+      <p>Secure, long-term plans with transparent daily returns.</p>
     </div>
     <div>
       <h5>Company</h5>
@@ -324,41 +300,6 @@ import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js
 const supabase = createClient('https://jytmnukzvxirnafukbck.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp5dG1udWt6dnhpcm5hZnVrYmNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQxNjQ3MjUsImV4cCI6MjA5OTc0MDcyNX0.ZvGUPTW7dJ3UxL2N1TW0lBCe3H4559HaUEhks7vEbEw');
 window.supabase = supabase;
 
-async function loadProducts() {
-  const { data } = await supabase.from('products').select('*').eq('is_locked', false).limit(3);
-  const container = document.getElementById('products-container');
-  if (!data || data.length === 0) {
-    container.innerHTML = '<div class="card text-center">No products available yet — check back soon.</div>';
-    return;
-  }
-  container.innerHTML = data.map(p => `
-    <div class="card">
-      <h3>${p.name}</h3>
-      <p class="text-muted">${p.description || ''}</p>
-      <div class="tier-roi">${p.daily_roi_percent}%<span style="font-size:0.9rem;color:var(--clr-text-secondary);font-family:var(--font-family);font-weight:400;"> / day</span></div>
-      <p style="margin:0.6rem 0 0;"><strong>Duration:</strong> ${p.duration_days} days</p>
-      <p style="margin:0.2rem 0 1rem;"><strong>Min invest:</strong> <span class="currency-ngn">${p.min_invest.toLocaleString()}</span></p>
-      <a href="register.html" class="btn btn-primary btn-sm btn-block">Invest Now</a>
-    </div>
-  `).join('');
-}
-
-async function loadVIP() {
-  const { data } = await supabase.from('vip_levels').select('*').order('min_deposit', { ascending: true });
-  const container = document.getElementById('vip-container');
-  if (!data || data.length === 0) return;
-  container.innerHTML = data.map((v, i) => `
-    <div class="card tier-card${i === data.length - 1 ? ' is-featured' : ''}">
-      ${i === data.length - 1 ? '<span class="tier-ribbon">Top Tier</span>' : ''}
-      <h3 style="font-family:var(--font-display);">${v.level.toUpperCase()}</h3>
-      <p style="margin:0.5rem 0 0;">Min deposit: <span class="currency-ngn">${v.min_deposit.toLocaleString()}</span></p>
-      <p style="margin:0.2rem 0;">Min active investments: ${v.min_investments}</p>
-      <p style="margin:0.2rem 0 0.8rem;">Min referrals: ${v.min_referrals}</p>
-      <div class="tier-roi" style="font-size:1.4rem;">+${v.daily_bonus_percent}%<span style="font-size:0.82rem;color:var(--clr-text-secondary);font-family:var(--font-family);font-weight:400;"> daily bonus</span></div>
-    </div>
-  `).join('');
-}
-
 async function loadStats() {
   const { data, error } = await supabase.rpc('get_public_stats');
   if (error || !data || data.length === 0) return;
@@ -369,8 +310,6 @@ async function loadStats() {
   document.getElementById('stat-paid').textContent = Number(stats.total_paid || 0).toLocaleString();
 }
 
-loadProducts();
-loadVIP();
 loadStats();
 </script>
 </body>
