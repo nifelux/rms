@@ -8,6 +8,7 @@ async function loadComponents() {
     const headerHTML = await headerRes.text();
     document.getElementById('header-container').innerHTML = headerHTML;
     initMobileMenu();
+    syncHeaderHeight();
   } catch (err) { console.error('Header load failed', err); }
 
   try {
@@ -315,6 +316,29 @@ function initMobileMenu() {
   overlay?.addEventListener('click', close);
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
   menu?.querySelectorAll('a').forEach(a => a.addEventListener('click', close));
+}
+
+// Keeps body's top padding matched to the header's ACTUAL rendered
+// height via a CSS var, instead of a hardcoded px guess that silently
+// goes stale the moment the header's content changes (which is exactly
+// what caused the header to overlap page content previously — the
+// header grew taller but body{padding-top} was never updated to match).
+// ResizeObserver re-fires on breakpoint changes, orientation changes,
+// and webfont-load reflow, not just once at page load.
+function syncHeaderHeight() {
+  const header = document.querySelector('.floating-header');
+  if (!header) return;
+
+  const apply = () => {
+    document.documentElement.style.setProperty('--header-h', `${header.offsetHeight}px`);
+  };
+  apply();
+
+  if ('ResizeObserver' in window) {
+    new ResizeObserver(apply).observe(header);
+  } else {
+    window.addEventListener('resize', apply);
+  }
 }
 
 document.addEventListener('DOMContentLoaded', loadComponents);
