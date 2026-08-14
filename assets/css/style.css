@@ -189,8 +189,8 @@ tr:hover{background:var(--clr-surface)}
 /* ============================================================
    PREMIUM FLOATING HEADER
    ============================================================ */
-body{padding-top:72px}
-.dark-theme{padding-top:72px}
+body{padding-top:var(--header-h, 72px)}
+.dark-theme{padding-top:var(--header-h, 72px)}
 
 .floating-header{
   position:fixed;top:0;left:0;width:100%;z-index:1000;
@@ -211,6 +211,15 @@ body{padding-top:72px}
 
 /* Brand */
 .brand{display:flex;align-items:center;gap:0.5rem;text-decoration:none;font-weight:600;font-size:1.25rem;color:var(--clr-text);font-family:var(--font-display)}
+.brand-copy{display:flex;flex-direction:column;line-height:1.15;gap:0.05rem;min-width:0}
+.brand-tag{
+  font-family:var(--font-family);font-size:0.66rem;font-weight:500;
+  color:var(--clr-text-secondary);letter-spacing:0.01em;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:14rem;
+}
+@media (max-width:480px){
+  .brand-tag{display:none} /* tagline drops on very narrow screens; brand-name alone still shows */
+}
 .brand-mark{
   display:inline-flex;align-items:center;justify-content:center;
   width:34px;height:34px;border-radius:10px;
@@ -1432,13 +1441,13 @@ tr:hover { background: rgba(245,212,110,.06); }
    the header or drawer into ordinary document flow.
    ============================================================ */
 body > * { position: static; z-index: auto; }
-body > .floating-header {
+#header-container .floating-header {
   position: fixed !important;
   inset: 0 0 auto 0 !important;
   z-index: 1100 !important;
   width: 100% !important;
 }
-body > .mobile-overlay {
+#header-container .mobile-overlay {
   position: fixed !important;
   inset: 0 !important;
   z-index: 1200 !important;
@@ -1446,7 +1455,7 @@ body > .mobile-overlay {
   backdrop-filter: blur(5px) !important;
   -webkit-backdrop-filter: blur(5px) !important;
 }
-body > .mobile-menu {
+#header-container .mobile-menu {
   position: fixed !important;
   top: 0 !important;
   right: 0 !important;
@@ -1460,4 +1469,4 @@ body > .mobile-menu {
   isolation: isolate;
   overflow-x: hidden;
 }
-body > .mobile-menu.active { transform: translateX(0) !important; }
+#header-container .mobile-menu.active { transform: translateX(0) !important; }
