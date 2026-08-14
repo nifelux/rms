@@ -8,13 +8,28 @@ import { verifyUser } from '../lib/auth.js';
  * from server UTC time rather than trusting anything from the client,
  * since a browser's clock/timezone is trivially spoofable.
  */
+const WAT_OFFSET_MS = 60 * 60 * 1000;
+
 function isWithdrawalWindowOpen() {
   const now = new Date();
   const watHour = (now.getUTCHours() + 1) % 24;
-  const watDay = new Date(now.getTime() + 60 * 60 * 1000).getUTCDay(); // 0=Sun..6=Sat
+  const watDay = new Date(now.getTime() + WAT_OFFSET_MS).getUTCDay(); // 0=Sun..6=Sat
   const isMonToSat = watDay >= 1 && watDay <= 6;
   const isWithinHours = watHour >= 10 && watHour < 17;
   return isMonToSat && isWithinHours;
+}
+
+function getWATDayBounds(now = new Date()) {
+  const watNow = new Date(now.getTime() + WAT_OFFSET_MS);
+  const startOfWatDay = Date.UTC(
+    watNow.getUTCFullYear(),
+    watNow.getUTCMonth(),
+    watNow.getUTCDate()
+  ) - WAT_OFFSET_MS;
+  return {
+    start: new Date(startOfWatDay),
+    end: new Date(startOfWatDay + 24 * 60 * 60 * 1000),
+  };
 }
 
 export default async function handler(req, res) {
@@ -212,7 +227,26 @@ async function createWithdrawal(req, res) {
     return res.status(400).json({ error: 'Withdrawals are only available Monday–Saturday, 10am–5pm.' });
   }
 
-  // 2. Input Validations — amount must be one of the fixed preset
+  // 2. One withdrawal request per West Africa Time calendar day.
+  // This includes pending, approved, and rejected requests: the limit is
+  // on request submissions, not on successful payouts.
+  const { start: watDayStart, end: watDayEnd } = getWATDayBounds();
+  const { data: todayWithdrawals, error: dailyLimitErr } = await supabaseAdmin
+    .from('withdrawals')
+    .select('id')
+    .eq('user_id', user.id)
+    .gte('created_at', watDayStart.toISOString())
+    .lt('created_at', watDayEnd.toISOString())
+    .limit(1);
+
+  if (dailyLimitErr) {
+    return res.status(500).json({ error: 'Could not verify your daily withdrawal limit' });
+  }
+  if (todayWithdrawals?.length) {
+    return res.status(429).json({ error: 'You can submit only one withdrawal request per day. Please try again tomorrow.' });
+  }
+
+  // 3. Input Validations — amount must be one of the fixed preset
   // values, not an arbitrary figure. Validated here server-side, not
   // just restricted in the UI.
   const ALLOWED_WITHDRAWAL_AMOUNTS = [1000, 3000, 5000, 10000, 20000, 30000, 50000];
@@ -223,7 +257,7 @@ async function createWithdrawal(req, res) {
     return res.status(400).json({ error: 'Account number and account name are required' });
   }
 
-  // 3. VIP gate — only paid tiers (not the free Newbie tier) can
+  // 4. VIP gate — only paid tiers (not the free Newbie tier) can
   // withdraw. task_tier defaults to 'newbie' for every user, including
   // ones from before this system existed, so this is a safe default.
   const { data: tierProfile } = await supabaseAdmin.from('profiles').select('task_tier').eq('id', user.id).single();
@@ -231,7 +265,7 @@ async function createWithdrawal(req, res) {
     return res.status(400).json({ error: 'Upgrade to a VIP tier to withdraw funds.' });
   }
 
-  // 4. Wallet Balance Check — account for amounts already tied up in
+  // 5. Wallet Balance Check — account for amounts already tied up in
   // other pending withdrawal requests, since the balance itself is no
   // longer debited until an admin approves (see below).
   const { data: wallet, error: walletErr } = await supabaseAdmin
@@ -257,7 +291,7 @@ async function createWithdrawal(req, res) {
     return res.status(400).json({ error: 'Insufficient available balance (some funds may be tied up in pending withdrawal requests)' });
   }
 
-  // 4. Create Withdrawal Record (Status: pending). The wallet is NOT
+  // 6. Create Withdrawal Record (Status: pending). The wallet is NOT
   // debited here — trg_process_transaction debits it automatically
   // once the linked transaction below is marked 'approved' by an admin.
   // Debiting it here too was the cause of the double-debit bug.
@@ -277,7 +311,7 @@ async function createWithdrawal(req, res) {
     return res.status(500).json({ error: wdErr.message });
   }
 
-  // 5. Log Transaction Record Immediately as Pending
+  // 7. Log Transaction Record Immediately as Pending
   await supabaseAdmin.from('transactions').insert({
     user_id: user.id,
     type: 'withdrawal',
@@ -288,7 +322,7 @@ async function createWithdrawal(req, res) {
     created_at: new Date()
   });
 
-  // 6. Telegram Notification
+  // 8. Telegram Notification
   await sendTelegramMessage(
     `💸 *New Withdrawal Request*\n` +
     `User ID: \`${user.id}\`\n` +
