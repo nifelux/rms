@@ -392,36 +392,33 @@
         return;
       }
 
-      // Keep the UI in sync with the server-side one-request-per-WAT-day rule.
-      const now = new Date();
-      const watNow = new Date(now.getTime() + 60 * 60 * 1000);
-      const watDayStart = new Date(Date.UTC(
-        watNow.getUTCFullYear(), watNow.getUTCMonth(), watNow.getUTCDate()
-      ) - 60 * 60 * 1000);
-      const watDayEnd = new Date(watDayStart.getTime() + 24 * 60 * 60 * 1000);
-      const { data: todayWithdrawals } = await supabase
-        .from('withdrawals')
-        .select('id')
-        .eq('user_id', user.id)
-        .gte('created_at', watDayStart.toISOString())
-        .lt('created_at', watDayEnd.toISOString())
-        .limit(1);
-
-      if (todayWithdrawals?.length) {
-        document.getElementById('hours-banner-wrap').innerHTML = `
-          <div class="alert alert-info kyc-banner">
-            <span>You have already submitted a withdrawal request today. You can submit another request tomorrow.</span>
-          </div>`;
-        document.getElementById('withdraw-form').style.display = 'none';
-        return;
-      }
-
       const { data: tierProfile } = await supabase.from('profiles').select('task_tier').eq('id', user.id).single();
       if (!tierProfile || tierProfile.task_tier === 'newbie') {
         document.getElementById('hours-banner-wrap').innerHTML = `
           <div class="alert alert-danger kyc-banner">
             <span>Only VIP members can withdraw funds.</span>
             <a href="/investments.html" class="btn btn-sm btn-primary">Upgrade Now</a>
+          </div>`;
+        document.getElementById('withdraw-form').style.display = 'none';
+        return;
+      }
+
+      // Once-per-day limit — mirrors the server-side check in finance.js.
+      const watNow = new Date();
+      const startOfTodayWAT = new Date(watNow.getTime() + 60 * 60 * 1000);
+      startOfTodayWAT.setUTCHours(0, 0, 0, 0);
+      const startOfTodayUTC = new Date(startOfTodayWAT.getTime() - 60 * 60 * 1000);
+
+      const { count: todaysWithdrawalCount } = await supabase
+        .from('withdrawals')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', user.id)
+        .gte('created_at', startOfTodayUTC.toISOString());
+
+      if ((todaysWithdrawalCount || 0) > 0) {
+        document.getElementById('hours-banner-wrap').innerHTML = `
+          <div class="alert alert-info kyc-banner">
+            <span>You've already requested a withdrawal today. You can request another tomorrow.</span>
           </div>`;
         document.getElementById('withdraw-form').style.display = 'none';
         return;
