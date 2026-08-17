@@ -17,15 +17,6 @@ function isWithdrawalWindowOpen() {
   return isMonToSat && isWithinHours;
 }
 
-// Same WAT (UTC+1) convention as isWithdrawalWindowOpen above, used for
-// the once-per-day withdrawal limit below.
-function startOfTodayWAT() {
-  const now = new Date();
-  const wat = new Date(now.getTime() + 60 * 60 * 1000);
-  wat.setUTCHours(0, 0, 0, 0);
-  return new Date(wat.getTime() - 60 * 60 * 1000); // back to UTC for the DB comparison
-}
-
 export default async function handler(req, res) {
   // Support actions sent via URL query (?action=...) or request body ({ action: '...' })
   const action = req.query.action || req.body?.action;
@@ -158,8 +149,8 @@ async function createDeposit(req, res) {
   if (!amount || Number(amount) <= 0) {
     return res.status(400).json({ error: 'Please enter a valid deposit amount' });
   }
-  if (Number(amount) < 5000) {
-    return res.status(400).json({ error: 'Minimum deposit is ₦5,000' });
+  if (Number(amount) < 2000) {
+    return res.status(400).json({ error: 'Minimum deposit is ₦2,000' });
   }
 
   // 1. Create Deposit Record
@@ -240,20 +231,7 @@ async function createWithdrawal(req, res) {
     return res.status(400).json({ error: 'Upgrade to a VIP tier to withdraw funds.' });
   }
 
-  // 4. Once-per-day limit — counts any request made today regardless of
-  // its outcome (pending/approved/rejected), so a rejected request
-  // doesn't grant a second attempt the same day.
-  const { count: todaysWithdrawalCount } = await supabaseAdmin
-    .from('withdrawals')
-    .select('id', { count: 'exact', head: true })
-    .eq('user_id', user.id)
-    .gte('created_at', startOfTodayWAT().toISOString());
-
-  if ((todaysWithdrawalCount || 0) > 0) {
-    return res.status(400).json({ error: 'You can only request one withdrawal per day. Please try again tomorrow.' });
-  }
-
-  // 5. Wallet Balance Check — account for amounts already tied up in
+  // 4. Wallet Balance Check — account for amounts already tied up in
   // other pending withdrawal requests, since the balance itself is no
   // longer debited until an admin approves (see below).
   const { data: wallet, error: walletErr } = await supabaseAdmin
@@ -279,7 +257,7 @@ async function createWithdrawal(req, res) {
     return res.status(400).json({ error: 'Insufficient available balance (some funds may be tied up in pending withdrawal requests)' });
   }
 
-  // 6. Create Withdrawal Record (Status: pending). The wallet is NOT
+  // 4. Create Withdrawal Record (Status: pending). The wallet is NOT
   // debited here — trg_process_transaction debits it automatically
   // once the linked transaction below is marked 'approved' by an admin.
   // Debiting it here too was the cause of the double-debit bug.
@@ -299,7 +277,7 @@ async function createWithdrawal(req, res) {
     return res.status(500).json({ error: wdErr.message });
   }
 
-  // 7. Log Transaction Record Immediately as Pending
+  // 5. Log Transaction Record Immediately as Pending
   await supabaseAdmin.from('transactions').insert({
     user_id: user.id,
     type: 'withdrawal',
@@ -310,7 +288,7 @@ async function createWithdrawal(req, res) {
     created_at: new Date()
   });
 
-  // 8. Telegram Notification
+  // 6. Telegram Notification
   await sendTelegramMessage(
     `💸 *New Withdrawal Request*\n` +
     `User ID: \`${user.id}\`\n` +
