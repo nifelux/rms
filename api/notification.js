@@ -92,6 +92,28 @@ async function telegramWebhook(req, res) {
         case '/pending': return await handlePending(chatId, res);
         case '/deposits': return await handleDeposits(chatId, res);
         case '/withdrawals': return await handleWithdrawals(chatId, res);
+        case '/kyc': return await handleKyc(chatId, res);
+        case '/products': return await handleProducts(chatId, res);
+        case '/lockproduct': return await handleLockProduct(chatId, text, res);
+        case '/createproduct': return await handleCreateProduct(chatId, text, res);
+        case '/updateproduct': return await handleUpdateProduct(chatId, text, res);
+        case '/deleteproduct': return await handleDeleteProduct(chatId, text, res);
+        case '/runincome': return await handleRunIncome(chatId, res);
+        case '/cron': return await handleCron(chatId, res);
+        case '/health': return await handleHealth(chatId, res);
+        case '/admins': return await handleAdmins(chatId, res);
+        case '/promote': return await handleRoleChange(chatId, text, res, true);
+        case '/demote': return await handleRoleChange(chatId, text, res, false);
+        case '/maintenance': return await handleMaintenance(chatId, text, res);
+        case '/setting': return await handleSetting(chatId, text, res);
+        case '/tiers': return await handleTiers(chatId, res);
+        case '/tier': return await handleTierUpdate(chatId, text, res);
+        case '/vip': return await handleVip(chatId, text, res);
+        case '/viplevels': return await handleVipLevels(chatId, res);
+        case '/tickets': return await handleTickets(chatId, res);
+        case '/reply': return await handleTicketReply(chatId, text, res);
+        case '/close': return await handleTicketClose(chatId, text, res);
+        case '/notifications': return await handleNotifications(chatId, res);
         case '/broadcast': return await handleBroadcast(chatId, text, res);
         case '/purgeproofs': return await handlePurgeProofs(chatId, res);
         case '/giftcode': return await handleGiftCode(chatId, text, res);
@@ -165,7 +187,9 @@ async function handleCallbackQuery(callbackQuery, res) {
     approve_deposit: () => approveDepositCore(id),
     reject_deposit: () => rejectDepositCore(id),
     approve_withdrawal: () => approveWithdrawalCore(id),
-    reject_withdrawal: () => rejectWithdrawalCore(id)
+    reject_withdrawal: () => rejectWithdrawalCore(id),
+    approve_kyc: () => updateKyc(id, 'approved'),
+    reject_kyc: () => updateKyc(id, 'rejected')
   };
 
   const run = actions[rawAction];
@@ -185,6 +209,30 @@ async function handleCallbackQuery(callbackQuery, res) {
   );
   return res.status(200).end();
 }
+
+function tgEscape(value) { return String(value ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+async function updateKyc(id, status) { const { data, error } = await supabaseAdmin.from('kyc_documents').update({ status }).eq('id', id).select().single(); return error ? { ok:false, error:error.message } : { ok:true, message:`KYC ${status}`, data }; }
+async function handleKyc(chatId, res) { const { data, error } = await supabaseAdmin.from('kyc_documents').select('id,user_id,doc_type,status,profiles(email)').eq('status','pending').limit(10); if(error) throw error; if(!data?.length) await sendToTelegram(chatId,'<b>Pending KYC:</b> None'); else for(const d of data) await sendToTelegram(chatId,`🪪 <b>KYC Review</b>\nUser: ${tgEscape(d.profiles?.email || d.user_id)}\nType: ${tgEscape(d.doc_type || 'document')}`,{inline_keyboard:[[{text:'✅ Approve',callback_data:`approve_kyc:${d.id}`},{text:'❌ Reject',callback_data:`reject_kyc:${d.id}`}]]}); return res.status(200).end(); }
+async function handleProducts(chatId, res) { const { data, error } = await supabaseAdmin.from('products').select('id,name,min_invest,max_invest,daily_roi_percent,duration_days,is_locked').order('created_at',{ascending:false}).limit(20); if(error) throw error; const msg=(data||[]).map(p=>`<b>${tgEscape(p.name)}</b> · ${p.is_locked?'🔒 locked':'✅ open'}\nID: <code>${p.id}</code>\nRange: ₦${Number(p.min_invest||0).toLocaleString()}–₦${Number(p.max_invest||0).toLocaleString()} · ROI ${p.daily_roi_percent||0}% · ${p.duration_days||0} days`).join('\n\n') || 'No products.'; await sendToTelegram(chatId,`<b>Products</b>\n${msg}`); return res.status(200).end(); }
+async function handleLockProduct(chatId, text, res) { const [id, value] = text.split(/\s+/).slice(1); if(!id || !['on','off','lock','unlock'].includes((value||'').toLowerCase())) { await sendToTelegram(chatId,'Usage: /lockproduct <id> <on|off>'); return res.status(200).end(); } const is_locked=['on','lock'].includes(value.toLowerCase()); const {error}=await supabaseAdmin.from('products').update({is_locked}).eq('id',id); await sendToTelegram(chatId,error?`⚠️ ${tgEscape(error.message)}`:`✅ Product ${is_locked?'locked':'unlocked'}`); return res.status(200).end(); }
+async function handleCreateProduct(chatId, text, res) { const parts=text.slice(text.indexOf(' ')+1).split('|').map(x=>x.trim()); if(parts.length<6){await sendToTelegram(chatId,'Usage: /createproduct name|description|minimum|max|roi_percent|duration_days|daily_income|max_purchases|category');return res.status(200).end();} const [name,description,min,max,roi,duration,daily,maxPurchases,category]=parts; const {data,error}=await supabaseAdmin.from('products').insert({name,description,min_invest:Number(min),max_invest:Number(max)||null,daily_roi_percent:Number(roi),duration_days:Number(duration),daily_income_amount:Number(daily)||null,max_purchases_per_user:Number(maxPurchases)||null,category:category||'investment'}).select().single(); await sendToTelegram(chatId,error?`⚠️ ${tgEscape(error.message)}`:`✅ Product created: <b>${tgEscape(data.name)}</b>`); return res.status(200).end(); }
+async function handleUpdateProduct(chatId, text, res) { const parts=text.slice(text.indexOf(' ')+1).split('|').map(x=>x.trim()); if(parts.length<7){await sendToTelegram(chatId,'Usage: /updateproduct id|name|description|min|max|roi_percent|duration_days|daily_income|max_purchases|category');return res.status(200).end();} const [id,name,description,min,max,roi,duration,daily,maxPurchases,category]=parts; const {error}=await supabaseAdmin.from('products').update({name,description,min_invest:Number(min),max_invest:Number(max)||null,daily_roi_percent:Number(roi),duration_days:Number(duration),daily_income_amount:Number(daily)||null,max_purchases_per_user:Number(maxPurchases)||null,category:category||'investment'}).eq('id',id); await sendToTelegram(chatId,error?`⚠️ ${tgEscape(error.message)}`:'✅ Product updated'); return res.status(200).end(); }
+async function handleDeleteProduct(chatId, text, res) { const id=text.split(/\s+/)[1]; if(!id){await sendToTelegram(chatId,'Usage: /deleteproduct <id>');return res.status(200).end();} const {error}=await supabaseAdmin.from('products').delete().eq('id',id); await sendToTelegram(chatId,error?`⚠️ ${tgEscape(error.message)}`:'✅ Product deleted'); return res.status(200).end(); }
+async function handleRunIncome(chatId, res) { const today=new Date().toISOString().slice(0,10); const {data:due,error}=await supabaseAdmin.from('investments').select('*').eq('status','active').or(`last_income_date.is.null,last_income_date.lt.${today}`); if(error) throw error; let paid=0,completed=0; for(const inv of due||[]){const days=Number(inv.days_elapsed)+1;const total=Number(inv.total_income)+Number(inv.daily_income);const done=days>=Number(inv.duration_days);const tx=await supabaseAdmin.from('transactions').insert({user_id:inv.user_id,type:'earning',amount:Number(inv.daily_income),status:'approved',reference:`inv_income_${inv.id}_day${days}`});if(tx.error&&!tx.error.message.includes('duplicate'))continue;await supabaseAdmin.from('investments').update({days_elapsed:days,total_income:total,last_income_date:today,status:done?'completed':'active'}).eq('id',inv.id);paid++;if(done)completed++;} await supabaseAdmin.from('cron_logs').insert({job_name:'daily_income',status:'success',details:{paidCount:paid,completedCount:completed,triggeredBy:'telegram'}}); await sendToTelegram(chatId,`✅ Daily income processed\nPaid: ${paid}\nCompleted: ${completed}`); return res.status(200).end(); }
+async function handleCron(chatId, res) { const {data,error}=await supabaseAdmin.from('cron_logs').select('*').order('created_at',{ascending:false}).limit(5); if(error) throw error; await sendToTelegram(chatId,`<b>Recent cron runs</b>\n${(data||[]).map(x=>`${tgEscape(x.job_name)} · ${tgEscape(x.status)} · ${new Date(x.created_at).toLocaleString()}`).join('\n')||'None'}`); return res.status(200).end(); }
+async function handleHealth(chatId, res) { const {data,error}=await supabaseAdmin.from('cron_logs').select('*').order('created_at',{ascending:false}).limit(1); if(error) throw error; await sendToTelegram(chatId,`<b>System health</b>\nDatabase: ✅\nLast cron: ${data?.[0]?`${tgEscape(data[0].job_name)} · ${tgEscape(data[0].status)}`:'None'}`); return res.status(200).end(); }
+async function handleAdmins(chatId, res) { const {data,error}=await supabaseAdmin.from('profiles').select('id,email,full_name').eq('is_admin',true); if(error) throw error; await sendToTelegram(chatId,`<b>Admins</b>\n${(data||[]).map(a=>`${tgEscape(a.full_name||'N/A')} · ${tgEscape(a.email)}\n<code>${a.id}</code>`).join('\n\n')||'None'}`); return res.status(200).end(); }
+async function handleRoleChange(chatId, text, res, promote) { const id=text.split(/\s+/)[1]; if(!id){await sendToTelegram(chatId,`Usage: /${promote?'promote':'demote'} <user_id>`);return res.status(200).end();} const {error}=await supabaseAdmin.from('profiles').update({is_admin:promote}).eq('id',id); await sendToTelegram(chatId,error?`⚠️ ${tgEscape(error.message)}`:`✅ ${promote?'Promoted to':'Removed from'} admin: <code>${id}</code>`); return res.status(200).end(); }
+async function handleMaintenance(chatId, text, res) { const value=text.split(/\s+/)[1]?.toLowerCase(); if(!['on','off'].includes(value)){await sendToTelegram(chatId,'Usage: /maintenance <on|off>');return res.status(200).end();} const {error}=await supabaseAdmin.from('settings').upsert({key:'maintenance_mode',value:value==='on'?'true':'false',updated_at:new Date()}); await sendToTelegram(chatId,error?`⚠️ ${tgEscape(error.message)}`:`✅ Maintenance mode ${value==='on'?'enabled':'disabled'}`); return res.status(200).end(); }
+async function handleSetting(chatId, text, res) { const first=text.indexOf(' '), second=text.indexOf(' ',first+1); const key=first>0?text.slice(first+1,second>0?second:undefined):''; const raw=second>0?text.slice(second+1):''; if(!key||!raw){await sendToTelegram(chatId,'Usage: /setting <key> <json>');return res.status(200).end();} let value; try{value=JSON.parse(raw);}catch{value=raw;} const {error}=await supabaseAdmin.from('settings').upsert({key,value,updated_at:new Date()}); await sendToTelegram(chatId,error?`⚠️ ${tgEscape(error.message)}`:`✅ Setting saved: ${tgEscape(key)}`); return res.status(200).end(); }
+async function handleTiers(chatId, res) { const {data,error}=await supabaseAdmin.from('task_tiers').select('*').order('sort_order'); if(error) throw error; await sendToTelegram(chatId,`<b>Task tiers</b>\n${(data||[]).map(t=>`${tgEscape(t.name)} · ID <code>${t.id}</code>\nPrice ₦${t.price} · ${t.tasks_per_day}/day · ₦${t.pay_per_task}/task`).join('\n\n')||'None'}`); return res.status(200).end(); }
+async function handleTierUpdate(chatId, text, res) { const parts=text.slice(text.indexOf(' ')+1).split('|').map(x=>x.trim()); if(parts.length!==4){await sendToTelegram(chatId,'Usage: /tier <id>|<price>|<tasks_per_day>|<pay_per_task>');return res.status(200).end();} const [id,price,tasks,pay]=parts; const {error}=await supabaseAdmin.from('task_tiers').update({price:Number(price),tasks_per_day:Number(tasks),pay_per_task:Number(pay)}).eq('id',id); await sendToTelegram(chatId,error?`⚠️ ${tgEscape(error.message)}`:`✅ Tier updated: <code>${id}</code>`); return res.status(200).end(); }
+async function handleVip(chatId, text, res) { const parts=text.slice(text.indexOf(' ')+1).split('|').map(x=>x.trim()); if(parts.length<5){await sendToTelegram(chatId,'Usage: /vip <level>|<min_deposit>|<min_investments>|<min_referrals>|<daily_bonus_percent>');return res.status(200).end();} const [level,minDeposit,minInvestments,minReferrals,bonus]=parts; const {data,error}=await supabaseAdmin.from('vip_levels').insert({level,min_deposit:Number(minDeposit)||0,min_investments:Number(minInvestments)||0,min_referrals:Number(minReferrals)||0,daily_bonus_percent:Number(bonus)||0}).select().single(); await sendToTelegram(chatId,error?`⚠️ ${tgEscape(error.message)}`:`✅ VIP level created: ${tgEscape(data.level)}`); return res.status(200).end(); }
+async function handleVipLevels(chatId, res) { const {data,error}=await supabaseAdmin.from('vip_levels').select('*').order('level'); if(error) throw error; await sendToTelegram(chatId,`<b>VIP levels</b>\n${(data||[]).map(v=>`${tgEscape(v.level)} · Deposit ₦${v.min_deposit||0} · Investments ₦${v.min_investments||0} · Referrals ${v.min_referrals||0} · Bonus ${v.daily_bonus_percent||0}%`).join('\n')||'None'}`); return res.status(200).end(); }
+async function handleTickets(chatId, res) { const {data,error}=await supabaseAdmin.from('support_tickets').select('id,subject,status,created_at,profiles(email)').order('created_at',{ascending:false}).limit(10); if(error) throw error; await sendToTelegram(chatId,`<b>Support tickets</b>\n${(data||[]).map(t=>`<code>${t.id}</code> · ${tgEscape(t.status)}\n${tgEscape(t.subject)} · ${tgEscape(t.profiles?.email||'')}`).join('\n\n')||'None'}`); return res.status(200).end(); }
+async function handleTicketReply(chatId, text, res) { const first=text.indexOf(' '), second=text.indexOf(' ',first+1); const id=first>0?text.slice(first+1,second>0?second:undefined):''; const message=second>0?text.slice(second+1):''; if(!id||!message){await sendToTelegram(chatId,'Usage: /reply <ticket_id> <message>');return res.status(200).end();} const {error}=await supabaseAdmin.from('ticket_replies').insert({ticket_id:id,user_id:null,is_admin_reply:true,message}); if(!error) await supabaseAdmin.from('support_tickets').update({status:'answered',updated_at:new Date()}).eq('id',id); await sendToTelegram(chatId,error?`⚠️ ${tgEscape(error.message)}`:'✅ Reply sent'); return res.status(200).end(); }
+async function handleTicketClose(chatId, text, res) { const id=text.split(/\s+/)[1]; if(!id){await sendToTelegram(chatId,'Usage: /close <ticket_id>');return res.status(200).end();} const {error}=await supabaseAdmin.from('support_tickets').update({status:'closed',updated_at:new Date()}).eq('id',id); await sendToTelegram(chatId,error?`⚠️ ${tgEscape(error.message)}`:'✅ Ticket closed'); return res.status(200).end(); }
+async function handleNotifications(chatId, res) { const {data,error}=await supabaseAdmin.from('notifications').select('title,body,created_at,profiles(email)').order('created_at',{ascending:false}).limit(10); if(error) throw error; await sendToTelegram(chatId,`<b>Recent notifications</b>\n${(data||[]).map(n=>`${tgEscape(n.title)} · ${tgEscape(n.profiles?.email||'All users')}\n${tgEscape(n.body||'')}`).join('\n\n')||'None'}`); return res.status(200).end(); }
 
 async function handleStats(chatId, res) {
   const [users, deposits, withdrawals] = await Promise.all([
@@ -219,7 +267,7 @@ async function handlePending(chatId, res) {
 // Sends ONE message per pending deposit, each with its own inline
 // Approve/Reject buttons — simpler to act on than one big list.
 async function handleDeposits(chatId, res) {
-  const { data } = await supabaseAdmin.from('deposits').select('*').eq('status', 'pending').limit(5);
+  const { data } = await supabaseAdmin.from('deposits').select('*, profiles(email, full_name)').eq('status', 'pending').limit(5);
   if (!data || data.length === 0) {
     await sendToTelegram(chatId, '<b>Pending Deposits:</b>\nNone');
     return res.status(200).end();
@@ -227,7 +275,7 @@ async function handleDeposits(chatId, res) {
   for (const d of data) {
     await sendToTelegram(
       chatId,
-      `💰 <b>Deposit</b>\nID: <code>${d.id.slice(0, 8)}</code>\nAmount: ₦${d.amount}\nUser: <code>${d.user_id.slice(0, 8)}</code>`,
+      `💰 <b>Deposit</b>\nID: <code>${d.id.slice(0, 8)}</code>\nAmount: ₦${d.amount}\nUser: ${tgEscape(d.profiles?.full_name || d.user_id.slice(0, 8))}\nEmail: ${tgEscape(d.profiles?.email || 'Unavailable')}`,
       { inline_keyboard: [[
         { text: '✅ Approve', callback_data: `approve_deposit:${d.id}` },
         { text: '❌ Reject', callback_data: `reject_deposit:${d.id}` }
@@ -238,7 +286,7 @@ async function handleDeposits(chatId, res) {
 }
 
 async function handleWithdrawals(chatId, res) {
-  const { data } = await supabaseAdmin.from('withdrawals').select('*').eq('status', 'pending').limit(5);
+  const { data } = await supabaseAdmin.from('withdrawals').select('*, profiles(email, full_name)').eq('status', 'pending').limit(5);
   if (!data || data.length === 0) {
     await sendToTelegram(chatId, '<b>Pending Withdrawals:</b>\nNone');
     return res.status(200).end();
@@ -246,7 +294,7 @@ async function handleWithdrawals(chatId, res) {
   for (const w of data) {
     await sendToTelegram(
       chatId,
-      `💸 <b>Withdrawal</b>\nID: <code>${w.id.slice(0, 8)}</code>\nAmount: ₦${w.amount}\nUser: <code>${w.user_id.slice(0, 8)}</code>`,
+      `💸 <b>Withdrawal</b>\nID: <code>${w.id.slice(0, 8)}</code>\nAmount: ₦${w.amount}\nUser: ${tgEscape(w.profiles?.full_name || w.user_id.slice(0, 8))}\nEmail: ${tgEscape(w.profiles?.email || 'Unavailable')}`,
       { inline_keyboard: [[
         { text: '✅ Approve', callback_data: `approve_withdrawal:${w.id}` },
         { text: '❌ Reject', callback_data: `reject_withdrawal:${w.id}` }
@@ -322,14 +370,25 @@ async function handleGiftCode(chatId, text, res) {
 
 async function handleHelp(chatId, res) {
   const msg = `<b>Admin Commands:</b>
-/stats - Platform statistics
-/users - Recent 10 users
-/pending - Pending deposits/withdrawals summary
-/deposits - Pending deposits (with Approve/Reject buttons)
-/withdrawals - Pending withdrawals (with Approve/Reject buttons)
+/stats, /users, /pending - Platform summaries
+/deposits, /withdrawals, /kyc - Review pending items with buttons
+/products - List products
+/lockproduct &lt;id&gt; &lt;on|off&gt; - Lock or unlock a product
+/createproduct name|description|min|max|roi|days|daily|max_purchases|category
+/updateproduct id|name|description|min|max|roi|days|daily|max_purchases|category
+/deleteproduct &lt;id&gt; - Delete a product
+/runincome, /cron, /health - Income job and system controls
+/admins, /promote &lt;id&gt;, /demote &lt;id&gt; - Manage admin access
+/maintenance &lt;on|off&gt; - Toggle maintenance mode
+/setting &lt;key&gt; &lt;json&gt; - Update settings and website content
+/tiers, /tier id|price|tasks_per_day|pay - Manage task tiers
+/vip level|min_deposit|min_investments|min_referrals|bonus - Create VIP level
+/viplevels - List VIP levels
+/tickets, /reply &lt;ticket_id&gt; &lt;message&gt;, /close &lt;ticket_id&gt; - Manage support
+/notifications - Recent in-app notifications
 /broadcast &lt;msg&gt; - Send message to all users
-/purgeproofs - Manually delete yesterday's-and-older withdrawal proof screenshots
-/giftcode &lt;amount&gt; [max_uses] [code] - Create a gift code (auto-generates code if omitted)
+/purgeproofs - Delete old withdrawal proof screenshots
+/giftcode &lt;amount&gt; [max_uses] [code] - Create a gift code
 /help - Show this help`;
   await sendToTelegram(chatId, msg);
   res.status(200).end();
