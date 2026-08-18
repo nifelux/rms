@@ -3,281 +3,121 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>RoyalVest — Where stocks meets Investments.</title>
+  <title>RoyalVest — User Details</title>
   <link rel="stylesheet" href="../assets/css/style.css">
-  <meta name="theme-color" content="#071a3d">
-
-<style data-royalvest-theme>
-  :root {
-    --rv-ink: #030a19;
-    --rv-midnight: #071a3d;
-    --rv-blue: #12376a;
-    --rv-blue-soft: #1c4d83;
-    --rv-gold: #e8ba4f;
-    --rv-yellow: #f5d46e;
-    --rv-green: #6fd55e;
-    --rv-white: #f7f4eb;
-    --rv-muted: #a7b8d3;
-    --rv-line: rgba(232, 186, 79, .22);
-    --rv-panel: rgba(10, 31, 70, .86);
-    --rv-display: "Fraunces", Georgia, serif;
-    --rv-body: "Inter", system-ui, sans-serif;
-    --rv-shadow: 0 22px 70px rgba(0, 0, 0, .26);
-  }
-
-  html { background: var(--rv-ink) !important; scroll-behavior: smooth; }
-  body.rv-shell {
-    min-height: 100vh;
-    color: var(--rv-white) !important;
-    background:
-      radial-gradient(circle at 84% 0%, rgba(23, 72, 136, .30), transparent 32rem),
-      radial-gradient(circle at 8% 42%, rgba(111, 213, 94, .05), transparent 28rem),
-      linear-gradient(135deg, var(--rv-ink) 0%, var(--rv-midnight) 56%, #0b2554 100%) !important;
-    font-family: var(--rv-body) !important;
-  }
-  body.rv-shell::before {
-    content: "";
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    opacity: .16;
-    background-image: linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px);
-    background-size: 64px 64px;
-    mask-image: linear-gradient(to bottom, black, transparent 78%);
-    z-index: 0;
-  }
-  body.rv-shell > * { position: relative; z-index: 1; }
-  body.rv-shell a { color: var(--rv-yellow); }
-  body.rv-shell p, body.rv-shell li { color: var(--rv-muted); }
-  body.rv-shell h1, body.rv-shell h2, body.rv-shell h3, body.rv-shell h4, body.rv-shell h5,
-  body.rv-shell .mkt-heading, body.rv-shell .page-hero-mkt h1 { font-family: var(--rv-display) !important; color: var(--rv-white) !important; letter-spacing: -.02em; }
-  body.rv-shell .mkt-eyebrow, body.rv-shell .eyebrow, body.rv-shell .section-label, body.rv-shell .page-hero-mkt .eyebrow { color: var(--rv-yellow) !important; letter-spacing: .16em; text-transform: uppercase; font-weight: 700; }
-
-  body.rv-shell .floating-header {
-    position: sticky;
-    top: 0;
-    z-index: 50;
-    background: rgba(3, 10, 25, .88) !important;
-    border-bottom: 1px solid var(--rv-line) !important;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, .18);
-    backdrop-filter: blur(22px);
-  }
-  body.rv-shell .header-container { max-width: 1320px; min-height: 82px; padding: 0 1.4rem; }
-  body.rv-shell .brand { gap: .7rem; text-decoration: none; }
-  body.rv-shell .brand-mark {
-    display: grid; place-items: center; width: 42px; height: 48px; border: 1px solid var(--rv-gold);
-    border-radius: 48% 48% 45% 45% / 42% 42% 58% 58%; background: linear-gradient(155deg, rgba(232,186,79,.28), rgba(4,16,42,.95) 52%);
-    color: var(--rv-yellow) !important; font-family: var(--rv-display) !important; font-size: 1.3rem; font-weight: 700;
-    box-shadow: inset 0 0 0 3px rgba(232,186,79,.08), 0 8px 22px rgba(0,0,0,.22);
-  }
-  body.rv-shell .brand-name { color: var(--rv-white) !important; font-family: var(--rv-display) !important; font-size: 1.35rem; font-weight: 600; }
-  body.rv-shell .brand-copy { display: grid; gap: .12rem; }
-  body.rv-shell .brand-tag { color: var(--rv-yellow); font-size: .56rem; letter-spacing: .18em; text-transform: uppercase; white-space: nowrap; }
-  body.rv-shell #main-nav { gap: .3rem; }
-  body.rv-shell .nav-link { color: var(--rv-muted) !important; border-radius: 999px; transition: color .18s ease, background .18s ease, transform .18s ease; }
-  body.rv-shell .nav-link:hover, body.rv-shell .nav-dropdown.open > .nav-link { color: var(--rv-white) !important; background: rgba(232,186,79,.10) !important; }
-  body.rv-shell .dropdown-menu { background: #071a3d !important; border: 1px solid var(--rv-line) !important; box-shadow: var(--rv-shadow); }
-  body.rv-shell .dropdown-menu a { color: var(--rv-muted) !important; }
-  body.rv-shell .dropdown-menu a:hover { color: var(--rv-yellow) !important; background: rgba(232,186,79,.08) !important; }
-  body.rv-shell .btn { border-radius: 999px !important; font-family: var(--rv-body) !important; font-weight: 700; letter-spacing: .02em; transition: transform .18s ease, box-shadow .18s ease, background .18s ease; }
-  body.rv-shell .btn:active { transform: scale(.97); }
-  body.rv-shell .btn-primary, body.rv-shell .btn-success, body.rv-shell button[type="submit"] { background: linear-gradient(135deg, var(--rv-yellow), var(--rv-gold)) !important; border-color: var(--rv-yellow) !important; color: #081a38 !important; box-shadow: 0 10px 28px rgba(232,186,79,.18); }
-  body.rv-shell .btn-primary:hover, body.rv-shell button[type="submit"]:hover { box-shadow: 0 14px 34px rgba(232,186,79,.28); transform: translateY(-1px); }
-  body.rv-shell .btn-outline { color: var(--rv-yellow) !important; border: 1px solid rgba(232,186,79,.42) !important; background: rgba(7,26,61,.36) !important; }
-
-  body.rv-shell .hero-mkt, body.rv-shell .page-hero-mkt, body.rv-shell .hero, body.rv-shell .dashboard-hero {
-    position: relative; overflow: hidden; border-bottom: 1px solid var(--rv-line);
-    background: linear-gradient(120deg, rgba(3,10,25,.97), rgba(7,26,61,.80) 68%, rgba(18,55,106,.54));
-  }
-  body.rv-shell .hero-mkt::after, body.rv-shell .page-hero-mkt::after, body.rv-shell .dashboard-hero::after {
-    content: ""; position: absolute; right: 4%; bottom: -5rem; width: 18rem; height: 18rem; border: 1px solid rgba(232,186,79,.24); transform: rotate(45deg); box-shadow: 0 0 0 20px rgba(232,186,79,.035), 0 0 0 40px rgba(232,186,79,.02); pointer-events: none;
-  }
-  body.rv-shell .hero-mkt-inner, body.rv-shell .page-hero-mkt-inner { position: relative; z-index: 1; }
-  body.rv-shell .hero-mkt h1 { max-width: 780px; font-size: clamp(2.5rem, 7vw, 5.8rem) !important; line-height: .98; }
-  body.rv-shell .hero-mkt h1::first-line { color: var(--rv-white); }
-  body.rv-shell .hero-mkt p, body.rv-shell .page-hero-mkt p { max-width: 650px; color: var(--rv-muted) !important; }
-  body.rv-shell .hero-proof-dot { background: var(--rv-green) !important; box-shadow: 0 0 0 5px rgba(111,213,94,.10); }
-  body.rv-shell .trust-strip { background: rgba(7,26,61,.78) !important; border-top: 1px solid var(--rv-line); border-bottom: 1px solid var(--rv-line); }
-  body.rv-shell .trust-card { border-right: 1px solid rgba(232,186,79,.18) !important; }
-  body.rv-shell .trust-number, body.rv-shell .tier-roi { color: var(--rv-yellow) !important; }
-  body.rv-shell .trust-label { color: var(--rv-muted) !important; }
-  body.rv-shell .mkt-section, body.rv-shell .card, body.rv-shell .quote-card, body.rv-shell .panel, body.rv-shell .form-card,
-  body.rv-shell .auth-card, body.rv-shell .auth-shell-card, body.rv-shell .dashboard-card, body.rv-shell .stat-card,
-  body.rv-shell .content-card, body.rv-shell .settings-card, body.rv-shell .profile-card {
-    background: linear-gradient(155deg, rgba(12,38,82,.88), rgba(4,15,37,.92)) !important;
-    border: 1px solid rgba(232,186,79,.18) !important; box-shadow: 0 14px 38px rgba(0,0,0,.16); border-radius: 18px;
-  }
-  body.rv-shell .mkt-section.is-tinted { background: rgba(12,38,82,.42) !important; }
-  body.rv-shell .feature-row, body.rv-shell .step-row { border-color: rgba(232,186,79,.18) !important; }
-  body.rv-shell .feature-mark, body.rv-shell .step-num { background: linear-gradient(145deg, var(--rv-gold), var(--rv-yellow)) !important; color: #071a3d !important; }
-  body.rv-shell input, body.rv-shell select, body.rv-shell textarea { background: rgba(3,10,25,.72) !important; color: var(--rv-white) !important; border-color: rgba(232,186,79,.25) !important; }
-  body.rv-shell input::placeholder, body.rv-shell textarea::placeholder { color: #7890b2 !important; }
-  body.rv-shell label, body.rv-shell .form-label { color: var(--rv-muted) !important; }
-  body.rv-shell .badge, body.rv-shell .status-badge, body.rv-shell .tier-ribbon { background: rgba(111,213,94,.14) !important; color: var(--rv-green) !important; border-color: rgba(111,213,94,.32) !important; }
-  body.rv-shell .mkt-footer { margin-top: 3rem; background: #020814 !important; border-top: 1px solid var(--rv-line); }
-  body.rv-shell .mkt-footer-bottom { color: #7890b2 !important; border-top-color: rgba(232,186,79,.14) !important; }
-  body.rv-shell .cta-band { background: linear-gradient(135deg, rgba(18,55,106,.9), rgba(7,26,61,.92)) !important; border: 1px solid rgba(232,186,79,.32) !important; box-shadow: var(--rv-shadow); }
-  body.rv-shell .mobile-menu { background: #04102a !important; border-left: 1px solid var(--rv-line); }
-  body.rv-shell .mobile-menu-header { border-bottom-color: rgba(232,186,79,.18) !important; }
-  body.rv-shell .mobile-link, body.rv-shell .mobile-accordion-toggle { color: var(--rv-muted) !important; }
-  body.rv-shell .tab-bar { background: rgba(3,10,25,.94) !important; border-top: 1px solid var(--rv-line) !important; backdrop-filter: blur(18px); }
-  body.rv-shell .tab-item { color: #8fa5c2 !important; }
-  body.rv-shell .tab-item.is-active { color: var(--rv-yellow) !important; }
-  body.rv-shell .rv-ambient-line { max-width: 1320px; height: 1px; margin: 0 auto; background: linear-gradient(90deg, transparent, var(--rv-gold), transparent); opacity: .65; }
-  @media (max-width: 760px) {
-    body.rv-shell .header-container { min-height: 72px; padding: 0 1rem; }
-    body.rv-shell .brand-mark { width: 34px; height: 40px; }
-    body.rv-shell .brand-name { font-size: 1.1rem; }
-    body.rv-shell .brand-tag { font-size: .46rem; letter-spacing: .11em; }
-    body.rv-shell .hero-mkt h1 { font-size: clamp(2.35rem, 14vw, 4rem) !important; }
-    body.rv-shell .trust-strip { grid-template-columns: repeat(2, 1fr) !important; }
-    body.rv-shell .trust-card { border-bottom: 1px solid rgba(232,186,79,.18) !important; }
-  }
-</style>
+  <style>
+    :root { --admin-ink:#071a3d; --admin-panel:#0c2856; --admin-line:rgba(232,186,79,.2); --admin-gold:#f5d46e; --admin-muted:#a7b8d3; }
+    body { background:linear-gradient(135deg,#030a19 0%,#071a3d 60%,#0b2554 100%); color:#f7f4eb; min-height:100vh; }
+    .user-page { max-width:1280px; margin:0 auto; padding:2rem 1.25rem 4rem; }
+    .user-topbar { display:flex; align-items:center; justify-content:space-between; gap:1rem; margin-bottom:1.25rem; }
+    .user-topbar h1 { margin:0; font-family:Georgia,serif; }
+    .user-topbar p { color:var(--admin-muted); margin:.35rem 0 0; }
+    .user-actions { display:flex; flex-wrap:wrap; gap:.6rem; }
+    .profile-hero { display:flex; align-items:center; justify-content:space-between; gap:1rem; padding:1.5rem; background:linear-gradient(135deg,rgba(18,55,106,.95),rgba(4,15,37,.96)); border:1px solid var(--admin-line); border-radius:22px; box-shadow:0 18px 50px rgba(0,0,0,.22); }
+    .profile-main { display:flex; align-items:center; gap:1rem; min-width:0; }
+    .avatar { width:68px; height:68px; display:grid; place-items:center; flex:none; border-radius:50%; background:linear-gradient(135deg,#f5d46e,#d69d26); color:#071a3d; font-size:1.6rem; font-weight:800; }
+    .profile-main h2 { margin:0; font-family:Georgia,serif; overflow-wrap:anywhere; }
+    .profile-main p { margin:.3rem 0 0; color:var(--admin-muted); overflow-wrap:anywhere; }
+    .profile-badges { display:flex; flex-wrap:wrap; gap:.45rem; margin-top:.6rem; }
+    .badge { display:inline-flex; align-items:center; padding:.35rem .65rem; border-radius:999px; font-size:.75rem; font-weight:700; }
+    .badge-gold { background:rgba(245,212,110,.16); color:var(--admin-gold); border:1px solid rgba(245,212,110,.3); }
+    .badge-green { background:rgba(111,213,94,.14); color:#6fd55e; border:1px solid rgba(111,213,94,.3); }
+    .badge-red { background:rgba(239,68,68,.14); color:#fca5a5; border:1px solid rgba(239,68,68,.3); }
+    .summary-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:1rem; margin:1rem 0; }
+    .summary-card, .detail-card { background:linear-gradient(155deg,rgba(12,38,82,.9),rgba(4,15,37,.94)); border:1px solid var(--admin-line); border-radius:18px; box-shadow:0 12px 32px rgba(0,0,0,.14); }
+    .summary-card { padding:1rem; }
+    .summary-label { color:var(--admin-muted); font-size:.78rem; text-transform:uppercase; letter-spacing:.08em; }
+    .summary-value { display:block; margin-top:.35rem; color:var(--admin-gold); font-size:1.45rem; font-weight:800; overflow-wrap:anywhere; }
+    .content-grid { display:grid; grid-template-columns:minmax(260px,.85fr) minmax(0,1.6fr); gap:1rem; align-items:start; }
+    .detail-card { padding:1.15rem; margin-bottom:1rem; min-width:0; }
+    .detail-card h3 { margin:0 0 1rem; font-family:Georgia,serif; }
+    .info-list { display:grid; gap:.7rem; margin:0; }
+    .info-row { display:flex; justify-content:space-between; gap:1rem; padding-bottom:.65rem; border-bottom:1px solid rgba(232,186,79,.1); }
+    .info-row:last-child { border-bottom:0; padding-bottom:0; }
+    .info-row dt { color:var(--admin-muted); }
+    .info-row dd { margin:0; text-align:right; overflow-wrap:anywhere; }
+    .table-wrap { overflow-x:auto; }
+    table { width:100%; min-width:620px; border-collapse:collapse; }
+    th,td { padding:.7rem .55rem; text-align:left; border-bottom:1px solid rgba(232,186,79,.12); vertical-align:top; white-space:nowrap; }
+    th { color:var(--admin-muted); font-size:.76rem; text-transform:uppercase; letter-spacing:.05em; }
+    td { color:#f7f4eb; }
+    .empty { color:var(--admin-muted); margin:0; }
+    .notice { padding:.8rem 1rem; margin-bottom:1rem; border-radius:12px; background:rgba(239,68,68,.14); color:#fecaca; border:1px solid rgba(239,68,68,.28); }
+    .btn { display:inline-flex; align-items:center; justify-content:center; min-height:38px; padding:.55rem .9rem; border:1px solid rgba(245,212,110,.35); border-radius:999px; background:rgba(7,26,61,.5); color:var(--admin-gold); font-weight:700; text-decoration:none; cursor:pointer; }
+    .btn-primary { background:linear-gradient(135deg,#f5d46e,#e8ba4f); color:#071a3d; border-color:#f5d46e; }
+    .btn-danger { color:#fecaca; border-color:rgba(239,68,68,.45); }
+    .btn:disabled { opacity:.55; cursor:not-allowed; }
+    @media (max-width:860px) { .summary-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } .content-grid { grid-template-columns:1fr; } .profile-hero { align-items:flex-start; flex-direction:column; } }
+    @media (max-width:560px) { .user-page { padding:1rem .75rem 3rem; } .user-topbar { align-items:flex-start; flex-direction:column; } .user-topbar h1 { font-size:1.8rem; } .summary-grid { gap:.65rem; } .summary-card { padding:.8rem; } .summary-value { font-size:1.1rem; } .profile-hero { padding:1rem; } .profile-main { align-items:flex-start; } .avatar { width:54px; height:54px; font-size:1.25rem; } .info-row { align-items:flex-start; flex-direction:column; gap:.2rem; } .info-row dd { text-align:left; } }
+  </style>
 </head>
-<body class="rv-shell">
-  <nav class="navbar"><div class="logo"><strong>Admin Panel</strong></div><a href="../dashboard.html">User Site</a></nav>
-  <div class="flex">
-    <aside class="sidebar">
-      <ul class="sidebar-nav">
-        <li><a href="index.html">Dashboard</a></li>
-        <li><a href="users.html" class="active">Users</a></li>
-        <li><a href="deposits.html">Deposits</a></li>
-        <li><a href="withdrawals.html">Withdrawals</a></li>
-        <li><a href="products.html">Products</a></li>
-        <li><a href="support.html">Support</a></li>
-        <li><a href="kyc.html">KYC</a></li>
-        <li><a href="reports.html">Reports</a></li>
-        <li><a href="settings.html">Settings</a></li>
-        <li><a href="logs.html">Logs</a></li>
-      </ul>
-    </aside>
-    <main style="flex:1; padding:2rem;">
-      <a href="users.html" class="text-muted">&larr; Back to Users</a>
-      <div id="content" class="mt-2">Loading…</div>
-    </main>
-  </div>
-
+<body>
+  <nav class="navbar"><div class="logo"><strong>Admin Panel</strong></div><a href="index.html#users">Back to Users</a></nav>
+  <main class="user-page">
+    <div id="page-error" class="notice" hidden></div>
+    <div id="loading" class="detail-card">Loading user profile…</div>
+    <div id="user-content" hidden>
+      <div class="user-topbar">
+        <div><h1>User Details</h1><p>Review the account, wallet, and complete activity history.</p></div>
+        <div class="user-actions"><a class="btn" href="index.html#users">← Back to Users</a><button class="btn" id="refresh-btn">Refresh</button></div>
+      </div>
+      <section class="profile-hero">
+        <div class="profile-main"><div class="avatar" id="avatar">RV</div><div><h2 id="user-name">—</h2><p id="user-email">—</p><div class="profile-badges" id="profile-badges"></div></div></div>
+        <div class="user-actions"><button class="btn" id="freeze-btn">Freeze</button><button class="btn btn-danger" id="ban-btn">Ban</button></div>
+      </section>
+      <section class="summary-grid" id="summary-grid"></section>
+      <div class="content-grid">
+        <div>
+          <section class="detail-card"><h3>Profile information</h3><dl class="info-list" id="profile-info"></dl></section>
+          <section class="detail-card"><h3>Wallet</h3><dl class="info-list" id="wallet-info"></dl></section>
+        </div>
+        <div>
+          <section class="detail-card"><h3>Deposits</h3><div class="table-wrap" id="deposits-table"></div></section>
+          <section class="detail-card"><h3>Withdrawals</h3><div class="table-wrap" id="withdrawals-table"></div></section>
+          <section class="detail-card"><h3>Investments</h3><div class="table-wrap" id="investments-table"></div></section>
+          <section class="detail-card"><h3>Welfare plans</h3><div class="table-wrap" id="welfare-table"></div></section>
+          <section class="detail-card"><h3>Transactions</h3><div class="table-wrap" id="transactions-table"></div></section>
+        </div>
+      </div>
+    </div>
+  </main>
   <script type="module">
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
-    const supabase = createClient('https://jytmnukzvxirnafukbck.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp5dG1udWt6dnhpcm5hZnVrYmNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQxNjQ3MjUsImV4cCI6MjA5OTc0MDcyNX0.ZvGUPTW7dJ3UxL2N1TW0lBCe3H4559HaUEhks7vEbEw');
-
-    async function getToken() { return (await supabase.auth.getSession()).data.session?.access_token; }
-
-    function fmtDate(d) { return d ? new Date(d).toLocaleString() : '—'; }
-    function fmtMoney(n) { return '₦' + Number(n || 0).toLocaleString(); }
-
-    function statusBadge(status) {
-      const s = (status || '').toLowerCase();
-      if (s === 'approved' || s === 'active' || s === 'completed') return `<span class="badge badge-success">${status}</span>`;
-      if (s === 'rejected' || s === 'failed') return `<span class="badge badge-danger">${status}</span>`;
-      if (s === 'pending') return `<span class="badge badge-warning">${status}</span>`;
-      return `<span class="badge">${status || '—'}</span>`;
+    const supabase = createClient('https://jytmnukzvxirnafukbck.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp5dG1udWt6dnhpcm5hZnVrYmNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQxNjQ3MjUsImV4cCI6MjA5OTc0MDcyNX0.ZvGUPTW7dJ3UxL2N1TW0lBCe3H4559HaUEhks7vEbEw');
+    const userId = new URLSearchParams(location.search).get('id');
+    let current;
+    const $ = id => document.getElementById(id);
+    const esc = value => { const node = document.createElement('span'); node.textContent = value ?? '—'; return node.innerHTML; };
+    const money = value => `₦${Number(value || 0).toLocaleString()}`;
+    const date = value => value ? new Date(value).toLocaleString() : '—';
+    const status = value => `<span class="badge ${String(value||'').toLowerCase().includes('approved') || String(value||'').toLowerCase() === 'active' ? 'badge-green' : String(value||'').toLowerCase().includes('reject') || String(value||'').toLowerCase() === 'failed' ? 'badge-red' : 'badge-gold'}">${esc(value || '—')}</span>`;
+    async function token() { return (await supabase.auth.getSession()).data.session?.access_token; }
+    async function api(action, options = {}) { const accessToken = await token(); const response = await fetch(`/api/admin?action=${action}`, { ...options, headers: { 'Content-Type':'application/json', Authorization:`Bearer ${accessToken}`, ...(options.headers || {}) } }); const data = await response.json().catch(() => ({})); if (!response.ok) throw new Error(data.error || `Request failed (${response.status})`); return data; }
+    function table(rows, columns, empty = 'No records found.') { if (!rows?.length) return `<p class="empty">${empty}</p>`; return `<table><thead><tr>${columns.map(c => `<th>${c.label}</th>`).join('')}</tr></thead><tbody>${rows.map(row => `<tr>${columns.map(c => `<td>${c.render(row)}</td>`).join('')}</tr>`).join('')}</tbody></table>`; }
+    function render(data) {
+      current = data;
+      const p = data.profile || {}, w = data.wallet || {};
+      const name = p.full_name || p.email || 'Unnamed user';
+      $('avatar').textContent = name.split(/\s+/).map(x => x[0]).join('').slice(0,2).toUpperCase();
+      $('user-name').textContent = name; $('user-email').textContent = p.email || 'No email';
+      $('profile-badges').innerHTML = `${p.vip_level ? `<span class="badge badge-gold">VIP ${esc(p.vip_level)}</span>` : ''}${p.is_banned ? '<span class="badge badge-red">Banned</span>' : '<span class="badge badge-green">Active</span>'}${p.is_frozen ? '<span class="badge badge-red">Frozen</span>' : ''}`;
+      $('freeze-btn').textContent = p.is_frozen ? 'Unfreeze' : 'Freeze'; $('ban-btn').textContent = p.is_banned ? 'Unban' : 'Ban';
+      $('summary-grid').innerHTML = `<div class="summary-card"><span class="summary-label">Balance</span><strong class="summary-value">${money(w.balance)}</strong></div><div class="summary-card"><span class="summary-label">Deposited</span><strong class="summary-value">${money(w.total_deposited)}</strong></div><div class="summary-card"><span class="summary-label">Withdrawn</span><strong class="summary-value">${money(w.total_withdrawn)}</strong></div><div class="summary-card"><span class="summary-label">Joined</span><strong class="summary-value">${esc(date(p.created_at))}</strong></div>`;
+      $('profile-info').innerHTML = [['Full name',p.full_name],['Email',p.email],['Phone',p.phone],['VIP level',p.vip_level],['Referral code',p.referral_code],['Referred by',p.referred_by],['Last sign in',date(p.last_sign_in_at)],['Created',date(p.created_at)]].map(([label,value]) => `<div class="info-row"><dt>${label}</dt><dd>${esc(value)}</dd></div>`).join('');
+      $('wallet-info').innerHTML = [['Balance',money(w.balance)],['Total deposited',money(w.total_deposited)],['Total withdrawn',money(w.total_withdrawn)],['Referral earnings',money(w.referral_earnings)],['Task earnings',money(w.task_earnings)],['Investment earnings',money(w.investment_earnings)]].map(([label,value]) => `<div class="info-row"><dt>${label}</dt><dd>${esc(value)}</dd></div>`).join('');
+      $('deposits-table').innerHTML = table(data.deposits, [{label:'Amount',render:r=>money(r.amount)},{label:'Method',render:r=>esc(r.method || r.payment_method)},{label:'Reference',render:r=>esc(r.reference)},{label:'Status',render:r=>status(r.status)},{label:'Date',render:r=>esc(date(r.created_at))}]);
+      $('withdrawals-table').innerHTML = table(data.withdrawals, [{label:'Amount',render:r=>money(r.amount)},{label:'Method',render:r=>esc(r.method)},{label:'Status',render:r=>status(r.status)},{label:'Date',render:r=>esc(date(r.created_at))}]);
+      $('investments-table').innerHTML = table(data.investments, [{label:'Product',render:r=>esc(r.products?.name || r.product_name)},{label:'Amount',render:r=>money(r.amount || r.investment_amount)},{label:'Income',render:r=>money(r.total_income)},{label:'Status',render:r=>status(r.status)},{label:'Date',render:r=>esc(date(r.created_at))}]);
+      $('welfare-table').innerHTML = table(data.welfare, [{label:'Plan',render:r=>esc(r.plan_name || r.name)},{label:'Amount',render:r=>money(r.amount)},{label:'Status',render:r=>status(r.status)},{label:'Date',render:r=>esc(date(r.created_at))}]);
+      $('transactions-table').innerHTML = table(data.transactions, [{label:'Type',render:r=>esc(r.type)},{label:'Amount',render:r=>money(r.amount)},{label:'Status',render:r=>status(r.status)},{label:'Reference',render:r=>esc(r.reference)},{label:'Date',render:r=>esc(date(r.created_at))}]);
     }
-
-    function tableOrEmpty(rows, headerHtml, rowFn, emptyText) {
-      if (!rows || rows.length === 0) return `<p class="text-muted">${emptyText}</p>`;
-      return `
-        <div class="table-container">
-          <table>
-            <thead><tr>${headerHtml}</tr></thead>
-            <tbody>${rows.map(rowFn).join('')}</tbody>
-          </table>
-        </div>`;
-    }
-
-    async function loadUser() {
-      const userId = new URLSearchParams(location.search).get('id');
-      const content = document.getElementById('content');
-      if (!userId) { content.innerHTML = '<div class="alert alert-danger">No user ID provided.</div>'; return; }
-
-      const token = await getToken();
-      const res = await fetch(`/api/admin?action=userDetail&user_id=${userId}`, { headers: { Authorization: `Bearer ${token}` } });
-      const data = await res.json();
-      if (!res.ok) { content.innerHTML = `<div class="alert alert-danger">${data.error || 'Failed to load user'}</div>`; return; }
-
-      const { profile, wallet, transactions, investments, welfare, deposits, withdrawals } = data;
-
-      content.innerHTML = `
-        <h2>${profile.full_name || profile.email}</h2>
-        <p class="text-muted">${profile.email} · Joined ${fmtDate(profile.created_at)}</p>
-
-        <div class="widget-grid mt-2">
-          <div class="card stat-card">
-            <div class="stat-value">${fmtMoney(wallet?.balance)}</div>
-            <div class="stat-label">Wallet Balance</div>
-          </div>
-          <div class="card stat-card">
-            <div class="stat-value">${fmtMoney(wallet?.total_deposited)}</div>
-            <div class="stat-label">Total Deposited</div>
-          </div>
-          <div class="card stat-card">
-            <div class="stat-value">${fmtMoney(wallet?.total_withdrawn)}</div>
-            <div class="stat-label">Total Withdrawn</div>
-          </div>
-          <div class="card stat-card">
-            <div class="stat-value">${fmtMoney(wallet?.total_earned)}</div>
-            <div class="stat-label">Total Earned</div>
-          </div>
-        </div>
-
-        <div class="card mt-2">
-          <h3>Account Info</h3>
-          <p><strong>VIP Level:</strong> ${profile.vip_level || 'bronze'}</p>
-          <p><strong>KYC Status:</strong> ${statusBadge(profile.kyc_status)}</p>
-          <p><strong>Status:</strong> ${profile.is_banned ? '<span class="badge badge-danger">Banned</span>' : profile.is_frozen ? '<span class="badge badge-warning">Frozen</span>' : '<span class="badge badge-success">Active</span>'}</p>
-          <p><strong>Referral Code:</strong> ${profile.referral_code || '—'}</p>
-          <p><strong>Phone:</strong> ${profile.phone || '—'}</p>
-        </div>
-
-        <div class="card mt-2">
-          <h3>Transaction History</h3>
-          ${tableOrEmpty(transactions,
-            '<th>Date</th><th>Type</th><th>Amount</th><th>Status</th><th>Reference</th>',
-            t => `<tr><td>${fmtDate(t.created_at)}</td><td>${t.type}</td><td>${fmtMoney(t.amount)}</td><td>${statusBadge(t.status)}</td><td>${t.reference || '—'}</td></tr>`,
-            'No transactions yet.'
-          )}
-        </div>
-
-        <div class="card mt-2">
-          <h3>Investment History</h3>
-          ${tableOrEmpty(investments,
-            '<th>Product</th><th>Amount</th><th>Daily Income</th><th>Progress</th><th>Earned</th><th>Status</th>',
-            i => `<tr><td>${i.products?.name || 'Investment'}</td><td>${fmtMoney(i.amount)}</td><td>${fmtMoney(i.daily_income)}</td><td>${i.days_elapsed}/${i.duration_days} days</td><td>${fmtMoney(i.total_income)}</td><td>${statusBadge(i.status)}</td></tr>`,
-            'No investments yet.'
-          )}
-        </div>
-
-        <div class="card mt-2">
-          <h3>Welfare Plans</h3>
-          ${tableOrEmpty(welfare,
-            '<th>Amount</th><th>Duration</th><th>Daily Rate</th><th>Matures</th><th>Status</th>',
-            w => `<tr><td>${fmtMoney(w.amount)}</td><td>${w.duration_days} days</td><td>${w.daily_rate_percent}%/day</td><td>${fmtDate(w.maturity_date)}</td><td>${statusBadge(w.status)}</td></tr>`,
-            'No Welfare plans yet.'
-          )}
-        </div>
-
-        <div class="card mt-2">
-          <h3>Deposit History</h3>
-          ${tableOrEmpty(deposits,
-            '<th>Date</th><th>Amount</th><th>Method</th><th>Status</th>',
-            d => `<tr><td>${fmtDate(d.created_at)}</td><td>${fmtMoney(d.amount)}</td><td>${d.payment_method || '—'}</td><td>${statusBadge(d.status)}</td></tr>`,
-            'No deposits yet.'
-          )}
-        </div>
-
-        <div class="card mt-2">
-          <h3>Withdrawal History</h3>
-          ${tableOrEmpty(withdrawals,
-            '<th>Date</th><th>Amount</th><th>Bank</th><th>Status</th>',
-            w => `<tr><td>${fmtDate(w.created_at)}</td><td>${fmtMoney(w.amount)}</td><td>${w.bank_details?.bank_name || '—'} · ${w.bank_details?.account_number || ''}</td><td>${statusBadge(w.status)}</td></tr>`,
-            'No withdrawals yet.'
-          )}
-        </div>
-      `;
-    }
-
-    loadUser();
+    async function load() { if (!userId) throw new Error('Missing user id. Return to Users and choose a user.'); const data = await api(`userDetail&user_id=${encodeURIComponent(userId)}`); render(data); $('loading').hidden = true; $('user-content').hidden = false; }
+    async function toggle(action, button) { button.disabled = true; try { await api(action, { method:'POST', body:JSON.stringify({ user_id:userId }) }); await load(); } catch (error) { $('page-error').textContent = error.message; $('page-error').hidden = false; } finally { button.disabled = false; } }
+    $('refresh-btn').addEventListener('click', () => load().catch(error => { $('page-error').textContent = error.message; $('page-error').hidden = false; }));
+    $('freeze-btn').addEventListener('click', e => toggle(current?.profile?.is_frozen ? 'unfreezeUser' : 'freezeUser', e.currentTarget));
+    $('ban-btn').addEventListener('click', e => toggle(current?.profile?.is_banned ? 'unbanUser' : 'banUser', e.currentTarget));
+    const session = (await supabase.auth.getSession()).data.session;
+    if (!session) location.href = '../login.html'; else load().catch(error => { $('loading').hidden = true; $('page-error').textContent = error.message; $('page-error').hidden = false; });
   </script>
 </body>
 </html>
