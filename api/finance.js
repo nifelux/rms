@@ -9,6 +9,7 @@ export default async function handler(req, res) {
       case 'getTransactions': return await getTransactions(req, res);
       case 'getDeposits': return await getDeposits(req, res);
       case 'getWithdrawals': return await getWithdrawals(req, res);
+      case 'getWithdrawalEligibility': return await getWithdrawalEligibility(req, res);
       case 'createDeposit': return await createDeposit(req, res);
       case 'createWithdrawal': return await createWithdrawal(req, res);
       default: return res.status(400).json({ error: 'Invalid action' });
@@ -52,7 +53,7 @@ async function getWallet(req, res) {
   if (!user) return res.status(401).json({ error: 'Unauthorized' });
 
   const { data: wallet } = await supabaseAdmin.from('wallets').select('*').eq('user_id', user.id).single();
-  if (!wallet) return res.status(200).json({ balance: 0, total_earned: 0, total_deposited: 0 });
+  if (!wallet) return res.status(200).json({ balance: 0, total_earned: 0, total_deposited: 0, total_withdrawn: 0 });
   
   return res.status(200).json(wallet);
 }
@@ -61,7 +62,13 @@ async function getTransactions(req, res) {
   const user = await verifyUser(req);
   if (!user) return res.status(401).json({ error: 'Unauthorized' });
 
-  const { data: transactions } = await supabaseAdmin.from('transactions').select('*').eq('user_id', user.id).order('created_at', { ascending: false }).limit(50);
+  const { data: transactions } = await supabaseAdmin
+    .from('transactions')
+    .select('*')
+    .eq('user_id', user.id)
+    .order('created_at', { ascending: false })
+    .limit(50);
+    
   return res.status(200).json({ transactions: transactions || [] });
 }
 
@@ -79,6 +86,41 @@ async function getWithdrawals(req, res) {
 
   const { data: withdrawals } = await supabaseAdmin.from('withdrawals').select('*').eq('user_id', user.id).order('created_at', { ascending: false });
   return res.status(200).json({ withdrawals: withdrawals || [] });
+}
+
+// NEW ACTION: Helps the frontend display the exact withdrawal status/rules to the user
+async function getWithdrawalEligibility(req, res) {
+  const user = await verifyUser(req);
+  if (!user) return res.status(401).json({ error: 'Unauthorized' });
+
+  const { data: profile } = await supabaseAdmin.from('profiles').select('vip_level').eq('id', user.id).single();
+  const tier = profile?.vip_level || 'newbie';
+  
+  const windowCheck = checkWithdrawalWindow(tier);
+  const rules = getWithdrawalRules(tier);
+
+  // Check if they already withdrew today
+  const now = new Date();
+  const startOfTodayWAT = new Date(now.getTime() + 60 * 60 * 1000);
+  startOfTodayWAT.setUTCHours(0, 0, 0, 0);
+  const startOfTodayUTC = new Date(startOfTodayWAT.getTime() - 60 * 60 * 1000);
+
+  const { count: todaysCount } = await supabaseAdmin.from('withdrawals').select('*', { count: 'exact', head: true })
+    .eq('user_id', user.id).gte('created_at', startOfTodayUTC.toISOString());
+
+  return res.status(200).json({
+    tier: tier,
+    withdrawal_day: rules ? rules.name : 'None',
+    can_withdraw_now: windowCheck.allowed && todaysCount === 0,
+    reason_blocked: windowCheck.allowed ? (todaysCount > 0 ? 'You have already withdrawn today.' : null) : windowCheck.reason,
+    schedule: {
+      'Monday': ['M1', 'M2'],
+      'Tuesday': ['M3', 'M4'],
+      'Wednesday': ['M5'],
+      'Thursday': ['M6'],
+      'Friday': ['M7']
+    }
+  });
 }
 
 async function createDeposit(req, res) {
@@ -122,7 +164,7 @@ async function createWithdrawal(req, res) {
     .eq('user_id', user.id).gte('created_at', startOfTodayUTC.toISOString());
   if (todaysCount > 0) return res.status(400).json({ error: 'You can only make one withdrawal request per day.' });
 
-  // 4. Balance Check
+  // 4. Balance Check (Subtract pending withdrawals from available balance)
   const { data: wallet } = await supabaseAdmin.from('wallets').select('balance').eq('user_id', user.id).single();
   const { data: pending } = await supabaseAdmin.from('withdrawals').select('amount').eq('user_id', user.id).eq('status', 'pending');
   const pendingTotal = (pending || []).reduce((sum, r) => sum + Number(r.amount), 0);
