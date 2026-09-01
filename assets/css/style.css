@@ -1,3 +1,86 @@
+/* ==========================================
+   RMS DESIGN SYSTEM
+   ========================================== */
+:root {
+  --rms-bg: #0a0e27;           /* Deep Blue-Black Background */
+  --rms-bg-card: #11163a;      /* Slightly lighter for cards */
+  --rms-red: #d90429;          /* Standard Red */
+  --rms-vivid-red: #ff1a1a;    /* Bright, energetic Red */
+  --rms-yellow: #ffd700;       /* Premium Gold/Yellow */
+  --rms-white: #ffffff;
+  --rms-text-muted: #a0aec0;
+  --rms-border: rgba(255, 215, 0, 0.15);
+  --rms-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  --rms-radius: 16px;
+}
+
+body {
+  background-color: var(--rms-bg) !important;
+  color: var(--rms-white) !important;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* --- Typography --- */
+h1, h2, h3, h4 { color: var(--rms-white); font-weight: 700; margin-top: 0; }
+.text-muted { color: var(--rms-text-muted) !important; font-size: 0.9rem; }
+.text-yellow { color: var(--rms-yellow) !important; }
+.text-red { color: var(--rms-vivid-red) !important; }
+
+/* --- Cards --- */
+.rms-card {
+  background: var(--rms-bg-card);
+  border: 1px solid var(--rms-border);
+  border-radius: var(--rms-radius);
+  box-shadow: var(--rms-shadow);
+  padding: 20px;
+  margin-bottom: 16px;
+}
+
+/* --- Buttons --- */
+.rms-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 12px 24px; border-radius: 999px; font-weight: 700;
+  text-decoration: none; border: none; cursor: pointer; transition: all 0.2s ease;
+  font-size: 1rem;
+}
+.rms-btn:active { transform: scale(0.96); }
+.rms-btn-primary { background: linear-gradient(135deg, var(--rms-vivid-red), var(--rms-red)); color: white; }
+.rms-btn-yellow { background: linear-gradient(135deg, var(--rms-yellow), #e6c200); color: #0a0e27; }
+.rms-btn-outline { background: transparent; border: 1px solid var(--rms-yellow); color: var(--rms-yellow); }
+
+/* --- Icon Grid (Dashboard) --- */
+.icon-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 20px 0;
+}
+.icon-item {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  background: var(--rms-bg-card); border: 1px solid var(--rms-border);
+  border-radius: 12px; padding: 16px 8px; text-decoration: none; color: var(--rms-white);
+  transition: transform 0.2s;
+}
+.icon-item:hover { transform: translateY(-2px); border-color: var(--rms-yellow); }
+.icon-item .icon { font-size: 1.8rem; margin-bottom: 8px; }
+.icon-item .label { font-size: 0.75rem; text-align: center; font-weight: 500; }
+
+/* --- Bottom Navigation --- */
+.bottom-nav {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  background: rgba(10, 14, 39, 0.95); backdrop-filter: blur(10px);
+  border-top: 1px solid var(--rms-border);
+  display: flex; justify-content: space-around; padding: 12px 0;
+  z-index: 100;
+}
+.nav-item {
+  display: flex; flex-direction: column; align-items: center; text-decoration: none;
+  color: var(--rms-text-muted); font-size: 0.7rem; gap: 4px;
+}
+.nav-item.active { color: var(--rms-yellow); }
+.nav-item .nav-icon { font-size: 1.4rem; }
+
+
 /* ============================================================
    Investment Platform Design System – Premium, Naira-Centric
    ============================================================ */
