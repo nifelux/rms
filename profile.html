@@ -90,11 +90,13 @@
           <div class="menu-item-left"><i class="fa-solid fa-user-pen"></i> Edit Profile</div>
           <div class="menu-item-right"><i class="fa-solid fa-chevron-right"></i></div>
         </a>
-        <a href="/settings.html" class="menu-item security">
+        <!-- UPDATED LINK -->
+        <a href="/change-password.html" class="menu-item security">
           <div class="menu-item-left"><i class="fa-solid fa-shield-halved"></i> Change Password</div>
           <div class="menu-item-right"><i class="fa-solid fa-chevron-right"></i></div>
         </a>
-        <a href="/settings.html" class="menu-item bank">
+        <!-- UPDATED LINK -->
+        <a href="/bank-account.html" class="menu-item bank">
           <div class="menu-item-left"><i class="fa-solid fa-building-columns"></i> Bank Accounts</div>
           <div class="menu-item-right"><i class="fa-solid fa-chevron-right"></i></div>
         </a>
@@ -179,7 +181,6 @@
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return window.location.href = '/login.html';
 
-      // Fetch Profile
       const { data: profile } = await supabase.from('profiles').select('*').eq('id', user.id).single();
       document.getElementById('user-name').textContent = profile.full_name || 'User';
       document.getElementById('user-email').textContent = profile.email;
@@ -191,7 +192,6 @@
         tierBadge.style.color = '#0a0e27';
       }
 
-      // Fetch Wallet
       const { data: wallet } = await supabase.from('wallets').select('balance, total_earned').eq('user_id', user.id).single();
       if (wallet) {
         document.getElementById('wallet-balance').textContent = Number(wallet.balance).toLocaleString();
