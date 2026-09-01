@@ -5,82 +5,233 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>RMS — Admin Panel</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="assets/css/style.css">
   <meta name="theme-color" content="#0a0e27">
   <style>
-    /* Admin Specific Styles */
+    /* RMS Theme Variables - Built In */
+    :root {
+      --rms-bg: #0a0e27;
+      --rms-bg-card: #11163a;
+      --rms-red: #d90429;
+      --rms-vivid-red: #ff1a1a;
+      --rms-yellow: #ffd700;
+      --rms-white: #ffffff;
+      --rms-text-muted: #a0aec0;
+      --rms-border: rgba(255, 215, 0, 0.15);
+      --rms-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      background: var(--rms-bg);
+      color: var(--rms-white);
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Admin Layout */
     .admin-layout { display: flex; min-height: 100vh; background: var(--rms-bg); }
     
-    /* Sidebar */
-    .sidebar { 
-      width: 250px; background: #050816; border-right: 1px solid var(--rms-border); 
-      padding: 20px 0; position: fixed; height: 100vh; overflow-y: auto;
+    .sidebar {
+      width: 250px;
+      background: #050816;
+      border-right: 1px solid var(--rms-border);
+      padding: 20px 0;
+      position: fixed;
+      height: 100vh;
+      overflow-y: auto;
+      z-index: 100;
     }
-    .sidebar-header { padding: 0 20px 20px; border-bottom: 1px solid var(--rms-border); margin-bottom: 20px; }
-    .sidebar-logo { font-size: 1.5rem; font-weight: 800; color: var(--rms-white); }
-    .nav-link { 
-      display: flex; align-items: center; gap: 12px; padding: 14px 20px; 
-      color: var(--rms-text-muted); text-decoration: none; font-size: 0.9rem; 
-      border-left: 3px solid transparent; transition: 0.2s;
+    
+    .sidebar-header {
+      padding: 0 20px 20px;
+      border-bottom: 1px solid var(--rms-border);
+      margin-bottom: 20px;
     }
-    .nav-link:hover, .nav-link.active { 
-      background: rgba(255,215,0,0.05); color: var(--rms-yellow); border-left-color: var(--rms-yellow); 
+    
+    .sidebar-logo {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--rms-white);
     }
+    
+    .nav-link {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 20px;
+      color: var(--rms-text-muted);
+      text-decoration: none;
+      font-size: 0.9rem;
+      border-left: 3px solid transparent;
+      transition: 0.2s;
+    }
+    
+    .nav-link:hover, .nav-link.active {
+      background: rgba(255,215,0,0.05);
+      color: var(--rms-yellow);
+      border-left-color: var(--rms-yellow);
+    }
+    
     .nav-link i { width: 20px; text-align: center; }
 
-    /* Main Content */
-    .main-content { margin-left: 250px; flex: 1; padding: 30px; }
-    .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
-    .page-title { font-size: 1.5rem; font-weight: 700; margin: 0; }
+    .main-content {
+      margin-left: 250px;
+      flex: 1;
+      padding: 30px;
+      background: var(--rms-bg);
+    }
+    
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+    }
+    
+    .page-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin: 0;
+      color: var(--rms-white);
+    }
     
     /* Stats Grid */
-    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px; }
-    .stat-card { 
-      background: var(--rms-bg-card); border: 1px solid var(--rms-border); 
-      border-radius: 12px; padding: 20px; display: flex; align-items: center; gap: 16px;
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
     }
-    .stat-icon { 
-      width: 50px; height: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; 
+    
+    .stat-card {
+      background: var(--rms-bg-card);
+      border: 1px solid var(--rms-border);
+      border-radius: 12px;
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
     }
+    
+    .stat-icon {
+      width: 50px;
+      height: 50px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+    }
+    
     .icon-yellow { background: rgba(255,215,0,0.1); color: var(--rms-yellow); }
     .icon-red { background: rgba(255,26,26,0.1); color: var(--rms-vivid-red); }
     .icon-green { background: rgba(46,204,113,0.1); color: #2ecc71; }
-    .stat-info h3 { margin: 0; font-size: 1.4rem; font-weight: 800; color: var(--rms-white); }
-    .stat-info p { margin: 4px 0 0; font-size: 0.8rem; color: var(--rms-text-muted); }
-
-    /* Data Tables / Lists */
-    .data-card { background: var(--rms-bg-card); border: 1px solid var(--rms-border); border-radius: 12px; overflow: hidden; margin-bottom: 20px; }
-    .data-header { padding: 16px 20px; border-bottom: 1px solid var(--rms-border); display: flex; justify-content: space-between; align-items: center; }
-    .data-header h3 { margin: 0; font-size: 1.1rem; }
-    .data-list { padding: 0; }
-    .data-item { 
-      padding: 16px 20px; border-bottom: 1px solid rgba(255,255,255,0.05); 
-      display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;
+    
+    .stat-info h3 {
+      margin: 0;
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: var(--rms-white);
     }
+    
+    .stat-info p {
+      margin: 4px 0 0;
+      font-size: 0.8rem;
+      color: var(--rms-text-muted);
+    }
+
+    /* Data Cards */
+    .data-card {
+      background: var(--rms-bg-card);
+      border: 1px solid var(--rms-border);
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+    
+    .data-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--rms-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .data-header h3 {
+      margin: 0;
+      font-size: 1.1rem;
+      color: var(--rms-white);
+    }
+    
+    .data-list { padding: 0; }
+    
+    .data-item {
+      padding: 16px 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    
     .data-item:last-child { border-bottom: none; }
+    
     .item-details { flex: 1; min-width: 200px; }
-    .item-title { font-weight: 600; color: var(--rms-white); margin-bottom: 4px; }
-    .item-sub { font-size: 0.8rem; color: var(--rms-text-muted); }
+    
+    .item-title {
+      font-weight: 600;
+      color: var(--rms-white);
+      margin-bottom: 4px;
+    }
+    
+    .item-sub {
+      font-size: 0.8rem;
+      color: var(--rms-text-muted);
+    }
+    
     .item-actions { display: flex; gap: 8px; }
     
-    /* Buttons */
-    .btn-sm { padding: 6px 12px; font-size: 0.8rem; border-radius: 6px; border: none; cursor: pointer; font-weight: 600; color: white; }
+    .btn-sm {
+      padding: 6px 12px;
+      font-size: 0.8rem;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      font-weight: 600;
+      color: white;
+    }
+    
     .btn-approve { background: #2ecc71; }
     .btn-reject { background: var(--rms-vivid-red); }
     .btn-view { background: rgba(255,255,255,0.1); color: var(--rms-white); }
 
-    /* Sections */
     .admin-section { display: none; }
     .admin-section.active { display: block; }
 
-    /* Mobile Responsive */
+    .text-red { color: var(--rms-vivid-red); }
+    .text-muted { color: var(--rms-text-muted); }
+
+    /* Mobile */
     @media (max-width: 768px) {
-      .sidebar { transform: translateX(-100%); transition: 0.3s; z-index: 100; }
+      .sidebar {
+        transform: translateX(-100%);
+        transition: 0.3s;
+      }
       .sidebar.open { transform: translateX(0); }
       .main-content { margin-left: 0; padding: 16px; }
       .mobile-toggle { display: block !important; }
     }
-    .mobile-toggle { display: none; background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; }
+    
+    .mobile-toggle {
+      display: none;
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
@@ -88,9 +239,9 @@
   <!-- Security Gate -->
   <div id="admin-gate" style="display:none; position:fixed; inset:0; background:var(--rms-bg); z-index:999; align-items:center; justify-content:center; flex-direction:column; text-align:center;">
     <i class="fa-solid fa-user-shield" style="font-size: 4rem; color: var(--rms-yellow); margin-bottom: 20px;"></i>
-    <h2>Admin Access Required</h2>
+    <h2 style="color: white; margin-bottom: 10px;">Admin Access Required</h2>
     <p class="text-muted">You do not have permission to view this page.</p>
-    <a href="/login.html" class="rms-btn rms-btn-primary" style="margin-top: 20px; text-decoration: none;">Go to Login</a>
+    <a href="/login.html" style="display: inline-block; margin-top: 20px; padding: 12px 24px; background: var(--rms-yellow); color: #0a0e27; text-decoration: none; border-radius: 8px; font-weight: 700;">Go to Login</a>
   </div>
 
   <div class="admin-layout" id="admin-panel" style="display:none;">
@@ -120,7 +271,7 @@
         <div style="font-size: 0.9rem; color: var(--rms-text-muted);">Welcome, Admin</div>
       </div>
 
-      <!-- 1. Dashboard Section -->
+      <!-- Dashboard Section -->
       <div id="dashboard" class="admin-section active">
         <div class="stats-grid">
           <div class="stat-card">
@@ -142,53 +293,39 @@
         </div>
       </div>
 
-      <!-- 2. Deposits Section -->
+      <!-- Other Sections (Deposits, Withdrawals, etc.) -->
       <div id="deposits" class="admin-section">
         <div class="data-card">
           <div class="data-header"><h3>Pending Deposit Requests</h3></div>
-          <div class="data-list" id="deposit-list">
-            <div style="padding:20px; text-align:center; color:var(--rms-text-muted);">Loading...</div>
-          </div>
+          <div class="data-list" id="deposit-list">Loading...</div>
         </div>
       </div>
 
-      <!-- 3. Withdrawals Section -->
       <div id="withdrawals" class="admin-section">
         <div class="data-card">
           <div class="data-header"><h3>Pending Withdrawal Requests</h3></div>
-          <div class="data-list" id="withdrawal-list">
-            <div style="padding:20px; text-align:center; color:var(--rms-text-muted);">Loading...</div>
-          </div>
+          <div class="data-list" id="withdrawal-list">Loading...</div>
         </div>
       </div>
 
-      <!-- 4. Users Section (Placeholder for structure) -->
       <div id="users" class="admin-section">
         <div class="data-card">
           <div class="data-header"><h3>User Management</h3></div>
-          <div class="data-list" id="user-list">
-            <div style="padding:20px; text-align:center; color:var(--rms-text-muted);">User management interface loads here.</div>
-          </div>
+          <div class="data-list">User management loads here.</div>
         </div>
       </div>
 
-      <!-- 5. Wealth Section -->
       <div id="wealth" class="admin-section">
         <div class="data-card">
           <div class="data-header"><h3>Wealth Center Plans</h3></div>
-          <div class="data-list" id="wealth-list">
-            <div style="padding:20px; text-align:center; color:var(--rms-text-muted);">Wealth plans interface loads here.</div>
-          </div>
+          <div class="data-list">Wealth plans load here.</div>
         </div>
       </div>
 
-      <!-- 6. Support Section -->
       <div id="support" class="admin-section">
         <div class="data-card">
           <div class="data-header"><h3>Support Tickets</h3></div>
-          <div class="data-list" id="support-list">
-            <div style="padding:20px; text-align:center; color:var(--rms-text-muted);">Support tickets interface loads here.</div>
-          </div>
+          <div class="data-list">Support tickets load here.</div>
         </div>
       </div>
 
@@ -197,10 +334,9 @@
 
   <script type="module">
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
-    const supabase = createClient('https://ofysznsajwxnjqaumwch.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9meXN6bnNhand4bmpxYXVtd2NoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgyMzM4NDgsImV4cCI6MjEwMzgwOTg0OH0.XaHkP5WZ2nJVJXVdbG-D13rrD63g_09HxmJoZn7ZoWA');
+    const supabase = createClient('YOUR_SUPABASE_URL', 'YOUR_SUPABASE_ANON_KEY');
     window.supabase = supabase;
 
-    // 1. Security Check
     async function initAdmin() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return window.location.href = '/login.html';
@@ -218,17 +354,15 @@
       loadPendingWithdrawals();
     }
 
-    // 2. Navigation Logic
     window.showSection = (sectionId, el) => {
       document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
       document.getElementById(sectionId).classList.add('active');
       document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
       el.classList.add('active');
-      document.getElementById('page-title').textContent = el.textContent.trim().replace(/\d+/g, ''); // Clean badge numbers from title
+      document.getElementById('page-title').textContent = el.textContent.trim().replace(/\d+/g, '');
       if(window.innerWidth <= 768) document.getElementById('sidebar').classList.remove('open');
     };
 
-    // 3. API Helper
     async function adminApiCall(action, body = {}) {
       const token = (await supabase.auth.getSession()).data.session.access_token;
       const res = await fetch(`/api/admin?action=${action}`, {
@@ -238,7 +372,6 @@
       return await res.json();
     }
 
-    // 4. Load Data Functions
     async function loadDashboardStats() {
       const data = await adminApiCall('getDashboardStats');
       if(data.totalUsers !== undefined) {
@@ -256,7 +389,7 @@
       const data = await adminApiCall('getPendingDeposits');
       const list = document.getElementById('deposit-list');
       if (!data.deposits || data.deposits.length === 0) {
-        list.innerHTML = '<div style="padding:20px; text-align:center;">No pending deposits.</div>';
+        list.innerHTML = '<div style="padding:20px; text-align:center; color:var(--rms-text-muted);">No pending deposits.</div>';
         return;
       }
       list.innerHTML = data.deposits.map(d => `
@@ -277,7 +410,7 @@
       const data = await adminApiCall('getPendingWithdrawals');
       const list = document.getElementById('withdrawal-list');
       if (!data.withdrawals || data.withdrawals.length === 0) {
-        list.innerHTML = '<div style="padding:20px; text-align:center;">No pending withdrawals.</div>';
+        list.innerHTML = '<div style="padding:20px; text-align:center; color:var(--rms-text-muted);">No pending withdrawals.</div>';
         return;
       }
       list.innerHTML = data.withdrawals.map(w => {
@@ -296,7 +429,6 @@
       `}).join('');
     }
 
-    // 5. Action Handlers
     window.processDeposit = async (id, status) => {
       if(!confirm(`Are you sure you want to ${status} this deposit?`)) return;
       const res = await adminApiCall('processDeposit', { deposit_id: id, status });
