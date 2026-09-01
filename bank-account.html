@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>RMS — Bank Accounts</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="assets/css/style.css">
+  <meta name="theme-color" content="#0a0e27">
+  <style>
+    .bank-container { padding: 20px 16px 100px 16px; max-width: 600px; margin: 0 auto; }
+    .info-banner { background: rgba(255,215,0,0.05); border: 1px solid var(--rms-yellow); border-radius: 12px; padding: 14px; font-size: 0.85rem; color: var(--rms-yellow); margin-bottom: 24px; display: flex; gap: 10px; align-items: flex-start; }
+    
+    .form-group { margin-bottom: 20px; }
+    .form-group label { display: block; font-size: 0.85rem; color: var(--rms-text-muted); margin-bottom: 8px; font-weight: 600; }
+    .form-control { 
+      width: 100%; padding: 14px; background: var(--rms-bg-card); border: 1px solid var(--rms-border);
+      border-radius: 10px; color: white; font-size: 1rem; box-sizing: border-box;
+    }
+    .form-control:focus { outline: none; border-color: var(--rms-yellow); }
+    
+    .saved-card { background: var(--rms-bg-card); border: 1px solid var(--rms-border); border-radius: 12px; padding: 16px; margin-top: 20px; display: none; }
+    .saved-card.active { display: block; }
+    .saved-label { font-size: 0.75rem; color: var(--rms-text-muted); margin-bottom: 4px; }
+    .saved-value { font-size: 1rem; font-weight: 600; color: var(--rms-white); margin-bottom: 12px; }
+  </style>
+</head>
+<body class="rv-shell">
+  <div id="header-container"></div>
+
+  <div class="bank-container">
+    <h2 style="margin-bottom: 5px;">Bank Account Details</h2>
+    <p class="text-muted" style="margin-bottom: 20px;">Save your default account for faster withdrawals.</p>
+
+    <div class="info-banner">
+      <i class="fa-solid fa-circle-info" style="margin-top: 2px;"></i>
+      <div>Ensure the account name matches your RMS profile name to avoid withdrawal rejection.</div>
+    </div>
+
+    <!-- Saved Details Display -->
+    <div id="saved-details" class="saved-card">
+      <h4 style="margin-top:0; margin-bottom:12px; font-size:0.9rem; color:var(--rms-yellow);"><i class="fa-solid fa-check-circle"></i> Saved Account</h4>
+      <div class="saved-label">Bank Name</div><div class="saved-value" id="disp-bank">-</div>
+      <div class="saved-label">Account Number</div><div class="saved-value" id="disp-num">-</div>
+      <div class="saved-label">Account Name</div><div class="saved-value" id="disp-name">-</div>
+    </div>
+
+    <!-- Update Form -->
+    <form id="bank-form" style="margin-top: 24px;">
+      <div class="form-group">
+        <label><i class="fa-solid fa-building-columns"></i> Bank Name</label>
+        <input type="text" id="bank-name" class="form-control" placeholder="e.g. GTBank, Opay" required>
+      </div>
+      <div class="form-group">
+        <label><i class="fa-solid fa-hashtag"></i> Account Number</label>
+        <input type="text" id="account-number" class="form-control" placeholder="10-digit number" required maxlength="10">
+      </div>
+      <div class="form-group">
+        <label><i class="fa-solid fa-user"></i> Account Name</label>
+        <input type="text" id="account-name" class="form-control" placeholder="Name on the account" required>
+      </div>
+      <button type="submit" class="rms-btn rms-btn-primary" style="width: 100%; padding: 16px;">
+        <i class="fa-solid fa-floppy-disk" style="margin-right: 8px;"></i> Save Details
+      </button>
+    </form>
+  </div>
+
+  <div id="footer-container"></div>
+  <script src="/assets/js/components.js"></script>
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+    const supabase = createClient('https://ofysznsajwxnjqaumwch.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9meXN6bnNhand4bmpxYXVtd2NoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgyMzM4NDgsImV4cCI6MjEwMzgwOTg0OH0.XaHkP5WZ2nJVJXVdbG-D13rrD63g_09HxmJoZn7ZoWA');
+    window.supabase = supabase;
+
+    async function loadBankDetails() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return window.location.href = '/login.html';
+
+      const { data: profile } = await supabase.from('profiles').select('default_bank_name, default_account_number, default_account_name').eq('id', user.id).single();
+      
+      if (profile && profile.default_bank_name) {
+        document.getElementById('disp-bank').textContent = profile.default_bank_name;
+        document.getElementById('disp-num').textContent = profile.default_account_number;
+        document.getElementById('disp-name').textContent = profile.default_account_name;
+        document.getElementById('saved-details').classList.add('active');
+        
+        // Pre-fill form
+        document.getElementById('bank-name').value = profile.default_bank_name;
+        document.getElementById('account-number').value = profile.default_account_number;
+        document.getElementById('account-name').value = profile.default_account_name;
+      }
+    }
+
+    document.getElementById('bank-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = e.target.querySelector('button');
+      btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Saving...';
+      btn.disabled = true;
+
+      const { data: { user } } = await supabase.auth.getUser();
+      const { error } = await supabase.from('profiles').update({
+        default_bank_name: document.getElementById('bank-name').value,
+        default_account_number: document.getElementById('account-number').value,
+        default_account_name: document.getElementById('account-name').value
+      }).eq('id', user.id);
+
+      if (error) {
+        alert('Error saving details. Please ensure the database columns exist.');
+        console.error(error);
+      } else {
+        alert('Bank details saved successfully!');
+        loadBankDetails();
+      }
+      btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Save Details';
+      btn.disabled = false;
+    });
+
+    loadBankDetails();
+  </script>
+</body>
+</html>
