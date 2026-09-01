@@ -9,6 +9,8 @@
   <meta name="theme-color" content="#0a0e27">
   <style>
     .profile-container { padding: 20px 16px 100px 16px; max-width: 600px; margin: 0 auto; }
+    
+    /* Header Section */
     .profile-header { text-align: center; margin-bottom: 24px; padding-bottom: 20px; border-bottom: 1px solid var(--rms-border); }
     .avatar-large { 
       width: 90px; height: 90px; background: linear-gradient(135deg, var(--rms-bg-card), #1a2050); 
@@ -24,12 +26,17 @@
       font-size: 0.85rem; font-weight: 700; margin-top: 12px; letter-spacing: 0.5px;
     }
     
+    /* Stats Grid */
     .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; }
     .stat-box { background: var(--rms-bg-card); border: 1px solid var(--rms-border); border-radius: 12px; padding: 16px; text-align: center; }
     .stat-num { font-size: 1.4rem; font-weight: 800; color: var(--rms-white); margin-bottom: 4px; }
     .stat-lbl { font-size: 0.75rem; color: var(--rms-text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
 
+    /* Menu Groups */
+    .menu-group { margin-bottom: 24px; }
+    .menu-group-title { font-size: 0.75rem; color: var(--rms-text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; padding-left: 4px; font-weight: 600; }
     .menu-list { background: var(--rms-bg-card); border: 1px solid var(--rms-border); border-radius: 16px; overflow: hidden; }
+    
     .menu-item { 
       display: flex; justify-content: space-between; align-items: center; 
       padding: 16px 20px; border-bottom: 1px solid rgba(255,255,255,0.05); 
@@ -37,10 +44,13 @@
     }
     .menu-item:hover { background: rgba(255,255,255,0.02); }
     .menu-item:last-child { border-bottom: none; }
-    .menu-item-left { display: flex; align-items: center; gap: 14px; }
+    .menu-item-left { display: flex; align-items: center; gap: 14px; font-size: 0.95rem; }
     .menu-item-left i { width: 20px; text-align: center; color: var(--rms-yellow); font-size: 1.1rem; }
     .menu-item-right i { color: var(--rms-text-muted); font-size: 0.8rem; }
     
+    /* Specific Icon Colors */
+    .menu-item.security i { color: #2ecc71; }
+    .menu-item.bank i { color: #3498db; }
     .menu-item.logout { color: var(--rms-vivid-red); }
     .menu-item.logout .menu-item-left i { color: var(--rms-vivid-red); }
   </style>
@@ -72,25 +82,88 @@
       </div>
     </div>
 
-    <!-- Settings Menu -->
-    <h4 style="margin: 0 0 12px 0; font-size: 0.9rem; color: var(--rms-text-muted); text-transform: uppercase; letter-spacing: 1px;">Account Settings</h4>
-    <div class="menu-list">
-      <a href="/settings.html" class="menu-item">
-        <div class="menu-item-left"><i class="fa-solid fa-gear"></i> App Settings</div>
-        <div class="menu-item-right"><i class="fa-solid fa-chevron-right"></i></div>
-      </a>
-      <a href="/support.html" class="menu-item">
-        <div class="menu-item-left"><i class="fa-solid fa-headset"></i> Contact Support</div>
-        <div class="menu-item-right"><i class="fa-solid fa-chevron-right"></i></div>
-      </a>
-      <a href="/about.html" class="menu-item">
-        <div class="menu-item-left"><i class="fa-solid fa-circle-info"></i> About RMS</div>
-        <div class="menu-item-right"><i class="fa-solid fa-chevron-right"></i></div>
-      </a>
-      <a href="#" class="menu-item logout" id="logout-btn">
-        <div class="menu-item-left"><i class="fa-solid fa-right-from-bracket"></i> Logout</div>
-        <div class="menu-item-right"><i class="fa-solid fa-chevron-right"></i></div>
-      </a>
+    <!-- Group 1: Account & Security -->
+    <div class="menu-group">
+      <div class="menu-group-title">Account & Security</div>
+      <div class="menu-list">
+        <a href="/settings.html" class="menu-item">
+          <div class="menu-item-left"><i class="fa-solid fa-user-pen"></i> Edit Profile</div>
+          <div class="menu-item-right"><i class="fa-solid fa-chevron-right"></i></div>
+        </a>
+        <a href="/settings.html" class="menu-item security">
+          <div class="menu-item-left"><i class="fa-solid fa-shield-halved"></i> Change Password</div>
+          <div class="menu-item-right"><i class="fa-solid fa-chevron-right"></i></div>
+        </a>
+        <a href="/settings.html" class="menu-item bank">
+          <div class="menu-item-left"><i class="fa-solid fa-building-columns"></i> Bank Accounts</div>
+          <div class="menu-item-right"><i class="fa-solid fa-chevron-right"></i></div>
+        </a>
+      </div>
+    </div>
+
+    <!-- Group 2: My Activity -->
+    <div class="menu-group">
+      <div class="menu-group-title">My Activity</div>
+      <div class="menu-list">
+        <a href="/transaction-history.html" class="menu-item">
+          <div class="menu-item-left"><i class="fa-solid fa-clock-rotate-left"></i> Transaction History</div>
+          <div class="menu-item-right"><i class="fa-solid fa-chevron-right"></i></div>
+        </a>
+        <a href="/wealth-center.html" class="menu-item">
+          <div class="menu-item-left"><i class="fa-solid fa-gem"></i> My Investments</div>
+          <div class="menu-item-right"><i class="fa-solid fa-chevron-right"></i></div>
+        </a>
+        <a href="/daily-earnings.html" class="menu-item">
+          <div class="menu-item-left"><i class="fa-solid fa-box-open"></i> Task History</div>
+          <div class="menu-item-right"><i class="fa-solid fa-chevron-right"></i></div>
+        </a>
+      </div>
+    </div>
+
+    <!-- Group 3: Rewards & Network -->
+    <div class="menu-group">
+      <div class="menu-group-title">Rewards & Network</div>
+      <div class="menu-list">
+        <a href="/team.html" class="menu-item">
+          <div class="menu-item-left"><i class="fa-solid fa-users"></i> My Team & Referrals</div>
+          <div class="menu-item-right"><i class="fa-solid fa-chevron-right"></i></div>
+        </a>
+        <a href="/gift-codes.html" class="menu-item">
+          <div class="menu-item-left"><i class="fa-solid fa-gift"></i> Gift Codes</div>
+          <div class="menu-item-right"><i class="fa-solid fa-chevron-right"></i></div>
+        </a>
+        <a href="/messages.html" class="menu-item">
+          <div class="menu-item-left"><i class="fa-solid fa-envelope"></i> Messages</div>
+          <div class="menu-item-right"><i class="fa-solid fa-chevron-right"></i></div>
+        </a>
+      </div>
+    </div>
+
+    <!-- Group 4: Help & Info -->
+    <div class="menu-group">
+      <div class="menu-group-title">Help & Information</div>
+      <div class="menu-list">
+        <a href="/vip.html" class="menu-item">
+          <div class="menu-item-left"><i class="fa-solid fa-crown"></i> VIP Tiers Info</div>
+          <div class="menu-item-right"><i class="fa-solid fa-chevron-right"></i></div>
+        </a>
+        <a href="/faq.html" class="menu-item">
+          <div class="menu-item-left"><i class="fa-solid fa-circle-question"></i> FAQ / Help Center</div>
+          <div class="menu-item-right"><i class="fa-solid fa-chevron-right"></i></div>
+        </a>
+        <a href="/support.html" class="menu-item">
+          <div class="menu-item-left"><i class="fa-solid fa-headset"></i> Contact Support</div>
+          <div class="menu-item-right"><i class="fa-solid fa-chevron-right"></i></div>
+        </a>
+        <a href="/about.html" class="menu-item">
+          <div class="menu-item-left"><i class="fa-solid fa-circle-info"></i> About RMS</div>
+          <div class="menu-item-right"><i class="fa-solid fa-chevron-right"></i></div>
+        </a>
+        <a href="#" class="menu-item logout" id="logout-btn">
+          <div class="menu-item-left"><i class="fa-solid fa-right-from-bracket"></i> Logout</div>
+          <div class="menu-item-right"><i class="fa-solid fa-chevron-right"></i></div>
+        </a>
+      </div>
     </div>
 
   </div>
@@ -137,4 +210,4 @@
     loadProfile();
   </script>
 </body>
-</html>
+            </html>
