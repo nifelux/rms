@@ -1,251 +1,203 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RoyalVest — Team</title>
-<meta name="description" content="RoyalVest: Where stocks meets Investments. A composed workspace for reviewing plans, wallet activity, and account decisions.' investment products, compliance, and investor support.">
-<link rel="stylesheet" href="assets/css/style.css">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <meta name="theme-color" content="#071a3d">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>RMS — My Team</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="assets/css/style.css">
+  <meta name="theme-color" content="#0a0e27">
+  <style>
+    .team-container { padding: 20px 16px 100px 16px; max-width: 600px; margin: 0 auto; }
+    
+    .referral-card { 
+      background: linear-gradient(135deg, #11163a, #1a2050); 
+      border: 1px solid var(--rms-yellow); border-radius: 16px; 
+      padding: 24px; text-align: center; margin-bottom: 24px;
+      position: relative; overflow: hidden;
+    }
+    .referral-card::before {
+      content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+      background: radial-gradient(circle, rgba(255,215,0,0.05) 0%, transparent 70%);
+    }
+    .ref-label { font-size: 0.85rem; color: var(--rms-text-muted); margin-bottom: 8px; position: relative; }
+    .ref-code { 
+      font-size: 2rem; font-weight: 800; letter-spacing: 3px; color: var(--rms-yellow); 
+      margin-bottom: 16px; position: relative;
+    }
+    .copy-btn { 
+      background: var(--rms-vivid-red); color: white; border: none; 
+      padding: 10px 24px; border-radius: 999px; font-weight: 700; font-size: 0.9rem;
+      cursor: pointer; display: inline-flex; align-items: center; gap: 8px;
+      position: relative; transition: transform 0.2s;
+    }
+    .copy-btn:active { transform: scale(0.95); }
 
-<style data-royalvest-theme>
-  :root {
-    --rv-ink: #030a19;
-    --rv-midnight: #071a3d;
-    --rv-blue: #12376a;
-    --rv-blue-soft: #1c4d83;
-    --rv-gold: #e8ba4f;
-    --rv-yellow: #f5d46e;
-    --rv-green: #6fd55e;
-    --rv-white: #f7f4eb;
-    --rv-muted: #a7b8d3;
-    --rv-line: rgba(232, 186, 79, .22);
-    --rv-panel: rgba(10, 31, 70, .86);
-    --rv-display: "Fraunces", Georgia, serif;
-    --rv-body: "Inter", system-ui, sans-serif;
-    --rv-shadow: 0 22px 70px rgba(0, 0, 0, .26);
-  }
+    .stats-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 24px; }
+    .stat-box { background: var(--rms-bg-card); border: 1px solid var(--rms-border); border-radius: 12px; padding: 14px 8px; text-align: center; }
+    .stat-num { font-size: 1.3rem; font-weight: 800; color: var(--rms-white); margin-bottom: 4px; }
+    .stat-lbl { font-size: 0.65rem; color: var(--rms-text-muted); text-transform: uppercase; }
 
-  html { background: var(--rv-ink) !important; scroll-behavior: smooth; }
-  body.rv-shell {
-    min-height: 100vh;
-    color: var(--rv-white) !important;
-    background:
-      radial-gradient(circle at 84% 0%, rgba(23, 72, 136, .30), transparent 32rem),
-      radial-gradient(circle at 8% 42%, rgba(111, 213, 94, .05), transparent 28rem),
-      linear-gradient(135deg, var(--rv-ink) 0%, var(--rv-midnight) 56%, #0b2554 100%) !important;
-    font-family: var(--rv-body) !important;
-  }
-  body.rv-shell::before {
-    content: "";
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    opacity: .16;
-    background-image: linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px);
-    background-size: 64px 64px;
-    mask-image: linear-gradient(to bottom, black, transparent 78%);
-    z-index: 0;
-  }
-  body.rv-shell > * { position: relative; z-index: 1; }
-  body.rv-shell a { color: var(--rv-yellow); }
-  body.rv-shell p, body.rv-shell li { color: var(--rv-muted); }
-  body.rv-shell h1, body.rv-shell h2, body.rv-shell h3, body.rv-shell h4, body.rv-shell h5,
-  body.rv-shell .mkt-heading, body.rv-shell .page-hero-mkt h1 { font-family: var(--rv-display) !important; color: var(--rv-white) !important; letter-spacing: -.02em; }
-  body.rv-shell .mkt-eyebrow, body.rv-shell .eyebrow, body.rv-shell .section-label, body.rv-shell .page-hero-mkt .eyebrow { color: var(--rv-yellow) !important; letter-spacing: .16em; text-transform: uppercase; font-weight: 700; }
+    .team-list-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    .team-list-header h3 { margin: 0; font-size: 1.1rem; }
+    
+    .member-card { 
+      background: var(--rms-bg-card); border: 1px solid var(--rms-border); 
+      border-radius: 12px; padding: 14px 16px; margin-bottom: 10px;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .member-info { display: flex; align-items: center; gap: 12px; }
+    .member-avatar { 
+      width: 40px; height: 40px; background: rgba(255,255,255,0.05); 
+      border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      color: var(--rms-text-muted); font-size: 1rem;
+    }
+    .member-name { font-weight: 600; font-size: 0.95rem; margin-bottom: 2px; }
+    .member-date { font-size: 0.75rem; color: var(--rms-text-muted); }
+    
+    .status-badge { font-size: 0.7rem; padding: 4px 10px; border-radius: 20px; font-weight: 700; text-transform: uppercase; }
+    .status-active { background: rgba(46,204,113,0.15); color: #2ecc71; }
+    .status-inactive { background: rgba(255,255,255,0.05); color: var(--rms-text-muted); }
 
-  body.rv-shell .floating-header {
-    position: sticky;
-    top: 0;
-    z-index: 50;
-    background: rgba(3, 10, 25, .88) !important;
-    border-bottom: 1px solid var(--rv-line) !important;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, .18);
-    backdrop-filter: blur(22px);
-  }
-  body.rv-shell .header-container { max-width: 1320px; min-height: 82px; padding: 0 1.4rem; }
-  body.rv-shell .brand { gap: .7rem; text-decoration: none; }
-  body.rv-shell .brand-mark {
-    display: grid; place-items: center; width: 42px; height: 48px; border: 1px solid var(--rv-gold);
-    border-radius: 48% 48% 45% 45% / 42% 42% 58% 58%; background: linear-gradient(155deg, rgba(232,186,79,.28), rgba(4,16,42,.95) 52%);
-    color: var(--rv-yellow) !important; font-family: var(--rv-display) !important; font-size: 1.3rem; font-weight: 700;
-    box-shadow: inset 0 0 0 3px rgba(232,186,79,.08), 0 8px 22px rgba(0,0,0,.22);
-  }
-  body.rv-shell .brand-name { color: var(--rv-white) !important; font-family: var(--rv-display) !important; font-size: 1.35rem; font-weight: 600; }
-  body.rv-shell .brand-copy { display: grid; gap: .12rem; }
-  body.rv-shell .brand-tag { color: var(--rv-yellow); font-size: .56rem; letter-spacing: .18em; text-transform: uppercase; white-space: nowrap; }
-  body.rv-shell #main-nav { gap: .3rem; }
-  body.rv-shell .nav-link { color: var(--rv-muted) !important; border-radius: 999px; transition: color .18s ease, background .18s ease, transform .18s ease; }
-  body.rv-shell .nav-link:hover, body.rv-shell .nav-dropdown.open > .nav-link { color: var(--rv-white) !important; background: rgba(232,186,79,.10) !important; }
-  body.rv-shell .dropdown-menu { background: #071a3d !important; border: 1px solid var(--rv-line) !important; box-shadow: var(--rv-shadow); }
-  body.rv-shell .dropdown-menu a { color: var(--rv-muted) !important; }
-  body.rv-shell .dropdown-menu a:hover { color: var(--rv-yellow) !important; background: rgba(232,186,79,.08) !important; }
-  body.rv-shell .btn { border-radius: 999px !important; font-family: var(--rv-body) !important; font-weight: 700; letter-spacing: .02em; transition: transform .18s ease, box-shadow .18s ease, background .18s ease; }
-  body.rv-shell .btn:active { transform: scale(.97); }
-  body.rv-shell .btn-primary, body.rv-shell .btn-success, body.rv-shell button[type="submit"] { background: linear-gradient(135deg, var(--rv-yellow), var(--rv-gold)) !important; border-color: var(--rv-yellow) !important; color: #081a38 !important; box-shadow: 0 10px 28px rgba(232,186,79,.18); }
-  body.rv-shell .btn-primary:hover, body.rv-shell button[type="submit"]:hover { box-shadow: 0 14px 34px rgba(232,186,79,.28); transform: translateY(-1px); }
-  body.rv-shell .btn-outline { color: var(--rv-yellow) !important; border: 1px solid rgba(232,186,79,.42) !important; background: rgba(7,26,61,.36) !important; }
-
-  body.rv-shell .hero-mkt, body.rv-shell .page-hero-mkt, body.rv-shell .hero, body.rv-shell .dashboard-hero {
-    position: relative; overflow: hidden; border-bottom: 1px solid var(--rv-line);
-    background: linear-gradient(120deg, rgba(3,10,25,.97), rgba(7,26,61,.80) 68%, rgba(18,55,106,.54));
-  }
-  body.rv-shell .hero-mkt::after, body.rv-shell .page-hero-mkt::after, body.rv-shell .dashboard-hero::after {
-    content: ""; position: absolute; right: 4%; bottom: -5rem; width: 18rem; height: 18rem; border: 1px solid rgba(232,186,79,.24); transform: rotate(45deg); box-shadow: 0 0 0 20px rgba(232,186,79,.035), 0 0 0 40px rgba(232,186,79,.02); pointer-events: none;
-  }
-  body.rv-shell .hero-mkt-inner, body.rv-shell .page-hero-mkt-inner { position: relative; z-index: 1; }
-  body.rv-shell .hero-mkt h1 { max-width: 780px; font-size: clamp(2.5rem, 7vw, 5.8rem) !important; line-height: .98; }
-  body.rv-shell .hero-mkt h1::first-line { color: var(--rv-white); }
-  body.rv-shell .hero-mkt p, body.rv-shell .page-hero-mkt p { max-width: 650px; color: var(--rv-muted) !important; }
-  body.rv-shell .hero-proof-dot { background: var(--rv-green) !important; box-shadow: 0 0 0 5px rgba(111,213,94,.10); }
-  body.rv-shell .trust-strip { background: rgba(7,26,61,.78) !important; border-top: 1px solid var(--rv-line); border-bottom: 1px solid var(--rv-line); }
-  body.rv-shell .trust-card { border-right: 1px solid rgba(232,186,79,.18) !important; }
-  body.rv-shell .trust-number, body.rv-shell .tier-roi { color: var(--rv-yellow) !important; }
-  body.rv-shell .trust-label { color: var(--rv-muted) !important; }
-  body.rv-shell .mkt-section, body.rv-shell .card, body.rv-shell .quote-card, body.rv-shell .panel, body.rv-shell .form-card,
-  body.rv-shell .auth-card, body.rv-shell .auth-shell-card, body.rv-shell .dashboard-card, body.rv-shell .stat-card,
-  body.rv-shell .content-card, body.rv-shell .settings-card, body.rv-shell .profile-card {
-    background: linear-gradient(155deg, rgba(12,38,82,.88), rgba(4,15,37,.92)) !important;
-    border: 1px solid rgba(232,186,79,.18) !important; box-shadow: 0 14px 38px rgba(0,0,0,.16); border-radius: 18px;
-  }
-  body.rv-shell .mkt-section.is-tinted { background: rgba(12,38,82,.42) !important; }
-  body.rv-shell .feature-row, body.rv-shell .step-row { border-color: rgba(232,186,79,.18) !important; }
-  body.rv-shell .feature-mark, body.rv-shell .step-num { background: linear-gradient(145deg, var(--rv-gold), var(--rv-yellow)) !important; color: #071a3d !important; }
-  body.rv-shell input, body.rv-shell select, body.rv-shell textarea { background: rgba(3,10,25,.72) !important; color: var(--rv-white) !important; border-color: rgba(232,186,79,.25) !important; }
-  body.rv-shell input::placeholder, body.rv-shell textarea::placeholder { color: #7890b2 !important; }
-  body.rv-shell label, body.rv-shell .form-label { color: var(--rv-muted) !important; }
-  body.rv-shell .badge, body.rv-shell .status-badge, body.rv-shell .tier-ribbon { background: rgba(111,213,94,.14) !important; color: var(--rv-green) !important; border-color: rgba(111,213,94,.32) !important; }
-  body.rv-shell .mkt-footer { margin-top: 3rem; background: #020814 !important; border-top: 1px solid var(--rv-line); }
-  body.rv-shell .mkt-footer-bottom { color: #7890b2 !important; border-top-color: rgba(232,186,79,.14) !important; }
-  body.rv-shell .cta-band { background: linear-gradient(135deg, rgba(18,55,106,.9), rgba(7,26,61,.92)) !important; border: 1px solid rgba(232,186,79,.32) !important; box-shadow: var(--rv-shadow); }
-  body.rv-shell .mobile-menu { background: #04102a !important; border-left: 1px solid var(--rv-line); }
-  body.rv-shell .mobile-menu-header { border-bottom-color: rgba(232,186,79,.18) !important; }
-  body.rv-shell .mobile-link, body.rv-shell .mobile-accordion-toggle { color: var(--rv-muted) !important; }
-  body.rv-shell .tab-bar { background: rgba(3,10,25,.94) !important; border-top: 1px solid var(--rv-line) !important; backdrop-filter: blur(18px); }
-  body.rv-shell .tab-item { color: #8fa5c2 !important; }
-  body.rv-shell .tab-item.is-active { color: var(--rv-yellow) !important; }
-  body.rv-shell .rv-ambient-line { max-width: 1320px; height: 1px; margin: 0 auto; background: linear-gradient(90deg, transparent, var(--rv-gold), transparent); opacity: .65; }
-  @media (max-width: 760px) {
-    body.rv-shell .header-container { min-height: 72px; padding: 0 1rem; }
-    body.rv-shell .brand-mark { width: 34px; height: 40px; }
-    body.rv-shell .brand-name { font-size: 1.1rem; }
-    body.rv-shell .brand-tag { font-size: .46rem; letter-spacing: .11em; }
-    body.rv-shell .hero-mkt h1 { font-size: clamp(2.35rem, 14vw, 4rem) !important; }
-    body.rv-shell .trust-strip { grid-template-columns: repeat(2, 1fr) !important; }
-    body.rv-shell .trust-card { border-bottom: 1px solid rgba(232,186,79,.18) !important; }
-  }
-</style>
+    .empty-team { text-align: center; padding: 40px 20px; color: var(--rms-text-muted); }
+    .empty-team i { font-size: 3rem; margin-bottom: 16px; opacity: 0.3; }
+  </style>
 </head>
 <body class="rv-shell">
-<div id="header-container"></div>
-<div class="rv-page-marker" aria-hidden="true">ROYALVEST / WHERE STOCKS MEETS INVESTMENTS</div>
+  <div id="header-container"></div>
 
-<section class="page-hero-mkt">
-  <div class="mkt-eyebrow">Our Team</div>
-  <h1>The people behind your investments</h1>
-  <p>Every deposit, withdrawal, and KYC submission on RoyalVest is reviewed by a person on this team — not just a script.</p>
-</section>
+  <div class="team-container">
+    <h2 style="margin-bottom: 5px;">My Team</h2>
+    <p class="text-muted" style="margin-bottom: 20px;">Invite friends and earn rewards.</p>
 
-<section class="mkt-section">
-  <div class="mkt-eyebrow">How We're Organized</div>
-  <h2 class="mkt-heading" style="font-size:clamp(1.5rem,3vw,2rem);max-width:600px;">Four teams, one job: protect your capital</h2>
-  <div class="grid-3 mt-3">
-    <div class="card">
-      <h3 style="font-family:var(--font-display);font-size:1.1rem;">Investment Management</h3>
-      <p class="text-muted">Selects, monitors, and retires the investment products offered on the platform, and sets the daily return rates you see.</p>
+    <!-- Referral Card -->
+    <div class="referral-card">
+      <div class="ref-label">Your Referral Code</div>
+      <div class="ref-code" id="ref-code">------</div>
+      <button class="copy-btn" onclick="copyReferral()">
+        <i class="fa-regular fa-copy"></i> Copy Referral Link
+      </button>
     </div>
-    <div class="card">
-      <h3 style="font-family:var(--font-display);font-size:1.1rem;">Compliance &amp; Verification</h3>
-      <p class="text-muted">Reviews every KYC submission and manually confirms each deposit and withdrawal request before it's processed.</p>
-    </div>
-    <div class="card">
-      <h3 style="font-family:var(--font-display);font-size:1.1rem;">Investor Support</h3>
-      <p class="text-muted">Answers questions through the in-app Support Center and the <a href="contact.html">Contact page</a>, usually within 24 hours.</p>
-    </div>
-    <div class="card">
-      <h3 style="font-family:var(--font-display);font-size:1.1rem;">Risk &amp; Finance</h3>
-      <p class="text-muted">Tracks platform-wide exposure across sectors and makes sure payouts are backed by real, diversified capital.</p>
-    </div>
-    <div class="card">
-      <h3 style="font-family:var(--font-display);font-size:1.1rem;">Technology &amp; Platform</h3>
-      <p class="text-muted">Builds and maintains the dashboard, wallet, and security systems that keep your account accurate and safe.</p>
-    </div>
-  </div>
-</section>
 
-<section class="mkt-section is-tinted">
-  <div class="mkt-eyebrow">How We Work</div>
-  <h2 class="mkt-heading" style="font-size:clamp(1.5rem,3vw,2rem);max-width:600px;">Nothing runs on autopilot</h2>
-  <div class="feature-row mt-3">
-    <span class="feature-mark">✓</span>
-    <div>
-      <h4>Manual review, every time</h4>
-      <p>Deposits, withdrawals, and KYC documents are checked by our compliance team before any status changes — no automatic approvals.</p>
-    </div>
-  </div>
-  <div class="feature-row">
-    <span class="feature-mark">↻</span>
-    <div>
-      <h4>Ongoing product monitoring</h4>
-      <p>Our investment team continuously tracks each product's performance and adjusts availability if a sector's outlook changes.</p>
-    </div>
-  </div>
-  <div class="feature-row">
-    <span class="feature-mark">✉</span>
-    <div>
-      <h4>A real reply, not a bot</h4>
-      <p>Messages sent through Contact or the in-app Support Center are read and answered by our investor support team.</p>
-    </div>
-  </div>
-</section>
-
-<section class="mkt-section" style="padding-top:0;">
-  <div class="cta-band">
-    <h2>Have a question for the team?</h2>
-    <p>Reach out and we'll get back to you within 24 hours.</p>
-    <a href="contact.html" class="btn btn-primary btn-lg">Contact Us</a>
-  </div>
-</section>
-
-<footer class="mkt-footer">
-  <div class="mkt-footer-grid">
-    <div class="mkt-footer-brand">
-      <a href="/" class="brand"><span class="brand-mark">RV</span><span class="brand-name">RoyalVest</span></a>
-      <p>Secure, long-term investment products with transparent daily returns.</p>
-    </div>
-    <div>
-      <h5>Company</h5>
-      <div class="mkt-footer-links">
-        <a href="about.html">About Us</a>
-        <a href="team.html">Our Team</a>
-        <a href="news.html">Company News</a>
-        <a href="contact.html">Contact</a>
+    <!-- Stats -->
+    <div class="stats-grid">
+      <div class="stat-box">
+        <div class="stat-num" id="total-refs">0</div>
+        <div class="stat-lbl">Total Refs</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num text-yellow" id="active-downlines">0</div>
+        <div class="stat-lbl">Active <i class="fa-solid fa-circle-info" style="font-size:0.6rem;"></i></div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num text-red" id="wheel-spins">0</div>
+        <div class="stat-lbl">Wheel Spins</div>
       </div>
     </div>
-    <div>
-      <h5>Support</h5>
-      <div class="mkt-footer-links">
-        <a href="faq.html">FAQ</a>
-        <a href="register.html">Get Started</a>
-        <a href="login.html">Login</a>
-        <a href="contact.html">Contact Us</a>
+
+    <!-- Team List -->
+    <div class="team-list-header">
+      <h3>Referred Users</h3>
+      <span class="text-muted" style="font-size: 0.85rem;" id="list-count">0 members</span>
+    </div>
+    
+    <div id="team-list">
+      <div class="empty-team">
+        <i class="fa-solid fa-users-slash"></i>
+        <p>Loading team data...</p>
       </div>
     </div>
+
   </div>
-  <div class="mkt-footer-bottom">© 2026 RoyalVest. All rights reserved.</div>
-</footer>
 
-<div id="footer-container"></div>
-<script src="/assets/js/components.js"></script>
-<script type="module">
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
-const supabase = createClient('https://jytmnukzvxirnafukbck.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp5dG1udWt6dnhpcm5hZnVrYmNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQxNjQ3MjUsImV4cCI6MjA5OTc0MDcyNX0.ZvGUPTW7dJ3UxL2N1TW0lBCe3H4559HaUEhks7vEbEw');
+  <div id="footer-container"></div>
+  <script src="/assets/js/components.js"></script>
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+    const supabase = createClient('https://ofysznsajwxnjqaumwch.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9meXN6bnNhand4bmpxYXVtd2NoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgyMzM4NDgsImV4cCI6MjEwMzgwOTg0OH0.XaHkP5WZ2nJVJXVdbG-D13rrD63g_09HxmJoZn7ZoWA');
+    window.supabase = supabase;
 
-// Required so the shared header (assets/js/components.js) can detect
-// the logged-in session — without this it always shows the guest menu.
-window.supabase = supabase;
-</script>
+    async function loadTeam() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return window.location.href = '/login.html';
+
+      // 1. Get Profile & Ref Code
+      const { data: profile } = await supabase.from('profiles').select('referral_code').eq('id', user.id).single();
+      document.getElementById('ref-code').textContent = profile.referral_code;
+
+      // 2. Fetch all direct referrals
+      // Note: If RLS blocks this, you may need to use an API endpoint like /api/user?action=getTeam
+      const { data: referrals, error } = await supabase
+        .from('profiles')
+        .select('id, full_name, email, created_at')
+        .eq('referred_by', user.id)
+        .order('created_at', { ascending: false });
+
+      if (error || !referrals) {
+        document.getElementById('team-list').innerHTML = '<div class="empty-team"><i class="fa-solid fa-lock"></i><p>Unable to load team. Please check permissions.</p></div>';
+        return;
+      }
+
+      document.getElementById('total-refs').textContent = referrals.length;
+      document.getElementById('list-count').textContent = `${referrals.length} members`;
+
+      // 3. Calculate Active Downlines (Referrals with at least one approved deposit)
+      let activeCount = 0;
+      const teamListEl = document.getElementById('team-list');
+      
+      if (referrals.length === 0) {
+        teamListEl.innerHTML = '<div class="empty-team"><i class="fa-solid fa-user-plus"></i><p>You haven\'t referred anyone yet.<br>Share your link to start earning!</p></div>';
+      } else {
+        teamListEl.innerHTML = '';
+        for (const ref of referrals) {
+          // Check if this referral has an approved deposit
+          const { count } = await supabase.from('deposits').select('*', { count: 'exact', head: true })
+            .eq('user_id', ref.id).eq('status', 'approved');
+          
+          const isActive = count > 0;
+          if (isActive) activeCount++;
+
+          const initials = (ref.full_name || ref.email).substring(0, 2).toUpperCase();
+          const date = new Date(ref.created_at).toLocaleDateString('en-NG', { month: 'short', day: 'numeric', year: 'numeric' });
+
+          teamListEl.innerHTML += `
+            <div class="member-card">
+              <div class="member-info">
+                <div class="member-avatar">${initials}</div>
+                <div>
+                  <div class="member-name">${ref.full_name || 'Anonymous User'}</div>
+                  <div class="member-date">Joined ${date}</div>
+                </div>
+              </div>
+              <div class="status-badge ${isActive ? 'status-active' : 'status-inactive'}">
+                ${isActive ? 'Active' : 'Inactive'}
+              </div>
+            </div>
+          `;
+        }
+      }
+
+      // 4. Update Stats
+      document.getElementById('active-downlines').textContent = activeCount;
+      document.getElementById('wheel-spins').textContent = activeCount; // 1 spin per active downline
+    }
+
+    window.copyReferral = () => {
+      const code = document.getElementById('ref-code').textContent;
+      const link = `${window.location.origin}/register.html?ref=${code}`;
+      navigator.clipboard.writeText(link);
+      
+      const btn = document.querySelector('.copy-btn');
+      const originalHTML = btn.innerHTML;
+      btn.innerHTML = '<i class="fa-solid fa-check"></i> Copied!';
+      btn.style.background = '#2ecc71';
+      setTimeout(() => {
+        btn.innerHTML = originalHTML;
+        btn.style.background = 'var(--rms-vivid-red)';
+      }, 2000);
+    };
+
+    loadTeam();
+  </script>
 </body>
 </html>
