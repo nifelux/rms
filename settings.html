@@ -12,7 +12,12 @@
     .settings-group { margin-bottom: 24px; }
     .settings-group-title { font-size: 0.8rem; color: var(--rms-text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; padding-left: 4px; }
     .menu-list { background: var(--rms-bg-card); border: 1px solid var(--rms-border); border-radius: 16px; overflow: hidden; }
-    .menu-item { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; border-bottom: 1px solid rgba(255,255,255,0.05); text-decoration: none; color: white; cursor: pointer; }
+    .menu-item { 
+      display: flex; justify-content: space-between; align-items: center; 
+      padding: 16px 20px; border-bottom: 1px solid rgba(255,255,255,0.05); 
+      text-decoration: none; color: white; cursor: pointer; transition: background 0.2s;
+    }
+    .menu-item:hover { background: rgba(255,255,255,0.02); }
     .menu-item:last-child { border-bottom: none; }
     .menu-item-left { display: flex; align-items: center; gap: 14px; font-size: 0.95rem; }
     .menu-item-left i { width: 20px; text-align: center; color: var(--rms-yellow); }
@@ -33,10 +38,11 @@
     <div class="settings-group">
       <div class="settings-group-title">Account</div>
       <div class="menu-list">
-        <div class="menu-item" onclick="alert('Password change modal would open here.')">
+        <!-- UPDATED LINK: Changed from div with onclick to an anchor tag -->
+        <a href="/change-password.html" class="menu-item">
           <div class="menu-item-left"><i class="fa-solid fa-key"></i> Change Password</div>
           <i class="fa-solid fa-chevron-right" style="color:var(--rms-text-muted); font-size:0.8rem;"></i>
-        </div>
+        </a>
       </div>
     </div>
 
@@ -61,10 +67,10 @@
           <div class="menu-item-left"><i class="fa-solid fa-globe"></i> Language</div>
           <div style="color:var(--rms-text-muted); font-size:0.9rem;">English <i class="fa-solid fa-chevron-right" style="margin-left:8px; font-size:0.7rem;"></i></div>
         </div>
-        <div class="menu-item">
+        <a href="/about.html" class="menu-item">
           <div class="menu-item-left"><i class="fa-solid fa-circle-info"></i> About RMS</div>
           <i class="fa-solid fa-chevron-right" style="color:var(--rms-text-muted); font-size:0.8rem;"></i>
-        </div>
+        </a>
       </div>
     </div>
   </div>
