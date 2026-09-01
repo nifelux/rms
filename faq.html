@@ -1,274 +1,73 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RoyalVest — Questions, answered</title>
-<meta name="description" content="RoyalVest: Where stocks meets Investments. A composed workspace for reviewing plans, wallet activity, and account decisions.">
-<link rel="stylesheet" href="assets/css/style.css">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <meta name="theme-color" content="#071a3d">
-
-<style data-royalvest-theme>
-  :root {
-    --rv-ink: #030a19;
-    --rv-midnight: #071a3d;
-    --rv-blue: #12376a;
-    --rv-blue-soft: #1c4d83;
-    --rv-gold: #e8ba4f;
-    --rv-yellow: #f5d46e;
-    --rv-green: #6fd55e;
-    --rv-white: #f7f4eb;
-    --rv-muted: #a7b8d3;
-    --rv-line: rgba(232, 186, 79, .22);
-    --rv-panel: rgba(10, 31, 70, .86);
-    --rv-display: "Fraunces", Georgia, serif;
-    --rv-body: "Inter", system-ui, sans-serif;
-    --rv-shadow: 0 22px 70px rgba(0, 0, 0, .26);
-  }
-
-  html { background: var(--rv-ink) !important; scroll-behavior: smooth; }
-  body.rv-shell {
-    min-height: 100vh;
-    color: var(--rv-white) !important;
-    background:
-      radial-gradient(circle at 84% 0%, rgba(23, 72, 136, .30), transparent 32rem),
-      radial-gradient(circle at 8% 42%, rgba(111, 213, 94, .05), transparent 28rem),
-      linear-gradient(135deg, var(--rv-ink) 0%, var(--rv-midnight) 56%, #0b2554 100%) !important;
-    font-family: var(--rv-body) !important;
-  }
-  body.rv-shell::before {
-    content: "";
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    opacity: .16;
-    background-image: linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px);
-    background-size: 64px 64px;
-    mask-image: linear-gradient(to bottom, black, transparent 78%);
-    z-index: 0;
-  }
-  body.rv-shell > * { position: relative; z-index: 1; }
-  body.rv-shell a { color: var(--rv-yellow); }
-  body.rv-shell p, body.rv-shell li { color: var(--rv-muted); }
-  body.rv-shell h1, body.rv-shell h2, body.rv-shell h3, body.rv-shell h4, body.rv-shell h5,
-  body.rv-shell .mkt-heading, body.rv-shell .page-hero-mkt h1 { font-family: var(--rv-display) !important; color: var(--rv-white) !important; letter-spacing: -.02em; }
-  body.rv-shell .mkt-eyebrow, body.rv-shell .eyebrow, body.rv-shell .section-label, body.rv-shell .page-hero-mkt .eyebrow { color: var(--rv-yellow) !important; letter-spacing: .16em; text-transform: uppercase; font-weight: 700; }
-
-  body.rv-shell .floating-header {
-    position: sticky;
-    top: 0;
-    z-index: 50;
-    background: rgba(3, 10, 25, .88) !important;
-    border-bottom: 1px solid var(--rv-line) !important;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, .18);
-    backdrop-filter: blur(22px);
-  }
-  body.rv-shell .header-container { max-width: 1320px; min-height: 82px; padding: 0 1.4rem; }
-  body.rv-shell .brand { gap: .7rem; text-decoration: none; }
-  body.rv-shell .brand-mark {
-    display: grid; place-items: center; width: 42px; height: 48px; border: 1px solid var(--rv-gold);
-    border-radius: 48% 48% 45% 45% / 42% 42% 58% 58%; background: linear-gradient(155deg, rgba(232,186,79,.28), rgba(4,16,42,.95) 52%);
-    color: var(--rv-yellow) !important; font-family: var(--rv-display) !important; font-size: 1.3rem; font-weight: 700;
-    box-shadow: inset 0 0 0 3px rgba(232,186,79,.08), 0 8px 22px rgba(0,0,0,.22);
-  }
-  body.rv-shell .brand-name { color: var(--rv-white) !important; font-family: var(--rv-display) !important; font-size: 1.35rem; font-weight: 600; }
-  body.rv-shell .brand-copy { display: grid; gap: .12rem; }
-  body.rv-shell .brand-tag { color: var(--rv-yellow); font-size: .56rem; letter-spacing: .18em; text-transform: uppercase; white-space: nowrap; }
-  body.rv-shell #main-nav { gap: .3rem; }
-  body.rv-shell .nav-link { color: var(--rv-muted) !important; border-radius: 999px; transition: color .18s ease, background .18s ease, transform .18s ease; }
-  body.rv-shell .nav-link:hover, body.rv-shell .nav-dropdown.open > .nav-link { color: var(--rv-white) !important; background: rgba(232,186,79,.10) !important; }
-  body.rv-shell .dropdown-menu { background: #071a3d !important; border: 1px solid var(--rv-line) !important; box-shadow: var(--rv-shadow); }
-  body.rv-shell .dropdown-menu a { color: var(--rv-muted) !important; }
-  body.rv-shell .dropdown-menu a:hover { color: var(--rv-yellow) !important; background: rgba(232,186,79,.08) !important; }
-  body.rv-shell .btn { border-radius: 999px !important; font-family: var(--rv-body) !important; font-weight: 700; letter-spacing: .02em; transition: transform .18s ease, box-shadow .18s ease, background .18s ease; }
-  body.rv-shell .btn:active { transform: scale(.97); }
-  body.rv-shell .btn-primary, body.rv-shell .btn-success, body.rv-shell button[type="submit"] { background: linear-gradient(135deg, var(--rv-yellow), var(--rv-gold)) !important; border-color: var(--rv-yellow) !important; color: #081a38 !important; box-shadow: 0 10px 28px rgba(232,186,79,.18); }
-  body.rv-shell .btn-primary:hover, body.rv-shell button[type="submit"]:hover { box-shadow: 0 14px 34px rgba(232,186,79,.28); transform: translateY(-1px); }
-  body.rv-shell .btn-outline { color: var(--rv-yellow) !important; border: 1px solid rgba(232,186,79,.42) !important; background: rgba(7,26,61,.36) !important; }
-
-  body.rv-shell .hero-mkt, body.rv-shell .page-hero-mkt, body.rv-shell .hero, body.rv-shell .dashboard-hero {
-    position: relative; overflow: hidden; border-bottom: 1px solid var(--rv-line);
-    background: linear-gradient(120deg, rgba(3,10,25,.97), rgba(7,26,61,.80) 68%, rgba(18,55,106,.54));
-  }
-  body.rv-shell .hero-mkt::after, body.rv-shell .page-hero-mkt::after, body.rv-shell .dashboard-hero::after {
-    content: ""; position: absolute; right: 4%; bottom: -5rem; width: 18rem; height: 18rem; border: 1px solid rgba(232,186,79,.24); transform: rotate(45deg); box-shadow: 0 0 0 20px rgba(232,186,79,.035), 0 0 0 40px rgba(232,186,79,.02); pointer-events: none;
-  }
-  body.rv-shell .hero-mkt-inner, body.rv-shell .page-hero-mkt-inner { position: relative; z-index: 1; }
-  body.rv-shell .hero-mkt h1 { max-width: 780px; font-size: clamp(2.5rem, 7vw, 5.8rem) !important; line-height: .98; }
-  body.rv-shell .hero-mkt h1::first-line { color: var(--rv-white); }
-  body.rv-shell .hero-mkt p, body.rv-shell .page-hero-mkt p { max-width: 650px; color: var(--rv-muted) !important; }
-  body.rv-shell .hero-proof-dot { background: var(--rv-green) !important; box-shadow: 0 0 0 5px rgba(111,213,94,.10); }
-  body.rv-shell .trust-strip { background: rgba(7,26,61,.78) !important; border-top: 1px solid var(--rv-line); border-bottom: 1px solid var(--rv-line); }
-  body.rv-shell .trust-card { border-right: 1px solid rgba(232,186,79,.18) !important; }
-  body.rv-shell .trust-number, body.rv-shell .tier-roi { color: var(--rv-yellow) !important; }
-  body.rv-shell .trust-label { color: var(--rv-muted) !important; }
-  body.rv-shell .mkt-section, body.rv-shell .card, body.rv-shell .quote-card, body.rv-shell .panel, body.rv-shell .form-card,
-  body.rv-shell .auth-card, body.rv-shell .auth-shell-card, body.rv-shell .dashboard-card, body.rv-shell .stat-card,
-  body.rv-shell .content-card, body.rv-shell .settings-card, body.rv-shell .profile-card {
-    background: linear-gradient(155deg, rgba(12,38,82,.88), rgba(4,15,37,.92)) !important;
-    border: 1px solid rgba(232,186,79,.18) !important; box-shadow: 0 14px 38px rgba(0,0,0,.16); border-radius: 18px;
-  }
-  body.rv-shell .mkt-section.is-tinted { background: rgba(12,38,82,.42) !important; }
-  body.rv-shell .feature-row, body.rv-shell .step-row { border-color: rgba(232,186,79,.18) !important; }
-  body.rv-shell .feature-mark, body.rv-shell .step-num { background: linear-gradient(145deg, var(--rv-gold), var(--rv-yellow)) !important; color: #071a3d !important; }
-  body.rv-shell input, body.rv-shell select, body.rv-shell textarea { background: rgba(3,10,25,.72) !important; color: var(--rv-white) !important; border-color: rgba(232,186,79,.25) !important; }
-  body.rv-shell input::placeholder, body.rv-shell textarea::placeholder { color: #7890b2 !important; }
-  body.rv-shell label, body.rv-shell .form-label { color: var(--rv-muted) !important; }
-  body.rv-shell .badge, body.rv-shell .status-badge, body.rv-shell .tier-ribbon { background: rgba(111,213,94,.14) !important; color: var(--rv-green) !important; border-color: rgba(111,213,94,.32) !important; }
-  body.rv-shell .mkt-footer { margin-top: 3rem; background: #020814 !important; border-top: 1px solid var(--rv-line); }
-  body.rv-shell .mkt-footer-bottom { color: #7890b2 !important; border-top-color: rgba(232,186,79,.14) !important; }
-  body.rv-shell .cta-band { background: linear-gradient(135deg, rgba(18,55,106,.9), rgba(7,26,61,.92)) !important; border: 1px solid rgba(232,186,79,.32) !important; box-shadow: var(--rv-shadow); }
-  body.rv-shell .mobile-menu { background: #04102a !important; border-left: 1px solid var(--rv-line); }
-  body.rv-shell .mobile-menu-header { border-bottom-color: rgba(232,186,79,.18) !important; }
-  body.rv-shell .mobile-link, body.rv-shell .mobile-accordion-toggle { color: var(--rv-muted) !important; }
-  body.rv-shell .tab-bar { background: rgba(3,10,25,.94) !important; border-top: 1px solid var(--rv-line) !important; backdrop-filter: blur(18px); }
-  body.rv-shell .tab-item { color: #8fa5c2 !important; }
-  body.rv-shell .tab-item.is-active { color: var(--rv-yellow) !important; }
-  body.rv-shell .rv-ambient-line { max-width: 1320px; height: 1px; margin: 0 auto; background: linear-gradient(90deg, transparent, var(--rv-gold), transparent); opacity: .65; }
-  @media (max-width: 760px) {
-    body.rv-shell .header-container { min-height: 72px; padding: 0 1rem; }
-    body.rv-shell .brand-mark { width: 34px; height: 40px; }
-    body.rv-shell .brand-name { font-size: 1.1rem; }
-    body.rv-shell .brand-tag { font-size: .46rem; letter-spacing: .11em; }
-    body.rv-shell .hero-mkt h1 { font-size: clamp(2.35rem, 14vw, 4rem) !important; }
-    body.rv-shell .trust-strip { grid-template-columns: repeat(2, 1fr) !important; }
-    body.rv-shell .trust-card { border-bottom: 1px solid rgba(232,186,79,.18) !important; }
-  }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>RMS — FAQ</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="assets/css/style.css">
+  <meta name="theme-color" content="#0a0e27">
+  <style>
+    .faq-container { padding: 20px 16px 100px 16px; max-width: 600px; margin: 0 auto; }
+    details { 
+      background: var(--rms-bg-card); border: 1px solid var(--rms-border); 
+      border-radius: 12px; margin-bottom: 12px; overflow: hidden; transition: 0.3s;
+    }
+    details[open] { border-color: var(--rms-yellow); }
+    summary { 
+      padding: 16px; font-weight: 600; font-size: 0.95rem; color: var(--rms-white); 
+      cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center;
+    }
+    summary::-webkit-details-marker { display: none; }
+    summary::after { content: '\f078'; font-family: 'Font Awesome 6 Free'; font-weight: 900; color: var(--rms-text-muted); transition: 0.3s; }
+    details[open] summary::after { transform: rotate(180deg); color: var(--rms-yellow); }
+    .faq-answer { padding: 0 16px 16px 16px; font-size: 0.9rem; color: var(--rms-text-muted); line-height: 1.6; border-top: 1px solid rgba(255,255,255,0.05); margin-top: 10px; padding-top: 16px; }
+  </style>
 </head>
 <body class="rv-shell">
-<div id="header-container"></div>
-<div class="rv-page-marker" aria-hidden="true">ROYALVEST / WHERE STOCKS MEETS INVESTMENTS</div>
+  <div id="header-container"></div>
 
-<section class="page-hero-mkt">
-  <div class="mkt-eyebrow">Help</div>
-  <h1>Frequently asked questions</h1>
-  <p>Can't find what you need? <a href="contact.html">Contact us</a> and we'll get back to you within 24 hours.</p>
-</section>
+  <div class="faq-container">
+    <h2 style="margin-bottom: 5px;">Frequently Asked Questions</h2>
+    <p class="text-muted" style="margin-bottom: 24px;">Everything you need to know about RMS.</p>
 
-<section class="mkt-section" style="max-width:760px;">
-
-  <div class="faq-group-label">Account &amp; Verification</div>
-  <div class="card">
-    <details class="faq-item" open>
-      <summary>Do I need to verify my identity?</summary>
-      <p>Yes — KYC verification is required before you can withdraw funds. It's a one-time step you complete from your dashboard, and our compliance team reviews submissions manually.</p>
+    <details>
+      <summary>How do the Daily Mystery Boxes work?</summary>
+      <div class="faq-answer">Once you upgrade to an M-Tier (M1 to M7), you unlock a specific number of Mystery Boxes every day. Simply tap a box to open it and instantly claim your cash reward. The amount per box depends on your tier.</div>
     </details>
-    <details class="faq-item">
-      <summary>How long does KYC review take?</summary>
-      <p>Submissions are reviewed manually by our team. You'll see your status update on your dashboard once it's been reviewed.</p>
+
+    <details>
+      <summary>When can I withdraw my funds?</summary>
+      <div class="faq-answer">Withdrawals are strictly scheduled by tier to ensure fast processing: <br>• M1 & M2: Monday<br>• M3 & M4: Tuesday<br>• M5: Wednesday<br>• M6: Thursday<br>• M7: Friday.<br>Withdrawals are only processed between 10:00 AM and 6:00 PM WAT. No withdrawals on weekends.</div>
     </details>
-    <details class="faq-item">
-      <summary>What if my KYC submission is rejected?</summary>
-      <p>You can resubmit directly from your dashboard with corrected documents.</p>
+
+    <details>
+      <summary>What is the Wealth Center?</summary>
+      <div class="faq-answer">The Wealth Center allows you to lock up funds for a fixed period (e.g., 5 days) to earn guaranteed high returns. Once the plan matures, you can claim the total amount (Principal + Profit) directly to your wallet.</div>
+    </details>
+
+    <details>
+      <summary>How do I get Lucky Wheel spins?</summary>
+      <div class="faq-answer">You earn exactly 1 spin for every "Active Downline" you have. An active downline is a direct referral who has made at least one approved deposit. Spins reset daily!</div>
+    </details>
+
+    <details>
+      <summary>Is there a limit on how many times I can withdraw?</summary>
+      <div class="faq-answer">Yes. To maintain platform stability, each member is allowed exactly ONE withdrawal request per day, strictly on their designated tier day.</div>
+    </details>
+
+    <details>
+      <summary>How do I upgrade my VIP Tier?</summary>
+      <div class="faq-answer">Go to the Deposit page, fund your wallet, and then navigate to the VIP page. You can use your wallet balance to instantly upgrade to your desired M-Tier.</div>
     </details>
   </div>
 
-  <div class="faq-group-label">Deposits</div>
-  <div class="card">
-    <details class="faq-item">
-      <summary>What's the minimum deposit?</summary>
-      <p>You can fund your wallet with as little as ₦500 via bank transfer.</p>
-    </details>
-    <details class="faq-item">
-      <summary>How do I deposit funds?</summary>
-      <p>From your dashboard, go to Deposit, transfer the amount to the bank details shown, then enter your transfer sender details so our team can match and confirm it.</p>
-    </details>
-    <details class="faq-item">
-      <summary>How long until my deposit is confirmed?</summary>
-      <p>Deposits are reviewed and approved manually by our team. Your wallet is credited as soon as your transfer is confirmed.</p>
-    </details>
-  </div>
-
-  <div class="faq-group-label">Withdrawals</div>
-  <div class="card">
-    <details class="faq-item">
-      <summary>How do I withdraw my funds?</summary>
-      <p>Request a withdrawal from your dashboard with your bank account details. Our team reviews and pays out requests manually, usually within 24 hours.</p>
-    </details>
-    <details class="faq-item">
-      <summary>Is there a minimum withdrawal amount?</summary>
-      <p>Yes, the minimum withdrawal request is ₦1,000.</p>
-    </details>
-    <details class="faq-item">
-      <summary>What happens if my withdrawal request is rejected?</summary>
-      <p>If a request is rejected, the amount was never deducted from your wallet in the first place, so there's nothing to refund — your balance simply remains as it was.</p>
-    </details>
-  </div>
-
-  <div class="faq-group-label">Investments &amp; Returns</div>
-  <div class="card">
-    <details class="faq-item">
-      <summary>How are my funds protected?</summary>
-      <p>Your capital is spread across diversified, real-world backed products rather than a single asset, reducing exposure to any one sector's downturn.</p>
-    </details>
-    <details class="faq-item">
-      <summary>How often are returns paid?</summary>
-      <p>Daily returns post to your wallet every day your investment is active — visible in real time on your dashboard.</p>
-    </details>
-    <details class="faq-item">
-      <summary>Can I invest in more than one product at a time?</summary>
-      <p>Yes, you can hold multiple active investments across different products simultaneously.</p>
-    </details>
-  </div>
-
-  <div class="faq-group-label">VIP Program</div>
-  <div class="card">
-    <details class="faq-item">
-      <summary>How do I move up a VIP tier?</summary>
-      <p>Tiers are based on your total deposits, number of active investments, and referrals. Higher tiers unlock a bigger daily bonus.</p>
-    </details>
-  </div>
-
-</section>
-
-<section class="mkt-section" style="padding-top:0;">
-  <div class="cta-band">
-    <h2>Still have questions?</h2>
-    <p>Our team is happy to help before you make your first deposit.</p>
-    <a href="contact.html" class="btn btn-primary btn-lg">Contact Us</a>
-  </div>
-</section>
-
-<footer class="mkt-footer">
-  <div class="mkt-footer-grid">
-    <div class="mkt-footer-brand">
-      <a href="/" class="brand"><span class="brand-mark">RV</span><span class="brand-name">RoyalVest</span></a>
-      <p>Secure, long-term investment products with transparent daily returns.</p>
-    </div>
-    <div>
-      <h5>Company</h5>
-      <div class="mkt-footer-links">
-        <a href="about.html">About Us</a>
-        <a href="team.html">Our Team</a>
-        <a href="news.html">Company News</a>
-        <a href="contact.html">Contact</a>
-      </div>
-    </div>
-    <div>
-      <h5>Support</h5>
-      <div class="mkt-footer-links">
-        <a href="faq.html">FAQ</a>
-        <a href="register.html">Get Started</a>
-        <a href="login.html">Login</a>
-        <a href="contact.html">Contact Us</a>
-      </div>
-    </div>
-  </div>
-  <div class="mkt-footer-bottom">© 2026 RoyalVest. All rights reserved.</div>
-</footer>
-
-<div id="footer-container"></div>
-<script src="/assets/js/components.js"></script>
-<script type="module">
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
-const supabase = createClient('https://jytmnukzvxirnafukbck.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp5dG1udWt6dnhpcm5hZnVrYmNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQxNjQ3MjUsImV4cCI6MjA5OTc0MDcyNX0.ZvGUPTW7dJ3UxL2N1TW0lBCe3H4559HaUEhks7vEbEw');
-
-// Required so the shared header (assets/js/components.js) can detect
-// the logged-in session — without this it always shows the guest menu.
-window.supabase = supabase;
-</script>
+  <div id="footer-container"></div>
+  <script src="/assets/js/components.js"></script>
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+    const supabase = createClient('https://ofysznsajwxnjqaumwch.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9meXN6bnNhand4bmpxYXVtd2NoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgyMzM4NDgsImV4cCI6MjEwMzgwOTg0OH0.XaHkP5WZ2nJVJXVdbG-D13rrD63g_09HxmJoZn7ZoWA');
+    window.supabase = supabase;
+  </script>
 </body>
 </html>
