@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>RMS — Lucky Wheel</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="assets/css/style.css">
+  <meta name="theme-color" content="#0a0e27">
+  <style>
+    .wheel-container { padding: 20px 16px 100px 16px; max-width: 600px; margin: 0 auto; text-align: center; }
+    .spin-stats { display: flex; justify-content: center; gap: 20px; margin: 20px 0; }
+    .spin-stat-box { background: var(--rms-bg-card); border: 1px solid var(--rms-border); padding: 12px 20px; border-radius: 12px; }
+    .spin-stat-box .num { font-size: 1.5rem; font-weight: 800; color: var(--rms-yellow); }
+    .spin-stat-box .lbl { font-size: 0.75rem; color: var(--rms-text-muted); }
+
+    .wheel-wrapper { position: relative; width: 300px; height: 300px; margin: 30px auto; }
+    .wheel-pointer { position: absolute; top: -15px; left: 50%; transform: translateX(-50%); z-index: 10; color: var(--rms-vivid-red); font-size: 2rem; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5)); }
+    .wheel { 
+      width: 100%; height: 100%; border-radius: 50%; border: 6px solid var(--rms-yellow);
+      background: conic-gradient(
+        var(--rms-vivid-red) 0deg 45deg, var(--rms-white) 45deg 90deg, var(--rms-yellow) 90deg 135deg, var(--rms-vivid-red) 135deg 180deg,
+        var(--rms-white) 180deg 225deg, var(--rms-yellow) 225deg 270deg, var(--rms-vivid-red) 270deg 315deg, var(--rms-white) 315deg 360deg
+      );
+      transition: transform 4s cubic-bezier(0.17, 0.67, 0.12, 0.99);
+      box-shadow: 0 0 40px rgba(255,26,26,0.2);
+    }
+    .spin-btn-center { 
+      position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+      width: 80px; height: 80px; border-radius: 50%; background: var(--rms-bg);
+      border: 4px solid var(--rms-white); color: var(--rms-white); font-weight: 800;
+      display: flex; align-items: center; justify-content: center; z-index: 11;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.5); cursor: pointer;
+    }
+    .spin-btn-center:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .history-list { text-align: left; margin-top: 30px; }
+    .history-item { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.9rem; }
+  </style>
+</head>
+<body class="rv-shell">
+  <div id="header-container"></div>
+
+  <div class="wheel-container">
+    <h2 style="margin-bottom: 5px;">Lucky Wheel</h2>
+    <p class="text-muted">1 Spin for every active downline.</p>
+
+    <div class="spin-stats">
+      <div class="spin-stat-box">
+        <div class="num" id="spins-remaining">0</div>
+        <div class="lbl">Spins Left</div>
+      </div>
+      <div class="spin-stat-box">
+        <div class="num" id="active-downlines">0</div>
+        <div class="lbl">Active Downlines</div>
+      </div>
+    </div>
+
+    <div class="wheel-wrapper">
+      <div class="wheel-pointer"><i class="fa-solid fa-caret-down"></i></div>
+      <div class="wheel" id="wheel"></div>
+      <button class="spin-btn-center" id="spin-btn" onclick="doSpin()">SPIN</button>
+    </div>
+
+    <div class="rms-card history-list">
+      <h4 style="margin-top:0; margin-bottom:10px;"><i class="fa-solid fa-clock-rotate-left"></i> Spin History</h4>
+      <div id="history-container">
+        <p class="text-muted" style="text-align:center; font-size:0.85rem;">No spins yet today.</p>
+      </div>
+    </div>
+  </div>
+
+  <div id="footer-container"></div>
+  <script src="/assets/js/components.js"></script>
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+    const supabase = createClient('https://ofysznsajwxnjqaumwch.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9meXN6bnNhand4bmpxYXVtd2NoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgyMzM4NDgsImV4cCI6MjEwMzgwOTg0OH0.XaHkP5WZ2nJVJXVdbG-D13rrD63g_09HxmJoZn7ZoWA');
+    window.supabase = supabase;
+
+    let currentRotation = 0;
+    let spinsLeft = 0;
+
+    async function loadWheel() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return window.location.href = '/login.html';
+      const token = (await supabase.auth.getSession()).data.session.access_token;
+
+      const res = await fetch('/api/wheel?action=getSpinStatus', { headers: { 'Authorization': `Bearer ${token}` } });
+      const data = await res.json();
+
+      spinsLeft = data.spins_remaining;
+      document.getElementById('spins-remaining').textContent = spinsLeft;
+      document.getElementById('active-downlines').textContent = data.allowed_spins;
+      document.getElementById('spin-btn').disabled = spinsLeft <= 0;
+    }
+
+    window.doSpin = async () => {
+      if (spinsLeft <= 0) return;
+      const btn = document.getElementById('spin-btn');
+      btn.disabled = true;
+
+      const wheel = document.getElementById('wheel');
+      const extraSpins = 360 * (5 + Math.random() * 5);
+      const randomDegree = Math.floor(Math.random() * 360);
+      currentRotation += extraSpins + randomDegree;
+      wheel.style.transform = `rotate(${currentRotation}deg)`;
+
+      const token = (await supabase.auth.getSession()).data.session.access_token;
+      const res = await fetch('/api/wheel?action=spin', {
+        method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({})
+      });
+      const data = await res.json();
+
+      setTimeout(() => {
+        if (res.ok) {
+          spinsLeft--;
+          document.getElementById('spins-remaining').textContent = spinsLeft;
+          alert(`🎉 You won ₦${data.prize_amount.toLocaleString()}!`);
+          if(spinsLeft <= 0) btn.disabled = true;
+        } else {
+          alert(data.error);
+          btn.disabled = false;
+        }
+      }, 4000);
+    };
+
+    loadWheel();
+  </script>
+</body>
+</html>
