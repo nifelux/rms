@@ -9,7 +9,7 @@
   "buildCommand": "",
   "crons": [
     {
-      "path": "/api/investment?action=triggerDailyIncome",
+      "path": "/api/cron-income",
       "schedule": "0 0 * * *"
     }
   ]
