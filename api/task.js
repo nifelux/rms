@@ -1,217 +1,158 @@
 /**
- * Task-based VIP tier system.
- * Actions: myStatus, startTask, claimTask, upgradeTier, taskHistory
+ * RMS Task API — Mystery Box System
+ * Actions: getTaskStatus, openMysteryBox
  */
 import supabaseAdmin from '../lib/supabase.js';
 import { verifyUser } from '../lib/auth.js';
-import { sendTelegramMessage } from '../lib/telegram.js';
 
 export default async function handler(req, res) {
-  const { action } = req.query;
+  const action = req.query.action || req.body?.action;
   try {
     switch (action) {
-      case 'myStatus': return await myStatus(req, res);
-      case 'startTask': return await startTask(req, res);
-      case 'claimTask': return await claimTask(req, res);
-      case 'upgradeTier': return await upgradeTier(req, res);
-      case 'taskHistory': return await taskHistory(req, res);
+      case 'getTaskStatus': return await getTaskStatus(req, res);
+      case 'openMysteryBox': return await openMysteryBox(req, res);
       default: return res.status(400).json({ error: 'Invalid action' });
     }
   } catch (err) {
-    return res.status(500).json({ error: err.message });
+    console.error('Task API Error:', err);
+    return res.status(500).json({ error: err.message || 'Internal server error' });
   }
 }
 
-// Tasks run Monday-Saturday only, any time of day — computed in WAT
-// (UTC+1, no DST), same convention as the withdrawal-hours check.
-function isTaskDayOpen() {
-  const now = new Date();
-  const watDay = new Date(now.getTime() + 60 * 60 * 1000).getUTCDay(); // 0=Sun..6=Sat
-  return watDay !== 0;
-}
-
+// Helper: Get start of today in WAT (UTC+1) for accurate daily resets
 function startOfTodayWAT() {
   const now = new Date();
   const wat = new Date(now.getTime() + 60 * 60 * 1000);
   wat.setUTCHours(0, 0, 0, 0);
-  return new Date(wat.getTime() - 60 * 60 * 1000); // back to UTC for the DB comparison
+  return new Date(wat.getTime() - 60 * 60 * 1000); // Convert back to UTC for DB
 }
 
-async function getUserTierInfo(userId) {
+async function getTaskStatus(req, res) {
+  const user = await verifyUser(req);
+  if (!user) return res.status(401).json({ error: 'Unauthorized' });
+
+  // 1. Fetch Profile
   const { data: profile } = await supabaseAdmin
     .from('profiles')
-    .select('task_tier, newbie_expires_at')
-    .eq('id', userId)
+    .select('vip_level, boxes_opened_today, last_task_reset_date')
+    .eq('id', user.id)
     .single();
 
-  const { data: allTiers } = await supabaseAdmin.from('task_tiers').select('*').order('sort_order', { ascending: true });
-  const tier = allTiers.find(t => t.key === profile.task_tier) || allTiers.find(t => t.key === 'newbie');
+  if (!profile) return res.status(404).json({ error: 'Profile not found' });
 
-  const newbieExpired = profile.task_tier === 'newbie' && new Date(profile.newbie_expires_at) < new Date();
-
-  return { profile, tier, allTiers, newbieExpired };
-}
-
-async function myStatus(req, res) {
-  const user = await verifyUser(req);
-  const { profile, tier, allTiers, newbieExpired } = await getUserTierInfo(user.id);
-
+  // 2. Daily Reset Logic
   const todayStart = startOfTodayWAT();
-  const { count: doneToday } = await supabaseAdmin
-    .from('task_sessions')
-    .select('id', { count: 'exact', head: true })
-    .eq('user_id', user.id)
-    .eq('claimed', true)
-    .gte('started_at', todayStart.toISOString());
+  const lastReset = profile.last_task_reset_date ? new Date(profile.last_task_reset_date) : new Date(0);
+  
+  let boxesOpened = profile.boxes_opened_today || 0;
+  if (lastReset < todayStart) {
+    // It's a new day, reset the counter
+    boxesOpened = 0;
+    await supabaseAdmin.from('profiles').update({ 
+      boxes_opened_today: 0, 
+      last_task_reset_date: new Date().toISOString() 
+    }).eq('id', user.id);
+  }
 
-  const nextTier = allTiers.find(t => t.sort_order === tier.sort_order + 1) || null;
-  const upgradeCost = nextTier ? Number(nextTier.price) - Number(tier.price) : null;
+  // 3. Fetch Tier Info
+  const tier = profile.vip_level === 'newbie' ? null : profile.vip_level;
+  let tierInfo = { daily_boxes: 0, box_earning: 0, upgrade_cost: 0 };
+  
+  if (tier) {
+    const { data: tierData } = await supabaseAdmin
+      .from('rms_tiers')
+      .select('*')
+      .eq('tier', tier)
+      .single();
+    
+    if (tierData) {
+      tierInfo = {
+        daily_boxes: tierData.daily_boxes,
+        box_earning: tierData.box_earning,
+        upgrade_cost: tierData.upgrade_cost
+      };
+    }
+  }
 
   return res.status(200).json({
-    currentTier: tier,
-    nextTier,
-    upgradeCost,
-    tasksDoneToday: doneToday || 0,
-    tasksRemainingToday: Math.max(0, tier.tasks_per_day - (doneToday || 0)),
-    newbieExpired,
-    newbieExpiresAt: profile.newbie_expires_at,
-    canDoTasksToday: isTaskDayOpen() && !newbieExpired,
-    canReferOrWithdraw: profile.task_tier !== 'newbie'
+    tier: tier || 'newbie',
+    boxes_opened: boxesOpened,
+    max_boxes: tierInfo.daily_boxes,
+    earning_per_box: tierInfo.box_earning,
+    can_open: tier !== null && boxesOpened < tierInfo.daily_boxes
   });
 }
 
-async function startTask(req, res) {
+async function openMysteryBox(req, res) {
   const user = await verifyUser(req);
-  const { product_name } = req.body;
-  if (!product_name) return res.status(400).json({ error: 'product_name is required' });
+  if (!user) return res.status(401).json({ error: 'Unauthorized' });
 
-  if (!isTaskDayOpen()) return res.status(400).json({ error: 'Tasks are not available on Sundays.' });
+  // 1. Fetch Profile & Tier
+  const { data: profile } = await supabaseAdmin
+    .from('profiles')
+    .select('vip_level, boxes_opened_today, last_task_reset_date')
+    .eq('id', user.id)
+    .single();
 
-  const { profile, tier, newbieExpired } = await getUserTierInfo(user.id);
-  if (newbieExpired) return res.status(400).json({ error: 'Your free Newbie period has ended. Upgrade to a VIP tier to continue.' });
+  if (!profile) return res.status(404).json({ error: 'Profile not found' });
 
+  const tier = profile.vip_level;
+  if (tier === 'newbie' || !tier) {
+    return res.status(400).json({ error: 'You must upgrade to an M-Tier to open Mystery Boxes.' });
+  }
+
+  // 2. Check Daily Reset
   const todayStart = startOfTodayWAT();
-  const { count: doneToday } = await supabaseAdmin
-    .from('task_sessions')
-    .select('id', { count: 'exact', head: true })
-    .eq('user_id', user.id)
-    .eq('claimed', true)
-    .gte('started_at', todayStart.toISOString());
-
-  if ((doneToday || 0) >= tier.tasks_per_day) {
-    return res.status(400).json({ error: `You've completed all ${tier.tasks_per_day} tasks for today. Come back tomorrow.` });
+  const lastReset = profile.last_task_reset_date ? new Date(profile.last_task_reset_date) : new Date(0);
+  let boxesOpened = profile.boxes_opened_today || 0;
+  
+  if (lastReset < todayStart) {
+    boxesOpened = 0;
   }
 
-  const { data: session, error } = await supabaseAdmin.from('task_sessions').insert({
-    user_id: user.id,
-    product_name,
-    amount: tier.pay_per_task,
-    started_at: new Date()
-  }).select().single();
-  if (error) return res.status(400).json({ error: error.message });
+  // 3. Fetch Tier Limits
+  const { data: tierInfo } = await supabaseAdmin
+    .from('rms_tiers')
+    .select('daily_boxes, box_earning')
+    .eq('tier', tier)
+    .single();
 
-  return res.status(200).json({ session_id: session.id, amount: session.amount, waitSeconds: 5 });
-}
+  if (!tierInfo) return res.status(500).json({ error: 'Tier configuration not found' });
 
-async function claimTask(req, res) {
-  const user = await verifyUser(req);
-  const { session_id } = req.body;
-  if (!session_id) return res.status(400).json({ error: 'session_id is required' });
-
-  const { data: session } = await supabaseAdmin.from('task_sessions').select('*').eq('id', session_id).eq('user_id', user.id).single();
-  if (!session) return res.status(404).json({ error: 'Task session not found' });
-  if (session.claimed) return res.status(400).json({ error: 'This task has already been claimed' });
-
-  const elapsedMs = Date.now() - new Date(session.started_at).getTime();
-  if (elapsedMs < 5000) {
-    return res.status(400).json({ error: `Please wait ${Math.ceil((5000 - elapsedMs) / 1000)} more second(s).` });
+  // 4. Validate Limit
+  if (boxesOpened >= tierInfo.daily_boxes) {
+    return res.status(400).json({ error: `You have reached your daily limit of ${tierInfo.daily_boxes} boxes.` });
   }
 
-  // Credit via a transaction row (type: 'earning' — already a
-  // recognized credit type in trg_process_transaction), never a direct
-  // wallet update. Reference is unique per session, so this can't
-  // double-credit even if called twice.
+  // 5. Credit Wallet (via Transaction Trigger)
+  const reference = `box_${user.id}_${Date.now()}`;
   const { error: txnErr } = await supabaseAdmin.from('transactions').insert({
     user_id: user.id,
-    type: 'earning',
-    amount: session.amount,
+    type: 'task_earning',
+    amount: tierInfo.box_earning,
     status: 'approved',
-    reference: `task_${session.id}`
+    reference: reference,
+    description: `Mystery Box Reward (${tier})`
   });
-  if (txnErr && !txnErr.message.includes('duplicate')) {
+
+  if (txnErr) {
+    // Handle unique constraint violation if somehow triggered twice
+    if (txnErr.message.includes('duplicate')) {
+      return res.status(400).json({ error: 'Task already claimed.' });
+    }
     return res.status(500).json({ error: txnErr.message });
   }
 
-  await supabaseAdmin.from('task_sessions').update({ claimed: true, claimed_at: new Date() }).eq('id', session.id);
+  // 6. Increment Box Count & Update Reset Date
+  await supabaseAdmin.from('profiles').update({ 
+    boxes_opened_today: boxesOpened + 1,
+    last_task_reset_date: new Date().toISOString()
+  }).eq('id', user.id);
 
-  return res.status(200).json({ message: 'Task claimed', amount: session.amount });
-}
-
-/**
- * One-time payment: cost = nextTier.price - currentTier.price. Only
- * the immediate next tier is allowed (sequential upgrades, no skipping).
- * Debited via a direct atomic conditional UPDATE rather than a
- * transaction row with status 'approved' — 'task_tier_upgrade' isn't a
- * type trg_process_transaction recognizes, so relying on it here would
- * silently NOT debit the wallet (the same lesson learned from the
- * Welfare-claim flow). The audit record below is intentionally NOT
- * status 'approved', so it can never accidentally trigger it either.
- */
-async function upgradeTier(req, res) {
-  const user = await verifyUser(req);
-  const { profile, tier, allTiers } = await getUserTierInfo(user.id);
-
-  const nextTier = allTiers.find(t => t.sort_order === tier.sort_order + 1);
-  if (!nextTier) return res.status(400).json({ error: 'You are already at the highest tier.' });
-
-  const cost = Number(nextTier.price) - Number(tier.price);
-
-  // Conditional debit via optimistic concurrency: read balance, verify
-  // it's sufficient, then update WHERE balance still matches what we
-  // read — this prevents a race where two simultaneous upgrade
-  // requests both pass the balance check and both succeed.
-  const { data: wallet } = await supabaseAdmin.from('wallets').select('balance').eq('user_id', user.id).single();
-  if (!wallet || Number(wallet.balance) < cost) {
-    return res.status(400).json({ error: 'Insufficient balance for this upgrade.' });
-  }
-
-  const { data: debitResult, error: debitError } = await supabaseAdmin
-    .from('wallets')
-    .update({ balance: Number(wallet.balance) - cost, updated_at: new Date() })
-    .eq('user_id', user.id)
-    .eq('balance', wallet.balance) // only succeeds if balance hasn't changed since we read it
-    .select();
-
-  if (debitError || !debitResult || debitResult.length === 0) {
-    return res.status(409).json({ error: 'Balance changed — please try again.' });
-  }
-
-  await supabaseAdmin.from('profiles').update({ task_tier: nextTier.key }).eq('id', user.id);
-
-  await supabaseAdmin.from('transactions').insert({
-    user_id: user.id,
-    type: 'task_tier_upgrade',
-    amount: cost,
-    status: 'paid', // deliberately not 'approved' — see function comment
-    reference: `tierup_${user.id}_${nextTier.key}_${Date.now()}`,
-    meta: { from: tier.key, to: nextTier.key }
+  return res.status(200).json({ 
+    success: true, 
+    amount: tierInfo.box_earning,
+    boxes_opened: boxesOpened + 1,
+    max_boxes: tierInfo.daily_boxes
   });
-
-  try {
-    await sendTelegramMessage(`⬆️ *Tier Upgrade*\nUser: \`${user.id}\`\n${tier.name} → ${nextTier.name}\nPaid: ₦${cost}`);
-  } catch (e) { console.error('Telegram notify failed (upgrade still succeeded):', e.message); }
-
-  return res.status(200).json({ message: `Upgraded to ${nextTier.name}`, tier: nextTier });
-}
-
-async function taskHistory(req, res) {
-  const user = await verifyUser(req);
-  const { data } = await supabaseAdmin
-    .from('task_sessions')
-    .select('*')
-    .eq('user_id', user.id)
-    .eq('claimed', true)
-    .order('claimed_at', { ascending: false })
-    .limit(100);
-  return res.status(200).json(data || []);
 }
