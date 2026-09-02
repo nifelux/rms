@@ -25,9 +25,12 @@ export default async function handler(req, res) {
       .upload(path, buffer, { contentType, upsert: false });
     if (error) return res.status(400).json({ error: error.message });
 
-    const { publicURL } = supabaseAdmin.storage.from('proofs').getPublicUrl(data.path);
-    return res.status(200).json({ url: publicURL });
-  } catch (err) {
+   // OLD (Broken in v2):
+// const { publicURL, error } = supabaseAdmin.storage.from('bucket').getPublicUrl(path);
+
+// NEW (Correct for v2):
+const { data, error } = supabaseAdmin.storage.from('your_bucket_name').getPublicUrl(path);
+const publicUrl = data?.publicUrl;  } catch (err) {
     return res.status(500).json({ error: err.message });
   }
 }
