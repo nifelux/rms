@@ -166,7 +166,8 @@ async function createWithdrawal(req, res) {
 
   // 4. Balance Check (Subtract pending withdrawals from available balance)
   const { data: wallet } = await supabaseAdmin.from('wallets').select('balance').eq('user_id', user.id).single();
-  const { data: pending } = await supabaseAdmin.from('withdrawals').select('amount').eq('user_id', user.id).eq('status', 'pending');
+// ADD NULL CHECK:
+if (!wallet) return res.status(400).json({ error: 'Wallet not found. Please contact support.' });  const { data: pending } = await supabaseAdmin.from('withdrawals').select('amount').eq('user_id', user.id).eq('status', 'pending');
   const pendingTotal = (pending || []).reduce((sum, r) => sum + Number(r.amount), 0);
   
   if (Number(amount) > (wallet.balance - pendingTotal)) return res.status(400).json({ error: 'Insufficient available balance.' });
