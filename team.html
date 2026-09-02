@@ -9,28 +9,11 @@
   <meta name="theme-color" content="#0a0e27">
   <style>
     .team-container { padding: 20px 16px 100px 16px; max-width: 600px; margin: 0 auto; }
-    
-    .referral-card { 
-      background: linear-gradient(135deg, #11163a, #1a2050); 
-      border: 1px solid var(--rms-yellow); border-radius: 16px; 
-      padding: 24px; text-align: center; margin-bottom: 24px;
-      position: relative; overflow: hidden;
-    }
-    .referral-card::before {
-      content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
-      background: radial-gradient(circle, rgba(255,215,0,0.05) 0%, transparent 70%);
-    }
+    .referral-card { background: linear-gradient(135deg, #11163a, #1a2050); border: 1px solid var(--rms-yellow); border-radius: 16px; padding: 24px; text-align: center; margin-bottom: 24px; position: relative; overflow: hidden; }
+    .referral-card::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(255,215,0,0.05) 0%, transparent 70%); }
     .ref-label { font-size: 0.85rem; color: var(--rms-text-muted); margin-bottom: 8px; position: relative; }
-    .ref-code { 
-      font-size: 2rem; font-weight: 800; letter-spacing: 3px; color: var(--rms-yellow); 
-      margin-bottom: 16px; position: relative;
-    }
-    .copy-btn { 
-      background: var(--rms-vivid-red); color: white; border: none; 
-      padding: 10px 24px; border-radius: 999px; font-weight: 700; font-size: 0.9rem;
-      cursor: pointer; display: inline-flex; align-items: center; gap: 8px;
-      position: relative; transition: transform 0.2s;
-    }
+    .ref-code { font-size: 2rem; font-weight: 800; letter-spacing: 3px; color: var(--rms-yellow); margin-bottom: 16px; position: relative; }
+    .copy-btn { background: var(--rms-vivid-red); color: white; border: none; padding: 10px 24px; border-radius: 999px; font-weight: 700; font-size: 0.9rem; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; position: relative; transition: transform 0.2s; }
     .copy-btn:active { transform: scale(0.95); }
 
     .stats-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 24px; }
@@ -41,17 +24,9 @@
     .team-list-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
     .team-list-header h3 { margin: 0; font-size: 1.1rem; }
     
-    .member-card { 
-      background: var(--rms-bg-card); border: 1px solid var(--rms-border); 
-      border-radius: 12px; padding: 14px 16px; margin-bottom: 10px;
-      display: flex; justify-content: space-between; align-items: center;
-    }
+    .member-card { background: var(--rms-bg-card); border: 1px solid var(--rms-border); border-radius: 12px; padding: 14px 16px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
     .member-info { display: flex; align-items: center; gap: 12px; }
-    .member-avatar { 
-      width: 40px; height: 40px; background: rgba(255,255,255,0.05); 
-      border-radius: 50%; display: flex; align-items: center; justify-content: center;
-      color: var(--rms-text-muted); font-size: 1rem;
-    }
+    .member-avatar { width: 40px; height: 40px; background: rgba(255,255,255,0.05); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--rms-text-muted); font-size: 1rem; }
     .member-name { font-weight: 600; font-size: 0.95rem; margin-bottom: 2px; }
     .member-date { font-size: 0.75rem; color: var(--rms-text-muted); }
     
@@ -70,7 +45,6 @@
     <h2 style="margin-bottom: 5px;">My Team</h2>
     <p class="text-muted" style="margin-bottom: 20px;">Invite friends and earn rewards.</p>
 
-    <!-- Referral Card -->
     <div class="referral-card">
       <div class="ref-label">Your Referral Code</div>
       <div class="ref-code" id="ref-code">------</div>
@@ -79,41 +53,27 @@
       </button>
     </div>
 
-    <!-- Stats -->
     <div class="stats-grid">
-      <div class="stat-box">
-        <div class="stat-num" id="total-refs">0</div>
-        <div class="stat-lbl">Total Refs</div>
-      </div>
-      <div class="stat-box">
-        <div class="stat-num text-yellow" id="active-downlines">0</div>
-        <div class="stat-lbl">Active <i class="fa-solid fa-circle-info" style="font-size:0.6rem;"></i></div>
-      </div>
-      <div class="stat-box">
-        <div class="stat-num text-red" id="wheel-spins">0</div>
-        <div class="stat-lbl">Wheel Spins</div>
-      </div>
+      <div class="stat-box"><div class="stat-num" id="total-refs">0</div><div class="stat-lbl">Total Refs</div></div>
+      <div class="stat-box"><div class="stat-num text-yellow" id="active-downlines">0</div><div class="stat-lbl">Active <i class="fa-solid fa-circle-info" style="font-size:0.6rem;"></i></div></div>
+      <div class="stat-box"><div class="stat-num text-red" id="wheel-spins">0</div><div class="stat-lbl">Wheel Spins</div></div>
     </div>
 
-    <!-- Team List -->
     <div class="team-list-header">
       <h3>Referred Users</h3>
       <span class="text-muted" style="font-size: 0.85rem;" id="list-count">0 members</span>
     </div>
     
     <div id="team-list">
-      <div class="empty-team">
-        <i class="fa-solid fa-users-slash"></i>
-        <p>Loading team data...</p>
-      </div>
+      <div class="empty-team"><i class="fa-solid fa-users-slash"></i><p>Loading team data...</p></div>
     </div>
-
   </div>
 
   <div id="footer-container"></div>
   <script src="/assets/js/components.js"></script>
   <script type="module">
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+    // ⚠️ REPLACE WITH YOUR ACTUAL KEYS ⚠️
     const supabase = createClient('https://ofysznsajwxnjqaumwch.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9meXN6bnNhand4bmpxYXVtd2NoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgyMzM4NDgsImV4cCI6MjEwMzgwOTg0OH0.XaHkP5WZ2nJVJXVdbG-D13rrD63g_09HxmJoZn7ZoWA');
     window.supabase = supabase;
 
@@ -121,65 +81,73 @@
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return window.location.href = '/login.html';
 
-      // 1. Get Profile & Ref Code
-      const { data: profile } = await supabase.from('profiles').select('referral_code').eq('id', user.id).single();
-      document.getElementById('ref-code').textContent = profile.referral_code;
+      try {
+        // 1. Get Profile & Ref Code
+        const { data: profile, error: profileError } = await supabase.from('profiles').select('referral_code').eq('id', user.id).single();
+        if (profileError || !profile) throw profileError;
+        
+        document.getElementById('ref-code').textContent = profile.referral_code;
 
-      // 2. Fetch all direct referrals
-      // Note: If RLS blocks this, you may need to use an API endpoint like /api/user?action=getTeam
-      const { data: referrals, error } = await supabase
-        .from('profiles')
-        .select('id, full_name, email, created_at')
-        .eq('referred_by', user.id)
-        .order('created_at', { ascending: false });
+        // 2. Fetch all direct referrals
+        const { data: referrals, error: refError } = await supabase
+          .from('profiles')
+          .select('id, full_name, email, created_at')
+          .eq('referred_by', user.id)
+          .order('created_at', { ascending: false });
 
-      if (error || !referrals) {
-        document.getElementById('team-list').innerHTML = '<div class="empty-team"><i class="fa-solid fa-lock"></i><p>Unable to load team. Please check permissions.</p></div>';
-        return;
-      }
+        if (refError) throw refError;
 
-      document.getElementById('total-refs').textContent = referrals.length;
-      document.getElementById('list-count').textContent = `${referrals.length} members`;
+        document.getElementById('total-refs').textContent = referrals.length;
+        document.getElementById('list-count').textContent = `${referrals.length} members`;
 
-      // 3. Calculate Active Downlines (Referrals with at least one approved deposit)
-      let activeCount = 0;
-      const teamListEl = document.getElementById('team-list');
-      
-      if (referrals.length === 0) {
-        teamListEl.innerHTML = '<div class="empty-team"><i class="fa-solid fa-user-plus"></i><p>You haven\'t referred anyone yet.<br>Share your link to start earning!</p></div>';
-      } else {
-        teamListEl.innerHTML = '';
-        for (const ref of referrals) {
-          // Check if this referral has an approved deposit
-          const { count } = await supabase.from('deposits').select('*', { count: 'exact', head: true })
-            .eq('user_id', ref.id).eq('status', 'approved');
-          
-          const isActive = count > 0;
-          if (isActive) activeCount++;
+        // 3. Calculate Active Downlines
+        let activeCount = 0;
+        const teamListEl = document.getElementById('team-list');
+        
+        if (referrals.length === 0) {
+          teamListEl.innerHTML = '<div class="empty-team"><i class="fa-solid fa-user-plus"></i><p>You haven\'t referred anyone yet.<br>Share your link to start earning!</p></div>';
+        } else {
+          teamListEl.innerHTML = '';
+          for (const ref of referrals) {
+            const { count } = await supabase.from('deposits').select('*', { count: 'exact', head: true })
+              .eq('user_id', ref.id).eq('status', 'approved');
+            
+            const isActive = count > 0;
+            if (isActive) activeCount++;
 
-          const initials = (ref.full_name || ref.email).substring(0, 2).toUpperCase();
-          const date = new Date(ref.created_at).toLocaleDateString('en-NG', { month: 'short', day: 'numeric', year: 'numeric' });
+            const initials = (ref.full_name || ref.email).substring(0, 2).toUpperCase();
+            const date = new Date(ref.created_at).toLocaleDateString('en-NG', { month: 'short', day: 'numeric', year: 'numeric' });
 
-          teamListEl.innerHTML += `
-            <div class="member-card">
-              <div class="member-info">
-                <div class="member-avatar">${initials}</div>
-                <div>
-                  <div class="member-name">${ref.full_name || 'Anonymous User'}</div>
-                  <div class="member-date">Joined ${date}</div>
+            teamListEl.innerHTML += `
+              <div class="member-card">
+                <div class="member-info">
+                  <div class="member-avatar">${initials}</div>
+                  <div>
+                    <div class="member-name">${ref.full_name || 'Anonymous User'}</div>
+                    <div class="member-date">Joined ${date}</div>
+                  </div>
+                </div>
+                <div class="status-badge ${isActive ? 'status-active' : 'status-inactive'}">
+                  ${isActive ? 'Active' : 'Inactive'}
                 </div>
               </div>
-              <div class="status-badge ${isActive ? 'status-active' : 'status-inactive'}">
-                ${isActive ? 'Active' : 'Inactive'}
-              </div>
-            </div>
-          `;
+            `;
+          }
         }
-      }
 
-      // 4. Update Stats
-      document.getElementById('active-downlines').textContent = activeCount;
-      document.getElementById('wheel-spins').textContent = activeCount; // 1 spin per active downline
+        document.getElementById('active-downlines').textContent = activeCount;
+        document.getElementById('wheel-spins').textContent = activeCount;
+
+      } catch (err) {
+        console.error('Team loading error:', err);
+        document.getElementById('team-list').innerHTML = `
+          <div class="empty-team">
+            <i class="fa-solid fa-triangle-exclamation" style="color: var(--rms-vivid-red);"></i>
+            <p>Error loading team: ${err.message}</p>
+            <button onclick="loadTeam()" class="rms-btn rms-btn-outline" style="margin-top: 10px;">Retry</button>
+          </div>
+        `;
+      }
     }
 
     window.copyReferral = () => {
