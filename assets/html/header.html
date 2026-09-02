@@ -9,9 +9,9 @@
     </a>
     
     <!-- VIP Level Indicator -->
-    <a href="/vip.html" id="vip-indicator" class="vip-indicator" style="display:none;">
+    <a href="/vip.html" id="vip-indicator" class="vip-indicator" style="display:none; opacity: 0.5;">
       <i class="fa-solid fa-crown" style="margin-right: 6px;"></i>
-      <span id="vip-level-text">M0</span>
+      <span id="vip-level-text">...</span>
     </a>
   </div>
 </header>
@@ -28,7 +28,7 @@
     font-size: 0.85rem;
     cursor: pointer;
     text-decoration: none;
-    transition: all 0.2s;
+    transition: all 0.3s ease;
     box-shadow: 0 2px 8px rgba(255,215,0,0.3);
   }
   .vip-indicator:hover {
@@ -38,56 +38,83 @@
   .vip-indicator .fa-crown {
     font-size: 0.9rem;
   }
-  .vip-indicator.m0 { background: linear-gradient(135deg, #95a5a6, #7f8c8d); color: white; box-shadow: 0 2px 8px rgba(149,165,166,0.3); }
-  .vip-indicator.m1 { background: linear-gradient(135deg, #cd7f32, #a0522d); color: white; box-shadow: 0 2px 8px rgba(205,127,50,0.3); }
-  .vip-indicator.m2 { background: linear-gradient(135deg, #c0c0c0, #a8a8a8); color: #0a0e27; box-shadow: 0 2px 8px rgba(192,192,192,0.3); }
+  .vip-indicator.m0 { background: linear-gradient(135deg, #95a5a6, #7f8c8d); color: white; }
+  .vip-indicator.m1 { background: linear-gradient(135deg, #cd7f32, #a0522d); color: white; }
+  .vip-indicator.m2 { background: linear-gradient(135deg, #c0c0c0, #a8a8a8); color: #0a0e27; }
   .vip-indicator.m3 { background: linear-gradient(135deg, var(--rms-yellow), #e6c200); color: #0a0e27; }
-  .vip-indicator.m4 { background: linear-gradient(135deg, #2ecc71, #27ae60); color: white; box-shadow: 0 2px 8px rgba(46,204,113,0.3); }
-  .vip-indicator.m5 { background: linear-gradient(135deg, #3498db, #2980b9); color: white; box-shadow: 0 2px 8px rgba(52,152,219,0.3); }
-  .vip-indicator.m6 { background: linear-gradient(135deg, #9b59b6, #8e44ad); color: white; box-shadow: 0 2px 8px rgba(155,89,182,0.3); }
-  .vip-indicator.m7 { background: linear-gradient(135deg, var(--rms-vivid-red), #c0392b); color: white; box-shadow: 0 2px 8px rgba(255,26,26,0.3); }
+  .vip-indicator.m4 { background: linear-gradient(135deg, #2ecc71, #27ae60); color: white; }
+  .vip-indicator.m5 { background: linear-gradient(135deg, #3498db, #2980b9); color: white; }
+  .vip-indicator.m6 { background: linear-gradient(135deg, #9b59b6, #8e44ad); color: white; }
+  .vip-indicator.m7 { background: linear-gradient(135deg, var(--rms-vivid-red), #c0392b); color: white; }
 </style>
 
 <script>
-  async function loadVipIndicator() {
+  async function updateVipIndicator() {
     try {
-      if (!window.supabase) return;
+      if (!window.supabase) {
+        console.log('Supabase not ready yet');
+        return false;
+      }
       
       const { data: { user } } = await window.supabase.auth.getUser();
-      if (!user) return;
+      if (!user) {
+        console.log('No user logged in');
+        return false;
+      }
       
-      const { data: profile } = await window.supabase
+      const { data: profile, error } = await window.supabase
         .from('profiles')
         .select('vip_level')
         .eq('id', user.id)
         .single();
       
+      if (error) {
+        console.error('Profile fetch error:', error);
+        return false;
+      }
+      
       if (profile && profile.vip_level) {
         const levelText = document.getElementById('vip-level-text');
         const indicator = document.getElementById('vip-indicator');
         
-        if (levelText) levelText.textContent = profile.vip_level.toUpperCase();
+        if (levelText) {
+          levelText.textContent = profile.vip_level.toUpperCase();
+          console.log('VIP level set to:', profile.vip_level);
+        }
+        
         if (indicator) {
           indicator.style.display = 'flex';
-          indicator.className = 'vip-indicator ' + profile.vip_level.toLowerCase();
+          indicator.style.opacity = '1';
+          // Remove all tier classes first
+          indicator.className = 'vip-indicator';
+          // Add the correct tier class
+          indicator.classList.add(profile.vip_level.toLowerCase());
         }
+        
+        return true;
       }
     } catch (err) {
       console.error('VIP indicator error:', err);
+      return false;
     }
   }
   
-  // Wait for supabase to be ready
-  const checkSupabase = setInterval(() => {
-    if (window.supabase) {
-      clearInterval(checkSupabase);
-      loadVipIndicator();
-    }
-  }, 100);
+  // Try immediately
+  updateVipIndicator();
   
-  // Fallback after 3 seconds
-  setTimeout(() => {
-    clearInterval(checkSupabase);
-    if (window.supabase) loadVipIndicator();
-  }, 3000);
+  // Retry after 1 second
+  setTimeout(updateVipIndicator, 1000);
+  
+  // Retry after 2 seconds
+  setTimeout(updateVipIndicator, 2000);
+  
+  // Listen for auth state changes
+  if (window.supabase) {
+    window.supabase.auth.onAuthStateChange((event, session) => {
+      console.log('Auth state changed:', event);
+      if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+        setTimeout(updateVipIndicator, 500);
+      }
+    });
+  }
 </script>
