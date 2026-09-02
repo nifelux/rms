@@ -8,7 +8,6 @@
       </div>
     </a>
     
-    <!-- VIP Level Indicator -->
     <a href="/vip.html" id="vip-indicator" class="vip-indicator">
       <i class="fa-solid fa-crown" style="margin-right: 6px;"></i>
       <span id="vip-level-text">M0</span>
@@ -29,11 +28,8 @@
     cursor: pointer;
     text-decoration: none;
     transition: all 0.3s ease;
-    box-shadow: 0 2px 8px rgba(149,165,166,0.3);
   }
-  .vip-indicator:hover {
-    transform: scale(1.05);
-  }
+  .vip-indicator:hover { transform: scale(1.05); }
   .vip-indicator.m0 { background: linear-gradient(135deg, #95a5a6, #7f8c8d); }
   .vip-indicator.m1 { background: linear-gradient(135deg, #cd7f32, #a0522d); }
   .vip-indicator.m2 { background: linear-gradient(135deg, #c0c0c0, #a8a8a8); color: #0a0e27; }
@@ -43,80 +39,3 @@
   .vip-indicator.m6 { background: linear-gradient(135deg, #9b59b6, #8e44ad); }
   .vip-indicator.m7 { background: linear-gradient(135deg, #ff1a1a, #c0392b); }
 </style>
-
-<script>
-  // Wait for window.supabase to be available
-  function waitForSupabase(callback, maxAttempts = 20) {
-    let attempts = 0;
-    const interval = setInterval(() => {
-      attempts++;
-      if (window.supabase) {
-        clearInterval(interval);
-        callback();
-      } else if (attempts >= maxAttempts) {
-        clearInterval(interval);
-        console.error('Supabase not available after', maxAttempts, 'attempts');
-      }
-    }, 200);
-  }
-
-  async function updateVipBadge() {
-    try {
-      if (!window.supabase) {
-        console.log('Header: Supabase not ready');
-        return;
-      }
-
-      const { data: { user } } = await window.supabase.auth.getUser();
-      if (!user) {
-        console.log('Header: No user logged in');
-        return;
-      }
-
-      const { data: profile } = await window.supabase
-        .from('profiles')
-        .select('vip_level')
-        .eq('id', user.id)
-        .single();
-
-      if (profile && profile.vip_level) {
-        const levelText = document.getElementById('vip-level-text');
-        const indicator = document.getElementById('vip-indicator');
-        
-        if (levelText && indicator) {
-          levelText.textContent = profile.vip_level.toUpperCase();
-          
-          // Reset classes and add correct tier
-          indicator.className = 'vip-indicator';
-          indicator.classList.add(profile.vip_level.toLowerCase());
-          
-          console.log('✅ Header VIP updated to:', profile.vip_level);
-        }
-      }
-    } catch (err) {
-      console.error('Header VIP error:', err);
-    }
-  }
-
-  // Start checking when DOM is ready
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => {
-      waitForSupabase(updateVipBadge);
-    });
-  } else {
-    waitForSupabase(updateVipBadge);
-  }
-
-  // Also update when auth state changes
-  window.addEventListener('load', () => {
-    setTimeout(() => {
-      if (window.supabase) {
-        window.supabase.auth.onAuthStateChange((event) => {
-          if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-            setTimeout(updateVipBadge, 500);
-          }
-        });
-      }
-    }, 1000);
-  });
-</script>
