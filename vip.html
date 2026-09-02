@@ -62,8 +62,8 @@
   <script src="/assets/js/components.js"></script>
   <script type="module">
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
-    // ⚠️ REPLACE WITH YOUR ACTUAL KEYS ⚠️
-    const supabase = createClient('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9meXN6bnNhand4bmpxYXVtd2NoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgyMzM4NDgsImV4cCI6MjEwMzgwOTg0OH0.XaHkP5WZ2nJVJXVdbG-D13rrD63g_09HxmJoZn7ZoWA');
+    // ⚠️ REPLACE WITH YOUR ACTUAL KEYS ️
+    const supabase = createClient('https://ofysznsajwxnjqaumwch.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9meXN6bnNhand4bmpxYXVtd2NoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgyMzM4NDgsImV4cCI6MjEwMzgwOTg0OH0.XaHkP5WZ2nJVJXVdbG-D13rrD63g_09HxmJoZn7ZoWA');
     window.supabase = supabase;
 
     const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -72,8 +72,23 @@
       const list = document.getElementById('tiers-list');
       
       try {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) return window.location.href = '/login.html';
+        // Wait for auth session to be restored
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        
+        if (sessionError) {
+          console.error('Session error:', sessionError);
+        }
+        
+        if (!session) {
+          // No session - redirect to login
+          console.log('No session found, redirecting to login...');
+          window.location.href = '/login.html';
+          return;
+        }
+
+        // Get user from session
+        const user = session.user;
+        console.log('User authenticated:', user.email);
 
         // Fetch current user profile
         const { data: profile, error: profileError } = await supabase
@@ -103,7 +118,7 @@
             <div class="error-box">
               <i class="fa-solid fa-circle-exclamation"></i>
               <p>No VIP tiers configured yet.</p>
-              <p style="font-size: 0.85rem; margin-top: 10px;">Please contact support.</p>
+              <p style="font-size: 0.85rem; margin-top: 10px;">Please contact support or check if rms_tiers table exists.</p>
             </div>
           `;
           return;
@@ -149,7 +164,8 @@
       }
     }
 
-    loadTiers();
+    // Load when page is ready
+    document.addEventListener('DOMContentLoaded', loadTiers);
   </script>
 </body>
 </html>
