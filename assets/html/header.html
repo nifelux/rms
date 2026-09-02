@@ -33,59 +33,90 @@
   }
   .vip-indicator:hover {
     transform: scale(1.05);
-    box-shadow: 0 4px 12px rgba(149,165,166,0.4);
   }
-  .vip-indicator.m1 { background: linear-gradient(135deg, #cd7f32, #a0522d); box-shadow: 0 2px 8px rgba(205,127,50,0.3); }
-  .vip-indicator.m2 { background: linear-gradient(135deg, #c0c0c0, #a8a8a8); color: #0a0e27; box-shadow: 0 2px 8px rgba(192,192,192,0.3); }
-  .vip-indicator.m3 { background: linear-gradient(135deg, var(--rms-yellow), #e6c200); color: #0a0e27; box-shadow: 0 2px 8px rgba(255,215,0,0.3); }
-  .vip-indicator.m4 { background: linear-gradient(135deg, #2ecc71, #27ae60); box-shadow: 0 2px 8px rgba(46,204,113,0.3); }
-  .vip-indicator.m5 { background: linear-gradient(135deg, #3498db, #2980b9); box-shadow: 0 2px 8px rgba(52,152,219,0.3); }
-  .vip-indicator.m6 { background: linear-gradient(135deg, #9b59b6, #8e44ad); box-shadow: 0 2px 8px rgba(155,89,182,0.3); }
-  .vip-indicator.m7 { background: linear-gradient(135deg, var(--rms-vivid-red), #c0392b); box-shadow: 0 2px 8px rgba(255,26,26,0.3); }
+  .vip-indicator.m0 { background: linear-gradient(135deg, #95a5a6, #7f8c8d); }
+  .vip-indicator.m1 { background: linear-gradient(135deg, #cd7f32, #a0522d); }
+  .vip-indicator.m2 { background: linear-gradient(135deg, #c0c0c0, #a8a8a8); color: #0a0e27; }
+  .vip-indicator.m3 { background: linear-gradient(135deg, #ffd700, #e6c200); color: #0a0e27; }
+  .vip-indicator.m4 { background: linear-gradient(135deg, #2ecc71, #27ae60); }
+  .vip-indicator.m5 { background: linear-gradient(135deg, #3498db, #2980b9); }
+  .vip-indicator.m6 { background: linear-gradient(135deg, #9b59b6, #8e44ad); }
+  .vip-indicator.m7 { background: linear-gradient(135deg, #ff1a1a, #c0392b); }
 </style>
 
-<script type="module">
-  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
-  
-  // Initialize Supabase directly in header
-  const supabaseUrl = 'https://ofysznsajwxnjqaumwch.supabase.co';
-  const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9meXN6bnNhand4bmpxYXVtd2NoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgyMzM4NDgsImV4cCI6MjEwMzgwOTg0OH0.XaHkP5WZ2nJVJXVdbG-D13rrD63g_09HxmJoZn7ZoWA';
-  const supabase = createClient(supabaseUrl, supabaseKey);
-  
-  async function loadVipLevel() {
+<script>
+  // Wait for window.supabase to be available
+  function waitForSupabase(callback, maxAttempts = 20) {
+    let attempts = 0;
+    const interval = setInterval(() => {
+      attempts++;
+      if (window.supabase) {
+        clearInterval(interval);
+        callback();
+      } else if (attempts >= maxAttempts) {
+        clearInterval(interval);
+        console.error('Supabase not available after', maxAttempts, 'attempts');
+      }
+    }, 200);
+  }
+
+  async function updateVipBadge() {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        console.log('No user in header');
+      if (!window.supabase) {
+        console.log('Header: Supabase not ready');
         return;
       }
-      
-      const { data: profile } = await supabase
+
+      const { data: { user } } = await window.supabase.auth.getUser();
+      if (!user) {
+        console.log('Header: No user logged in');
+        return;
+      }
+
+      const { data: profile } = await window.supabase
         .from('profiles')
         .select('vip_level')
         .eq('id', user.id)
         .single();
-      
+
       if (profile && profile.vip_level) {
         const levelText = document.getElementById('vip-level-text');
         const indicator = document.getElementById('vip-indicator');
         
-        levelText.textContent = profile.vip_level.toUpperCase();
-        
-        // Remove all tier classes and add correct one
-        indicator.className = 'vip-indicator';
-        indicator.classList.add(profile.vip_level.toLowerCase());
-        
-        console.log('Header VIP loaded:', profile.vip_level);
+        if (levelText && indicator) {
+          levelText.textContent = profile.vip_level.toUpperCase();
+          
+          // Reset classes and add correct tier
+          indicator.className = 'vip-indicator';
+          indicator.classList.add(profile.vip_level.toLowerCase());
+          
+          console.log('✅ Header VIP updated to:', profile.vip_level);
+        }
       }
     } catch (err) {
       console.error('Header VIP error:', err);
     }
   }
-  
-  // Load immediately
-  loadVipLevel();
-  
-  // Refresh every 5 seconds
-  setInterval(loadVipLevel, 5000);
+
+  // Start checking when DOM is ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+      waitForSupabase(updateVipBadge);
+    });
+  } else {
+    waitForSupabase(updateVipBadge);
+  }
+
+  // Also update when auth state changes
+  window.addEventListener('load', () => {
+    setTimeout(() => {
+      if (window.supabase) {
+        window.supabase.auth.onAuthStateChange((event) => {
+          if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+            setTimeout(updateVipBadge, 500);
+          }
+        });
+      }
+    }, 1000);
+  });
 </script>
