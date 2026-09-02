@@ -8,17 +8,17 @@
       </div>
     </a>
     
-    <!-- VIP Level Indicator (replaces menu button) -->
-    <div id="vip-indicator" class="vip-indicator">
+    <!-- VIP Level Indicator -->
+    <a href="/vip.html" id="vip-indicator" class="vip-indicator" style="display:none;">
       <i class="fa-solid fa-crown" style="margin-right: 6px;"></i>
       <span id="vip-level-text">M0</span>
-    </div>
+    </a>
   </div>
 </header>
 
 <style>
   .vip-indicator {
-    display: flex;
+    display: flex !important;
     align-items: center;
     background: linear-gradient(135deg, var(--rms-yellow), #e6c200);
     color: #0a0e27;
@@ -49,9 +49,10 @@
 </style>
 
 <script>
-  // Load VIP level into header
   async function loadVipIndicator() {
     try {
+      if (!window.supabase) return;
+      
       const { data: { user } } = await window.supabase.auth.getUser();
       if (!user) return;
       
@@ -64,10 +65,11 @@
       if (profile && profile.vip_level) {
         const levelText = document.getElementById('vip-level-text');
         const indicator = document.getElementById('vip-indicator');
+        
         if (levelText) levelText.textContent = profile.vip_level.toUpperCase();
         if (indicator) {
+          indicator.style.display = 'flex';
           indicator.className = 'vip-indicator ' + profile.vip_level.toLowerCase();
-          indicator.onclick = () => window.location.href = '/vip.html';
         }
       }
     } catch (err) {
@@ -75,12 +77,17 @@
     }
   }
   
-  // Run when Supabase is ready
-  if (window.supabase) {
-    loadVipIndicator();
-  } else {
-    document.addEventListener('DOMContentLoaded', () => {
-      if (window.supabase) loadVipIndicator();
-    });
-  }
+  // Wait for supabase to be ready
+  const checkSupabase = setInterval(() => {
+    if (window.supabase) {
+      clearInterval(checkSupabase);
+      loadVipIndicator();
+    }
+  }, 100);
+  
+  // Fallback after 3 seconds
+  setTimeout(() => {
+    clearInterval(checkSupabase);
+    if (window.supabase) loadVipIndicator();
+  }, 3000);
 </script>
