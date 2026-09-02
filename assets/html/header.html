@@ -9,19 +9,19 @@
     </a>
     
     <!-- VIP Level Indicator -->
-    <a href="/vip.html" id="vip-indicator" class="vip-indicator" style="display:none; opacity: 0.5;">
+    <a href="/vip.html" id="vip-indicator" class="vip-indicator">
       <i class="fa-solid fa-crown" style="margin-right: 6px;"></i>
-      <span id="vip-level-text">...</span>
+      <span id="vip-level-text">M0</span>
     </a>
   </div>
 </header>
 
 <style>
   .vip-indicator {
-    display: flex !important;
+    display: flex;
     align-items: center;
-    background: linear-gradient(135deg, var(--rms-yellow), #e6c200);
-    color: #0a0e27;
+    background: linear-gradient(135deg, #95a5a6, #7f8c8d);
+    color: white;
     padding: 8px 14px;
     border-radius: 20px;
     font-weight: 800;
@@ -29,92 +29,63 @@
     cursor: pointer;
     text-decoration: none;
     transition: all 0.3s ease;
-    box-shadow: 0 2px 8px rgba(255,215,0,0.3);
+    box-shadow: 0 2px 8px rgba(149,165,166,0.3);
   }
   .vip-indicator:hover {
     transform: scale(1.05);
-    box-shadow: 0 4px 12px rgba(255,215,0,0.4);
+    box-shadow: 0 4px 12px rgba(149,165,166,0.4);
   }
-  .vip-indicator .fa-crown {
-    font-size: 0.9rem;
-  }
-  .vip-indicator.m0 { background: linear-gradient(135deg, #95a5a6, #7f8c8d); color: white; }
-  .vip-indicator.m1 { background: linear-gradient(135deg, #cd7f32, #a0522d); color: white; }
-  .vip-indicator.m2 { background: linear-gradient(135deg, #c0c0c0, #a8a8a8); color: #0a0e27; }
-  .vip-indicator.m3 { background: linear-gradient(135deg, var(--rms-yellow), #e6c200); color: #0a0e27; }
-  .vip-indicator.m4 { background: linear-gradient(135deg, #2ecc71, #27ae60); color: white; }
-  .vip-indicator.m5 { background: linear-gradient(135deg, #3498db, #2980b9); color: white; }
-  .vip-indicator.m6 { background: linear-gradient(135deg, #9b59b6, #8e44ad); color: white; }
-  .vip-indicator.m7 { background: linear-gradient(135deg, var(--rms-vivid-red), #c0392b); color: white; }
+  .vip-indicator.m1 { background: linear-gradient(135deg, #cd7f32, #a0522d); box-shadow: 0 2px 8px rgba(205,127,50,0.3); }
+  .vip-indicator.m2 { background: linear-gradient(135deg, #c0c0c0, #a8a8a8); color: #0a0e27; box-shadow: 0 2px 8px rgba(192,192,192,0.3); }
+  .vip-indicator.m3 { background: linear-gradient(135deg, var(--rms-yellow), #e6c200); color: #0a0e27; box-shadow: 0 2px 8px rgba(255,215,0,0.3); }
+  .vip-indicator.m4 { background: linear-gradient(135deg, #2ecc71, #27ae60); box-shadow: 0 2px 8px rgba(46,204,113,0.3); }
+  .vip-indicator.m5 { background: linear-gradient(135deg, #3498db, #2980b9); box-shadow: 0 2px 8px rgba(52,152,219,0.3); }
+  .vip-indicator.m6 { background: linear-gradient(135deg, #9b59b6, #8e44ad); box-shadow: 0 2px 8px rgba(155,89,182,0.3); }
+  .vip-indicator.m7 { background: linear-gradient(135deg, var(--rms-vivid-red), #c0392b); box-shadow: 0 2px 8px rgba(255,26,26,0.3); }
 </style>
 
-<script>
-  async function updateVipIndicator() {
+<script type="module">
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+  
+  // Initialize Supabase directly in header
+  const supabaseUrl = 'https://ofysznsajwxnjqaumwch.supabase.co';
+  const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9meXN6bnNhand4bmpxYXVtd2NoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgyMzM4NDgsImV4cCI6MjEwMzgwOTg0OH0.XaHkP5WZ2nJVJXVdbG-D13rrD63g_09HxmJoZn7ZoWA';
+  const supabase = createClient(supabaseUrl, supabaseKey);
+  
+  async function loadVipLevel() {
     try {
-      if (!window.supabase) {
-        console.log('Supabase not ready yet');
-        return false;
-      }
-      
-      const { data: { user } } = await window.supabase.auth.getUser();
+      const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        console.log('No user logged in');
-        return false;
+        console.log('No user in header');
+        return;
       }
       
-      const { data: profile, error } = await window.supabase
+      const { data: profile } = await supabase
         .from('profiles')
         .select('vip_level')
         .eq('id', user.id)
         .single();
       
-      if (error) {
-        console.error('Profile fetch error:', error);
-        return false;
-      }
-      
       if (profile && profile.vip_level) {
         const levelText = document.getElementById('vip-level-text');
         const indicator = document.getElementById('vip-indicator');
         
-        if (levelText) {
-          levelText.textContent = profile.vip_level.toUpperCase();
-          console.log('VIP level set to:', profile.vip_level);
-        }
+        levelText.textContent = profile.vip_level.toUpperCase();
         
-        if (indicator) {
-          indicator.style.display = 'flex';
-          indicator.style.opacity = '1';
-          // Remove all tier classes first
-          indicator.className = 'vip-indicator';
-          // Add the correct tier class
-          indicator.classList.add(profile.vip_level.toLowerCase());
-        }
+        // Remove all tier classes and add correct one
+        indicator.className = 'vip-indicator';
+        indicator.classList.add(profile.vip_level.toLowerCase());
         
-        return true;
+        console.log('Header VIP loaded:', profile.vip_level);
       }
     } catch (err) {
-      console.error('VIP indicator error:', err);
-      return false;
+      console.error('Header VIP error:', err);
     }
   }
   
-  // Try immediately
-  updateVipIndicator();
+  // Load immediately
+  loadVipLevel();
   
-  // Retry after 1 second
-  setTimeout(updateVipIndicator, 1000);
-  
-  // Retry after 2 seconds
-  setTimeout(updateVipIndicator, 2000);
-  
-  // Listen for auth state changes
-  if (window.supabase) {
-    window.supabase.auth.onAuthStateChange((event, session) => {
-      console.log('Auth state changed:', event);
-      if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-        setTimeout(updateVipIndicator, 500);
-      }
-    });
-  }
+  // Refresh every 5 seconds
+  setInterval(loadVipLevel, 5000);
 </script>
