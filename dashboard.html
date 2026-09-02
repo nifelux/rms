@@ -4,17 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>RMS — Dashboard</title>
-  
-  <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  
   <link rel="stylesheet" href="assets/css/style.css">
   <meta name="theme-color" content="#0a0e27">
-  
   <style>
-    /* Dashboard Specific Styles */
     .dashboard-container { padding: 0 16px 100px 16px; max-width: 600px; margin: 0 auto; }
     
     .welcome-section { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
@@ -36,7 +29,6 @@
       color: var(--rms-yellow); padding: 12px 16px; border-radius: 12px; 
       font-size: 0.85rem; margin-top: 16px; display: none; align-items: center; gap: 10px;
     }
-    .pending-alert i { font-size: 1.2rem; }
 
     .icon-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 24px 0; }
     .icon-item {
@@ -74,15 +66,15 @@
 
     .empty-state { text-align: center; padding: 20px 0; color: var(--rms-text-muted); font-size: 0.9rem; }
 
-    /* Floating Wheel Button */
-    .floating-wheel-btn {
+    /* Floating Support Button */
+    .floating-support-btn {
       position: fixed;
       bottom: 80px;
       right: 16px;
       width: 60px;
       height: 60px;
       border-radius: 50%;
-      background: linear-gradient(135deg, var(--rms-vivid-red), #c0392b);
+      background: linear-gradient(135deg, #2ecc71, #27ae60);
       border: 3px solid var(--rms-yellow);
       color: white;
       font-size: 1.5rem;
@@ -90,45 +82,27 @@
       align-items: center;
       justify-content: center;
       text-decoration: none;
-      box-shadow: 0 4px 16px rgba(255,26,26,0.4);
+      box-shadow: 0 4px 16px rgba(46,204,113,0.4);
       z-index: 99;
       transition: all 0.3s ease;
-      animation: pulse-wheel 2s infinite;
+      animation: pulse-support 2s infinite;
     }
-    .floating-wheel-btn:hover {
-      transform: scale(1.1) rotate(15deg);
-      box-shadow: 0 6px 20px rgba(255,26,26,0.6);
+    .floating-support-btn:hover {
+      transform: scale(1.1);
+      box-shadow: 0 6px 20px rgba(46,204,113,0.6);
     }
-    .floating-wheel-btn .spin-badge {
-      position: absolute;
-      top: -5px;
-      right: -5px;
-      background: var(--rms-yellow);
-      color: #0a0e27;
-      font-size: 0.7rem;
-      font-weight: 800;
-      width: 24px;
-      height: 24px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border: 2px solid var(--rms-bg);
-    }
-    @keyframes pulse-wheel {
-      0%, 100% { box-shadow: 0 4px 16px rgba(255,26,26,0.4); }
-      50% { box-shadow: 0 4px 24px rgba(255,26,26,0.7); }
+    @keyframes pulse-support {
+      0%, 100% { box-shadow: 0 4px 16px rgba(46,204,113,0.4); }
+      50% { box-shadow: 0 4px 24px rgba(46,204,113,0.7); }
     }
   </style>
 </head>
 <body class="rv-shell">
 
-  <!-- Shared Header Component -->
   <div id="header-container"></div>
 
   <div class="dashboard-container">
     
-    <!-- Welcome Section -->
     <div class="welcome-section">
       <div class="welcome-text">
         <h2>Hello, <span id="user-name">User</span> <span style="font-size: 1.2rem;">👋</span></h2>
@@ -140,7 +114,6 @@
       </a>
     </div>
 
-    <!-- Balance Card -->
     <div class="rms-card balance-card">
       <div class="balance-label">Available Balance</div>
       <div class="balance-amount">₦<span id="wallet-balance">0.00</span></div>
@@ -153,14 +126,13 @@
         </a>
       </div>
       
-      <!-- Pending Withdrawal Alert -->
       <div id="pending-withdrawal-note" class="pending-alert">
         <i class="fa-solid fa-circle-info"></i>
         <span id="pending-note-text">Funds tied up in pending withdrawal.</span>
       </div>
     </div>
 
-    <!-- Main Navigation Grid -->
+    <!-- Original Icon Grid (with Lucky Wheel) -->
     <div class="icon-grid">
       <a href="/investments.html" class="icon-item">
         <div class="icon"><i class="fa-solid fa-box-open"></i></div>
@@ -170,9 +142,9 @@
         <div class="icon text-yellow"><i class="fa-solid fa-gem"></i></div>
         <div class="label text-yellow">Wealth Center</div>
       </a>
-      <a href="/vip.html" class="icon-item">
-        <div class="icon text-red"><i class="fa-solid fa-crown"></i></div>
-        <div class="label text-red">VIP Tiers</div>
+      <a href="/lucky-wheel.html" class="icon-item">
+        <div class="icon text-red"><i class="fa-solid fa-dharmachakra"></i></div>
+        <div class="label text-red">Lucky Wheel</div>
       </a>
       <a href="/team.html" class="icon-item">
         <div class="icon"><i class="fa-solid fa-users"></i></div>
@@ -196,10 +168,8 @@
       </a>
     </div>
 
-    <!-- Dashboard Data Grid -->
     <div class="dashboard-grid">
       
-      <!-- Recent Transactions -->
       <div class="rms-card">
         <div class="section-header">
           <h3>Recent Transactions</h3>
@@ -210,7 +180,6 @@
         </div>
       </div>
 
-      <!-- Recent Tasks / Activity -->
       <div class="rms-card">
         <div class="section-header">
           <h3>Recent Activity</h3>
@@ -224,32 +193,26 @@
     </div>
   </div>
 
-  <!-- Floating Lucky Wheel Button -->
-  <a href="/lucky-wheel.html" class="floating-wheel-btn" id="wheel-btn" title="Lucky Wheel">
-    <i class="fa-solid fa-dharmachakra"></i>
-    <span class="spin-badge" id="spin-count">0</span>
+  <!-- Floating Customer Support Button -->
+  <a href="/support.html" class="floating-support-btn" title="Customer Support">
+    <i class="fa-solid fa-headset"></i>
   </a>
 
-  <!-- Shared Footer/Nav Component -->
   <div id="footer-container"></div>
 
   <script src="/assets/js/components.js"></script>
   <script type="module">
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
-    
-    // Initialize Supabase (Ensure this matches your repo's setup)
     const supabase = createClient('https://ofysznsajwxnjqaumwch.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9meXN6bnNhand4bmpxYXVtd2NoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgyMzM4NDgsImV4cCI6MjEwMzgwOTg0OH0.XaHkP5WZ2nJVJXVdbG-D13rrD63g_09HxmJoZn7ZoWA');
-    window.supabase = supabase; // Required for shared header component
+    window.supabase = supabase;
 
     async function loadDashboard() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) { window.location.href = '/login.html'; return; }
 
-      // 1. Fetch Profile for Name
       const { data: profile } = await supabase.from('profiles').select('full_name, username, vip_level').eq('id', user.id).single();
       document.getElementById('user-name').textContent = profile?.full_name || profile?.username || 'User';
 
-      // 2. Fetch Wallet Balance & Pending Withdrawals
       const { data: wallet } = await supabase.from('wallets').select('balance').eq('user_id', user.id).single();
       const balance = wallet?.balance || 0;
       document.getElementById('wallet-balance').textContent = Number(balance).toLocaleString('en-NG', { minimumFractionDigits: 2 });
@@ -259,26 +222,10 @@
       
       if (pendingTotal > 0) {
         const note = document.getElementById('pending-withdrawal-note');
-        document.getElementById('pending-note-text').textContent = `₦${pendingTotal.toLocaleString()} is tied up in a pending withdrawal.`;
+        document.getElementById('pending-note-text').textContent = `${pendingTotal.toLocaleString()} is tied up in a pending withdrawal.`;
         note.style.display = 'flex';
       }
 
-      // 3. Fetch Lucky Wheel Spins (for badge)
-      try {
-        const token = (await supabase.auth.getSession()).data.session.access_token;
-        const wheelRes = await fetch('/api/wheel?action=getSpinStatus', { headers: { 'Authorization': `Bearer ${token}` } });
-        if (wheelRes.ok) {
-          const wheelData = await wheelRes.json();
-          const spinCount = wheelData.spins_remaining || 0;
-          const badge = document.getElementById('spin-count');
-          badge.textContent = spinCount;
-          badge.style.display = spinCount > 0 ? 'flex' : 'none';
-        }
-      } catch (err) {
-        console.error('Wheel status error:', err);
-      }
-
-      // 4. Fetch Recent Transactions
       const { data: txns } = await supabase.from('transactions').select('*').eq('user_id', user.id).order('created_at', { ascending: false }).limit(5);
       const txnList = document.getElementById('transactions-list');
       
@@ -308,7 +255,6 @@
         txnList.innerHTML = '<div class="empty-state">No transactions yet.</div>';
       }
 
-      // 5. Fetch Recent Task Activity (Mystery Boxes & Wealth)
       const { data: recentTasks } = await supabase.from('transactions').select('*').eq('user_id', user.id).in('type', ['task_earning', 'wealth_claim', 'wheel_win']).order('created_at', { ascending: false }).limit(5);
       const activityList = document.getElementById('activity-list');
 
