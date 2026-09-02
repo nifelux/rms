@@ -106,6 +106,24 @@ async function getTaskStatus(req, res) {
         last_task_reset_date: new Date().toISOString() 
       }).eq('id', user.id);
     }
+// In the getTaskStatus function, add this check:
+
+if (tier === 'M0') {
+  // Check if M0 period has expired (1 day only)
+  const m0StartDate = profile.m0_start_date ? new Date(profile.m0_start_date) : todayStart;
+  const daysSinceM0 = Math.floor((now - m0StartDate) / (1000 * 60 * 60 * 24));
+  
+  if (daysSinceM0 >= 1) {
+    return res.status(200).json({
+      tier: 'M0',
+      boxes_opened: 0,
+      max_boxes: 0,
+      earning_per_box: 0,
+      can_open: false,
+      m0_expired: true,
+      message: 'Your free M0 trial has expired. Upgrade to continue earning.'
+    });
+  }
 
     // Fetch tier info
     const tier = profile.vip_level === 'newbie' ? null : profile.vip_level;
