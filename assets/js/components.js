@@ -342,3 +342,64 @@ function syncHeaderHeight() {
 }
 
 document.addEventListener('DOMContentLoaded', loadComponents);
+
+async function loadComponent(id, url) {
+  const container = document.getElementById(id);
+  if (!container) return;
+  try {
+    const res = await fetch(url);
+    const html = await res.text();
+    container.innerHTML = html;
+    
+    // If header was loaded, update VIP badge
+    if (id === 'header-container') {
+      setTimeout(updateHeaderVipBadge, 500);
+    }
+    
+    // Re-execute scripts
+    container.querySelectorAll('script').forEach(oldScript => {
+      const newScript = document.createElement('script');
+      Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
+      newScript.appendChild(document.createTextNode(oldScript.innerHTML));
+      oldScript.parentNode.replaceChild(newScript, oldScript);
+    });
+  } catch (err) {
+    console.error(`Failed to load ${url}:`, err);
+  }
+}
+
+// VIP Badge function for header
+async function updateHeaderVipBadge() {
+  try {
+    if (!window.supabase) return;
+    
+    const { data: { user } } = await window.supabase.auth.getUser();
+    if (!user) return;
+    
+    const { data: profile } = await window.supabase
+      .from('profiles')
+      .select('vip_level')
+      .eq('id', user.id)
+      .single();
+    
+    if (profile && profile.vip_level) {
+      const levelText = document.getElementById('vip-level-text');
+      const indicator = document.getElementById('vip-indicator');
+      
+      if (levelText && indicator) {
+        levelText.textContent = profile.vip_level.toUpperCase();
+        
+        // Remove all tier classes and add correct one
+        indicator.className = 'vip-indicator';
+        indicator.classList.add(profile.vip_level.toLowerCase());
+      }
+    }
+  } catch (err) {
+    console.error('Header VIP error:', err);
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  loadComponent('header-container', '/assets/html/header.html');
+  loadComponent('footer-container', '/assets/html/footer.html');
+});
