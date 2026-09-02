@@ -73,6 +73,52 @@
     .txn-amount.is-out { color: var(--rms-vivid-red); }
 
     .empty-state { text-align: center; padding: 20px 0; color: var(--rms-text-muted); font-size: 0.9rem; }
+
+    /* Floating Wheel Button */
+    .floating-wheel-btn {
+      position: fixed;
+      bottom: 80px;
+      right: 16px;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--rms-vivid-red), #c0392b);
+      border: 3px solid var(--rms-yellow);
+      color: white;
+      font-size: 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      box-shadow: 0 4px 16px rgba(255,26,26,0.4);
+      z-index: 99;
+      transition: all 0.3s ease;
+      animation: pulse-wheel 2s infinite;
+    }
+    .floating-wheel-btn:hover {
+      transform: scale(1.1) rotate(15deg);
+      box-shadow: 0 6px 20px rgba(255,26,26,0.6);
+    }
+    .floating-wheel-btn .spin-badge {
+      position: absolute;
+      top: -5px;
+      right: -5px;
+      background: var(--rms-yellow);
+      color: #0a0e27;
+      font-size: 0.7rem;
+      font-weight: 800;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid var(--rms-bg);
+    }
+    @keyframes pulse-wheel {
+      0%, 100% { box-shadow: 0 4px 16px rgba(255,26,26,0.4); }
+      50% { box-shadow: 0 4px 24px rgba(255,26,26,0.7); }
+    }
   </style>
 </head>
 <body class="rv-shell">
@@ -88,8 +134,9 @@
         <h2>Hello, <span id="user-name">User</span> <span style="font-size: 1.2rem;">👋</span></h2>
         <p>Welcome back to RMS</p>
       </div>
-      <a href="/notifications.html" style="color: var(--rms-white); font-size: 1.4rem; text-decoration: none;">
+      <a href="/messages.html" style="color: var(--rms-white); font-size: 1.4rem; text-decoration: none; position: relative;">
         <i class="fa-regular fa-bell"></i>
+        <span id="notif-badge" style="position:absolute; top:-4px; right:-4px; width:8px; height:8px; background:var(--rms-vivid-red); border-radius:50%; display:none;"></span>
       </a>
     </div>
 
@@ -123,9 +170,9 @@
         <div class="icon text-yellow"><i class="fa-solid fa-gem"></i></div>
         <div class="label text-yellow">Wealth Center</div>
       </a>
-      <a href="/lucky-wheel.html" class="icon-item">
-        <div class="icon text-red"><i class="fa-solid fa-dharmachakra"></i></div>
-        <div class="label text-red">Lucky Wheel</div>
+      <a href="/vip.html" class="icon-item">
+        <div class="icon text-red"><i class="fa-solid fa-crown"></i></div>
+        <div class="label text-red">VIP Tiers</div>
       </a>
       <a href="/team.html" class="icon-item">
         <div class="icon"><i class="fa-solid fa-users"></i></div>
@@ -177,6 +224,12 @@
     </div>
   </div>
 
+  <!-- Floating Lucky Wheel Button -->
+  <a href="/lucky-wheel.html" class="floating-wheel-btn" id="wheel-btn" title="Lucky Wheel">
+    <i class="fa-solid fa-dharmachakra"></i>
+    <span class="spin-badge" id="spin-count">0</span>
+  </a>
+
   <!-- Shared Footer/Nav Component -->
   <div id="footer-container"></div>
 
@@ -210,7 +263,22 @@
         note.style.display = 'flex';
       }
 
-      // 3. Fetch Recent Transactions
+      // 3. Fetch Lucky Wheel Spins (for badge)
+      try {
+        const token = (await supabase.auth.getSession()).data.session.access_token;
+        const wheelRes = await fetch('/api/wheel?action=getSpinStatus', { headers: { 'Authorization': `Bearer ${token}` } });
+        if (wheelRes.ok) {
+          const wheelData = await wheelRes.json();
+          const spinCount = wheelData.spins_remaining || 0;
+          const badge = document.getElementById('spin-count');
+          badge.textContent = spinCount;
+          badge.style.display = spinCount > 0 ? 'flex' : 'none';
+        }
+      } catch (err) {
+        console.error('Wheel status error:', err);
+      }
+
+      // 4. Fetch Recent Transactions
       const { data: txns } = await supabase.from('transactions').select('*').eq('user_id', user.id).order('created_at', { ascending: false }).limit(5);
       const txnList = document.getElementById('transactions-list');
       
@@ -240,7 +308,7 @@
         txnList.innerHTML = '<div class="empty-state">No transactions yet.</div>';
       }
 
-      // 4. Fetch Recent Task Activity (Mystery Boxes & Wealth)
+      // 5. Fetch Recent Task Activity (Mystery Boxes & Wealth)
       const { data: recentTasks } = await supabase.from('transactions').select('*').eq('user_id', user.id).in('type', ['task_earning', 'wealth_claim', 'wheel_win']).order('created_at', { ascending: false }).limit(5);
       const activityList = document.getElementById('activity-list');
 
