@@ -12,7 +12,9 @@
     .tier-card { 
       background: var(--rms-bg-card); border: 1px solid var(--rms-border); 
       border-radius: 16px; padding: 20px; margin-bottom: 16px; position: relative; overflow: hidden;
+      transition: transform 0.2s;
     }
+    .tier-card:hover { transform: translateY(-2px); }
     .tier-card.current { border-color: var(--rms-yellow); box-shadow: 0 0 15px rgba(255,215,0,0.1); }
     .tier-card.current::after { 
       content: 'CURRENT TIER'; position: absolute; top: 12px; right: -30px; 
@@ -33,6 +35,12 @@
       border-left: 3px solid var(--rms-vivid-red); padding: 10px 14px; border-radius: 0 8px 8px 0;
       font-size: 0.85rem; color: var(--rms-white); display: flex; align-items: center; gap: 8px;
     }
+    
+    .error-box { text-align: center; padding: 40px 20px; }
+    .error-box i { font-size: 3rem; margin-bottom: 16px; opacity: 0.5; }
+    .loading-box { text-align: center; padding: 40px 20px; color: var(--rms-text-muted); }
+    .loading-box i { font-size: 2rem; animation: spin 1s linear infinite; }
+    @keyframes spin { 100% { transform: rotate(360deg); } }
   </style>
 </head>
 <body class="rv-shell">
@@ -43,7 +51,10 @@
     <p class="text-muted" style="margin-bottom: 24px;">Upgrade your tier to unlock higher earnings.</p>
 
     <div id="tiers-list">
-      <!-- Injected by JS -->
+      <div class="loading-box">
+        <i class="fa-solid fa-circle-notch fa-spin"></i>
+        <p style="margin-top: 10px;">Loading tiers...</p>
+      </div>
     </div>
   </div>
 
@@ -51,45 +62,93 @@
   <script src="/assets/js/components.js"></script>
   <script type="module">
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
-    const supabase = createClient('https://ofysznsajwxnjqaumwch.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9meXN6bnNhand4bmpxYXVtd2NoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgyMzM4NDgsImV4cCI6MjEwMzgwOTg0OH0.XaHkP5WZ2nJVJXVdbG-D13rrD63g_09HxmJoZn7ZoWA');
+    // ⚠️ REPLACE WITH YOUR ACTUAL KEYS ⚠️
+    const supabase = createClient('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9meXN6bnNhand4bmpxYXVtd2NoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgyMzM4NDgsImV4cCI6MjEwMzgwOTg0OH0.XaHkP5WZ2nJVJXVdbG-D13rrD63g_09HxmJoZn7ZoWA');
     window.supabase = supabase;
 
     const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
     async function loadTiers() {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return window.location.href = '/login.html';
-
-      const { data: profile } = await supabase.from('profiles').select('vip_level').eq('id', user.id).single();
-      const { data: tiers } = await supabase.from('rms_tiers').select('*').order('upgrade_cost', { ascending: true });
-
       const list = document.getElementById('tiers-list');
-      list.innerHTML = tiers.map(t => {
-        const isCurrent = t.tier === profile.vip_level;
-        return `
-          <div class="tier-card ${isCurrent ? 'current' : ''}">
-            <div class="tier-header">
-              <div class="tier-name">${t.tier}</div>
-              <div class="tier-price">₦${Number(t.upgrade_cost).toLocaleString()}</div>
+      
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return window.location.href = '/login.html';
+
+        // Fetch current user profile
+        const { data: profile, error: profileError } = await supabase
+          .from('profiles')
+          .select('vip_level')
+          .eq('id', user.id)
+          .single();
+
+        if (profileError) {
+          console.error('Profile fetch error:', profileError);
+          throw new Error('Failed to load user profile');
+        }
+
+        // Fetch tiers from rms_tiers table
+        const { data: tiers, error: tiersError } = await supabase
+          .from('rms_tiers')
+          .select('*')
+          .order('upgrade_cost', { ascending: true });
+
+        if (tiersError) {
+          console.error('Tiers fetch error:', tiersError);
+          throw new Error('Failed to load VIP tiers: ' + tiersError.message);
+        }
+
+        if (!tiers || tiers.length === 0) {
+          list.innerHTML = `
+            <div class="error-box">
+              <i class="fa-solid fa-circle-exclamation"></i>
+              <p>No VIP tiers configured yet.</p>
+              <p style="font-size: 0.85rem; margin-top: 10px;">Please contact support.</p>
             </div>
-            <div class="tier-stats">
-              <div class="tier-stat">
-                <div class="tier-stat-val">${t.daily_boxes}</div>
-                <div class="tier-stat-lbl">Daily Boxes</div>
+          `;
+          return;
+        }
+
+        list.innerHTML = tiers.map(t => {
+          const isCurrent = t.tier === profile.vip_level;
+          const withdrawalDay = days[t.withdrawal_day] || 'Unknown';
+          
+          return `
+            <div class="tier-card ${isCurrent ? 'current' : ''}">
+              <div class="tier-header">
+                <div class="tier-name">${t.tier}</div>
+                <div class="tier-price">₦${Number(t.upgrade_cost).toLocaleString()}</div>
               </div>
-              <div class="tier-stat">
-                <div class="tier-stat-val text-yellow">₦${Number(t.box_earning).toLocaleString()}</div>
-                <div class="tier-stat-lbl">Per Box</div>
+              <div class="tier-stats">
+                <div class="tier-stat">
+                  <div class="tier-stat-val">${t.daily_boxes}</div>
+                  <div class="tier-stat-lbl">Daily Boxes</div>
+                </div>
+                <div class="tier-stat">
+                  <div class="tier-stat-val text-yellow">₦${Number(t.box_earning).toLocaleString()}</div>
+                  <div class="tier-stat-lbl">Per Box</div>
+                </div>
               </div>
+              <div class="withdrawal-day">
+                <i class="fa-regular fa-calendar-check text-red"></i> 
+                Withdrawal Day: <strong>${withdrawalDay}</strong>
+              </div>
+              ${isCurrent ? '<div style="margin-top: 12px; padding: 8px; background: rgba(46,204,113,0.1); border-radius: 8px; text-align: center; color: #2ecc71; font-size: 0.85rem; font-weight: 600;">✅ Your Current Tier</div>' : ''}
             </div>
-            <div class="withdrawal-day">
-              <i class="fa-regular fa-calendar-check text-red"></i> 
-              Withdrawal Day: <strong>${days[t.withdrawal_day]}</strong>
-            </div>
+          `;
+        }).join('');
+      } catch (err) {
+        console.error('VIP loading error:', err);
+        list.innerHTML = `
+          <div class="error-box">
+            <i class="fa-solid fa-triangle-exclamation" style="color: var(--rms-vivid-red);"></i>
+            <p style="color: var(--rms-vivid-red);">Error: ${err.message}</p>
+            <button onclick="loadTiers()" class="rms-btn rms-btn-outline" style="margin-top: 10px;">Retry</button>
           </div>
         `;
-      }).join('');
+      }
     }
+
     loadTiers();
   </script>
 </body>
