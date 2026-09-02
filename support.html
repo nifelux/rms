@@ -10,15 +10,10 @@
   <style>
     .support-container { padding: 20px 16px 100px 16px; max-width: 600px; margin: 0 auto; }
     .quick-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 30px; }
-    .action-btn { 
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      background: var(--rms-bg-card); border: 1px solid var(--rms-border); border-radius: 12px;
-      padding: 20px; text-decoration: none; color: var(--rms-white); transition: 0.2s;
-    }
+    .action-btn { display: flex; flex-direction: column; align-items: center; justify-content: center; background: var(--rms-bg-card); border: 1px solid var(--rms-border); border-radius: 12px; padding: 20px; text-decoration: none; color: var(--rms-white); transition: 0.2s; }
     .action-btn:hover { border-color: var(--rms-yellow); transform: translateY(-2px); }
-    .action-btn i { font-size: 1.8rem; margin-bottom: 10px; }
-    .action-btn.telegram i { color: #0088cc; }
-    .action-btn.whatsapp i { color: #25D366; }
+    .action-btn.telegram i { color: #0088cc; font-size: 1.8rem; margin-bottom: 10px; }
+    .action-btn.whatsapp i { color: #25D366; font-size: 1.8rem; margin-bottom: 10px; }
     .action-btn span { font-size: 0.9rem; font-weight: 600; }
 
     .ticket-form { background: var(--rms-bg-card); border: 1px solid var(--rms-border); border-radius: 16px; padding: 20px; }
@@ -67,6 +62,7 @@
   <script src="/assets/js/components.js"></script>
   <script type="module">
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+    // ⚠️ REPLACE WITH YOUR ACTUAL KEYS ⚠️
     const supabase = createClient('https://ofysznsajwxnjqaumwch.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9meXN6bnNhand4bmpxYXVtd2NoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgyMzM4NDgsImV4cCI6MjEwMzgwOTg0OH0.XaHkP5WZ2nJVJXVdbG-D13rrD63g_09HxmJoZn7ZoWA');
     window.supabase = supabase;
 
@@ -76,19 +72,28 @@
       btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Sending...';
       btn.disabled = true;
 
-      const { data: { user } } = await supabase.auth.getUser();
-      if(!user) return alert('Please login first.');
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if(!user) throw new Error('Please login first.');
 
-      // Note: Ensure your api/support.js handles 'createTicket'
-      const token = (await supabase.auth.getSession()).data.session.access_token;
-      const res = await fetch('/api/support?action=createTicket', {
-        method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify({ subject: document.getElementById('subject').value, message: document.getElementById('message').value })
-      });
-      
-      const data = await res.json();
-      alert(data.message || 'Ticket submitted successfully!');
-      if(res.ok) { e.target.reset(); btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Send Message'; btn.disabled = false; }
+        const token = (await supabase.auth.getSession()).data.session.access_token;
+        // FIX: Changed action from 'createTicket' to 'create' to match backend
+        const res = await fetch('/api/support?action=create', {
+          method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          body: JSON.stringify({ subject: document.getElementById('subject').value, message: document.getElementById('message').value })
+        });
+        
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Failed to send ticket');
+        
+        alert('Ticket submitted successfully!');
+        e.target.reset();
+      } catch (err) {
+        alert(err.message);
+      } finally {
+        btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Send Message';
+        btn.disabled = false;
+      }
     });
   </script>
 </body>
