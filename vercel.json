@@ -8,9 +8,7 @@
   "outputDirectory": ".",
   "buildCommand": "",
   "crons": [
-    {
-      "path": "/api/cron-income",
-      "schedule": "0 0 * * *"
-    }
+  
+    
   ]
 }
