@@ -66,55 +66,47 @@
     let taskStatus = null;
 
     async function loadTasks() {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return window.location.href = '/login.html';
+    async function loadTasks() {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return window.location.href = '/login.html';
 
-      const grid = document.getElementById('box-grid');
-      grid.innerHTML = '<div class="error-box"><i class="fa-solid fa-circle-notch fa-spin"></i><p>Loading tasks...</p></div>';
+  const grid = document.getElementById('box-grid');
+  grid.innerHTML = '<div class="error-box"><i class="fa-solid fa-circle-notch fa-spin"></i><p>Loading tasks...</p></div>';
 
-      try {
-        const token = (await supabase.auth.getSession()).data.session.access_token;
-        const res = await fetch('/api/task?action=getTaskStatus', { headers: { 'Authorization': `Bearer ${token}` } });
-        
-        if (!res.ok) {
-          const errorData = await res.json();
-          throw new Error(errorData.error || 'Failed to load tasks');
-        }
-        
-        taskStatus = await res.json();
-
-        // Handle Newbie / No Tier
-        if (!taskStatus.tier || taskStatus.tier === 'newbie') {
-          document.getElementById('current-tier').textContent = 'No Tier - Please Upgrade';
-          document.getElementById('current-tier').style.background = 'rgba(255,26,26,0.2)';
-          document.getElementById('progress-text').textContent = '0 / 0';
-          grid.innerHTML = `
-            <div class="error-box">
-              <i class="fa-solid fa-lock" style="color: var(--rms-text-muted);"></i>
-              <p style="color: var(--rms-text-muted);">Upgrade to M1 or higher to unlock Mystery Boxes</p>
-              <a href="/deposit.html" class="rms-btn rms-btn-primary" style="margin-top: 20px; text-decoration:none;">Deposit to Upgrade</a>
-            </div>
-          `;
-          return;
-        }
-
-        document.getElementById('current-tier').textContent = `Tier: ${taskStatus.tier.toUpperCase()}`;
-        document.getElementById('progress-text').textContent = `${taskStatus.boxes_opened} / ${taskStatus.max_boxes}`;
-        document.getElementById('progress-fill').style.width = `${taskStatus.max_boxes > 0 ? (taskStatus.boxes_opened / taskStatus.max_boxes) * 100 : 0}%`;
-
-        renderBoxes();
-      } catch (err) {
-        console.error('Task loading error:', err);
-        document.getElementById('current-tier').textContent = 'Error Loading';
-        document.getElementById('current-tier').style.color = 'var(--rms-vivid-red)';
-        grid.innerHTML = `
-          <div class="error-box">
-            <i class="fa-solid fa-triangle-exclamation" style="color: var(--rms-vivid-red);"></i>
-            <p style="color: var(--rms-vivid-red);">${err.message}</p>
-            <button onclick="loadTasks()" class="rms-btn rms-btn-outline" style="margin-top: 10px;">Retry</button>
-          </div>
-        `;
-      }
+  try {
+    const token = (await supabase.auth.getSession()).data.session.access_token;
+    const res = await fetch('/api/task?action=getTaskStatus', { 
+      headers: { 'Authorization': `Bearer ${token}` } 
+    });
+    
+    // Check if response is JSON
+    const contentType = res.headers.get('content-type');
+    if (!contentType || !contentType.includes('application/json')) {
+      const text = await res.text();
+      console.error('Non-JSON response:', text.substring(0, 200));
+      throw new Error('Server returned invalid response. Check Vercel logs.');
+    }
+    
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData.error || `Server error: ${res.status}`);
+    }
+    
+    taskStatus = await res.json();
+    // ... rest of your code
+  } catch (err) {
+    console.error('Task loading error:', err);
+    document.getElementById('current-tier').textContent = 'Error Loading';
+    document.getElementById('current-tier').style.color = 'var(--rms-vivid-red)';
+    grid.innerHTML = `
+      <div class="error-box">
+        <i class="fa-solid fa-triangle-exclamation" style="color: var(--rms-vivid-red);"></i>
+        <p style="color: var(--rms-vivid-red);">${err.message}</p>
+        <p style="font-size: 0.85rem; margin-top: 10px;">Check browser console for details</p>
+        <button onclick="loadTasks()" class="rms-btn rms-btn-outline" style="margin-top: 10px;">Retry</button>
+      </div>
+    `;
+  }
     }
 
     function renderBoxes() {
