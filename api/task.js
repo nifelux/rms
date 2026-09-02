@@ -5,8 +5,40 @@
 import supabaseAdmin from '../lib/supabase.js';
 import { verifyUser } from '../lib/auth.js';
 
+import supabaseAdmin from '../lib/supabase.js';
+import { verifyUser } from '../lib/auth.js';
+
 export default async function handler(req, res) {
+  // Add CORS headers
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+
   const action = req.query.action || req.body?.action;
+  
+  try {
+    switch (action) {
+      case 'getTaskStatus': return await getTaskStatus(req, res);
+      case 'openMysteryBox': return await openMysteryBox(req, res);
+      default: 
+        return res.status(400).json({ error: 'Invalid action', received: action });
+    }
+  } catch (err) {
+    console.error('Task API Error:', err);
+    return res.status(500).json({ 
+      error: 'Internal server error',
+      message: err.message,
+      stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
+    });
+  }
+}
+
+// ... rest of your functions
+const action = req.query.action || req.body?.action;
   try {
     switch (action) {
       case 'getTaskStatus': return await getTaskStatus(req, res);
