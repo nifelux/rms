@@ -50,7 +50,23 @@
       padding: 4px 30px; 
       transform: rotate(45deg);
     }
-    .tier-card.locked { opacity: 0.7; }
+    .tier-card.passed { 
+      opacity: 0.6;
+      border-color: rgba(46,204,113,0.3);
+    }
+    .tier-card.passed::before { 
+      content: 'PASSED'; 
+      position: absolute; 
+      top: 12px; 
+      left: -25px; 
+      background: #2ecc71; 
+      color: white; 
+      font-size: 0.6rem; 
+      font-weight: 800; 
+      padding: 4px 25px; 
+      transform: rotate(-45deg);
+    }
+    .tier-card.locked { opacity: 0.5; }
     
     .tier-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
     .tier-name { font-size: 1.8rem; font-weight: 800; color: var(--rms-white); }
@@ -105,6 +121,11 @@
       color: #2ecc71;
       cursor: default;
     }
+    .upgrade-btn.passed { 
+      background: rgba(46,204,113,0.15); 
+      color: #2ecc71;
+      cursor: default;
+    }
     .upgrade-btn.upgrade { 
       background: linear-gradient(135deg, var(--rms-yellow), #e6c200); 
       color: #0a0e27;
@@ -153,6 +174,13 @@
     window.supabase = supabase;
 
     const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    
+    // Tier order for comparison
+    const tierOrder = ['M0', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7'];
+
+    function getTierLevel(tierName) {
+      return tierOrder.indexOf(tierName);
+    }
 
     async function loadVIPPage() {
       try {
@@ -200,12 +228,16 @@
           return;
         }
 
+        const currentTierLevel = getTierLevel(profile.vip_level);
+
         list.innerHTML = tiers.map(tier => {
+          const tierLevel = getTierLevel(tier.tier);
           const isCurrent = tier.tier === profile.vip_level;
+          const isPassed = tierLevel < currentTierLevel;
           const canAfford = Number(wallet.balance) >= Number(tier.upgrade_cost);
 
           return `
-            <div class="tier-card ${isCurrent ? 'current' : ''} ${!isCurrent && !canAfford ? 'locked' : ''}">
+            <div class="tier-card ${isCurrent ? 'current' : ''} ${isPassed ? 'passed' : ''} ${!isCurrent && !isPassed && !canAfford ? 'locked' : ''}">
               <div class="tier-header">
                 <div class="tier-name">${tier.tier}</div>
                 <div class="tier-price">${Number(tier.upgrade_cost).toLocaleString()}</div>
@@ -234,6 +266,10 @@
               ${isCurrent ? `
                 <button class="upgrade-btn current" disabled>
                   <i class="fa-solid fa-check-circle"></i> Your Current Tier
+                </button>
+              ` : isPassed ? `
+                <button class="upgrade-btn passed" disabled>
+                  <i class="fa-solid fa-check-double"></i> Completed
                 </button>
               ` : `
                 <button 
