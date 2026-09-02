@@ -75,12 +75,16 @@ async function login(req, res) {
   if (error) return res.status(401).json({ error: error.message });
 
   // Check if banned or frozen
-  const { data: profile } = await supabaseAdmin.from('profiles').select('is_banned,is_frozen').eq('id', data.user.id).single();
-  if (profile?.is_banned) return res.status(403).json({ error: 'Account banned' });
+  const { data: profile } = await supabaseAdmin.from('profiles').select('is_banned, is_frozen, ban_reason').eq('id', user.id).single();
 
-  return res.status(200).json(data);
+if (profile?.is_banned) {
+  return res.status(403).json({ error: `Account banned: ${profile.ban_reason || 'No reason provided'}` });
 }
 
+// ADD THIS LINE:
+if (profile?.is_frozen) {
+  return res.status(403).json({ error: 'Account is frozen. Please contact support.' });
+}
 async function logout(req, res) {
   // Logout is handled client-side by removing token; we just return success
   return res.status(200).json({ message: 'Logged out' });
