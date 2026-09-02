@@ -2,15 +2,17 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>RMS — Daily Tasks</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="assets/css/style.css">
+  <meta name="theme-color" content="#0a0e27">
   <style>
     .task-container { padding: 20px 16px 100px 16px; max-width: 600px; margin: 0 auto; }
     .progress-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
     .progress-bar-bg { width: 100%; height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden; margin-bottom: 30px; }
     .progress-bar-fill { height: 100%; background: linear-gradient(90deg, var(--rms-yellow), var(--rms-vivid-red)); transition: width 0.5s ease; }
+    
     .box-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
     .mystery-box {
       aspect-ratio: 1; background: var(--rms-bg-card); border: 2px solid var(--rms-border);
@@ -19,19 +21,17 @@
     }
     .mystery-box:hover { transform: scale(1.05); border-color: var(--rms-yellow); }
     .mystery-box.opened { border-color: var(--rms-text-muted); opacity: 0.5; cursor: default; }
-    .mystery-box .box-icon { font-size: 2.5rem; color: var(--rms-yellow); margin-bottom: 8px; }
+    .mystery-box .box-icon { font-size: 2.5rem; color: var(--rms-yellow); margin-bottom: 8px; transition: transform 0.3s; }
+    .mystery-box:hover .box-icon { transform: rotate(-10deg) scale(1.1); }
     .mystery-box .box-label { font-size: 0.8rem; font-weight: 600; }
-    .mystery-box .box-reward { position: absolute; inset: 0; background: rgba(10,14,39,0.9); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; font-weight: 800; color: var(--rms-yellow); opacity: 0; }
+    .mystery-box .box-reward { position: absolute; inset: 0; background: rgba(10,14,39,0.9); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; font-weight: 800; color: var(--rms-yellow); opacity: 0; transition: opacity 0.3s; }
     .mystery-box.opened .box-reward { opacity: 1; }
     .mystery-box.opened .box-icon { display: none; }
+
     .tier-badge { display: inline-block; background: rgba(255,26,26,0.1); color: var(--rms-vivid-red); padding: 6px 16px; border-radius: 20px; font-size: 0.85rem; font-weight: 700; margin-bottom: 10px; }
     .error-box { text-align: center; padding: 40px 20px; grid-column: 1 / -1; }
     .error-box i { font-size: 3rem; margin-bottom: 16px; opacity: 0.5; }
-    .debug-box { 
-      background: rgba(255,0,0,0.1); border: 1px solid red; border-radius: 8px; 
-      padding: 16px; margin-bottom: 20px; font-family: monospace; font-size: 0.75rem; 
-      color: #ff6b6b; white-space: pre-wrap;
-    }
+    .loading-box { text-align: center; padding: 40px; color: var(--rms-text-muted); }
   </style>
 </head>
 <body class="rv-shell">
@@ -41,7 +41,6 @@
     <h2 style="margin-bottom: 5px;">Daily Mystery Boxes</h2>
     <p class="text-muted" style="margin-bottom: 20px;">Tap a box to reveal your reward.</p>
 
-    <div id="debug-container"></div>
     <div class="tier-badge" id="current-tier">Loading Tier...</div>
 
     <div class="progress-header">
@@ -53,7 +52,7 @@
     </div>
 
     <div class="box-grid" id="box-grid">
-      <!-- Boxes injected by JS -->
+      <div class="loading-box"><i class="fa-solid fa-circle-notch fa-spin"></i><p>Loading...</p></div>
     </div>
   </div>
 
@@ -65,57 +64,27 @@
     window.supabase = supabase;
 
     let taskStatus = null;
-    const debugDiv = document.getElementById('debug-container');
 
     async function loadTasks() {
-      const debug = [];
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return window.location.href = '/login.html';
+
       const grid = document.getElementById('box-grid');
-      
+      grid.innerHTML = '<div class="loading-box"><i class="fa-solid fa-circle-notch fa-spin"></i><p>Loading...</p></div>';
+
       try {
-        debug.push(' Starting task load...');
-        
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) {
-          debug.push('❌ Not logged in');
-          window.location.href = '/login.html';
-          return;
-        }
-        debug.push('✅ User: ' + user.email);
-
-        // Check current profile tier
-        const { data: profile } = await supabase.from('profiles').select('vip_level').eq('id', user.id).single();
-        debug.push('📊 User tier: ' + (profile?.vip_level || 'null'));
-
-        // Call the API
-        debug.push(' Calling /api/task?action=getTaskStatus...');
         const token = (await supabase.auth.getSession()).data.session.access_token;
-        
         const res = await fetch('/api/task?action=getTaskStatus', { 
           headers: { 'Authorization': `Bearer ${token}` } 
         });
         
-        debug.push(` Response status: ${res.status} ${res.statusText}`);
-        
-        // Check content type
-        const contentType = res.headers.get('content-type');
-        debug.push(`Content-Type: ${contentType}`);
-        
-        if (!contentType || !contentType.includes('application/json')) {
-          const text = await res.text();
-          debug.push(`❌ Non-JSON response:\n${text.substring(0, 500)}`);
-          throw new Error('Server returned invalid response. Check Vercel logs.');
-        }
-        
         if (!res.ok) {
           const errorData = await res.json();
-          debug.push(`❌ API Error: ${JSON.stringify(errorData, null, 2)}`);
-          throw new Error(errorData.error || `Server error: ${res.status}`);
+          throw new Error(errorData.error || 'Failed to load tasks');
         }
         
         taskStatus = await res.json();
-        debug.push(`✅ API Response: ${JSON.stringify(taskStatus, null, 2)}`);
 
-        // Handle newbie/M0 expired
         if (!taskStatus.tier || taskStatus.tier === 'newbie') {
           document.getElementById('current-tier').textContent = 'No Tier - Please Upgrade';
           document.getElementById('current-tier').style.background = 'rgba(255,26,26,0.2)';
@@ -143,21 +112,13 @@
           return;
         }
 
-        // Display tier and boxes
         document.getElementById('current-tier').textContent = `Tier: ${taskStatus.tier.toUpperCase()}`;
         document.getElementById('progress-text').textContent = `${taskStatus.boxes_opened} / ${taskStatus.max_boxes}`;
         document.getElementById('progress-fill').style.width = `${taskStatus.max_boxes > 0 ? (taskStatus.boxes_opened / taskStatus.max_boxes) * 100 : 0}%`;
 
         renderBoxes();
-        
-        // Show debug
-        debugDiv.innerHTML = `<div class="debug-box">${debug.join('\n')}</div>`;
-        
       } catch (err) {
-        debug.push(`💥 Fatal error: ${err.message}`);
-        debug.push(`Stack: ${err.stack}`);
         console.error('Task loading error:', err);
-        
         document.getElementById('current-tier').textContent = 'Error Loading';
         document.getElementById('current-tier').style.color = 'var(--rms-vivid-red)';
         grid.innerHTML = `
@@ -167,8 +128,6 @@
             <button onclick="loadTasks()" class="rms-btn rms-btn-outline" style="margin-top: 10px;">Retry</button>
           </div>
         `;
-        
-        debugDiv.innerHTML = `<div class="debug-box">${debug.join('\n')}</div>`;
       }
     }
 
