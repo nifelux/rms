@@ -8,55 +8,79 @@
       </div>
     </a>
     
-    <!-- Desktop Nav (Hidden on mobile via CSS in style.css) -->
-    <nav id="main-nav" style="display: none;"> 
-      <!-- Add desktop links here if needed later -->
-    </nav>
-
-    <!-- Mobile Menu Toggle -->
-    <button id="mobile-menu-toggle" style="background:none; border:none; color:white; font-size:1.4rem; cursor:pointer;">
-      <i class="fa-solid fa-bars"></i>
-    </button>
+    <!-- VIP Level Indicator (replaces menu button) -->
+    <div id="vip-indicator" class="vip-indicator">
+      <i class="fa-solid fa-crown" style="margin-right: 6px;"></i>
+      <span id="vip-level-text">M0</span>
+    </div>
   </div>
 </header>
 
-<!-- Mobile Slide-out Menu -->
-<div class="mobile-menu" id="mobile-menu" style="transform: translateX(100%); transition: transform 0.3s ease;">
-  <div class="mobile-menu-header">
-    <div class="brand-name" style="font-size: 1.2rem;">Menu</div>
-    <button id="close-mobile-menu" style="background:none; border:none; color:white; font-size:1.4rem; cursor:pointer;">
-      <i class="fa-solid fa-xmark"></i>
-    </button>
-  </div>
-  <div style="padding: 20px; display: flex; flex-direction: column; gap: 16px;">
-    <a href="/dashboard.html" class="mobile-link" style="color: white; text-decoration: none; font-size: 1.1rem; display: flex; align-items: center; gap: 12px;">
-      <i class="fa-solid fa-house" style="width: 24px; color: var(--rms-yellow);"></i> Dashboard
-    </a>
-    <a href="/investments.html" class="mobile-link" style="color: white; text-decoration: none; font-size: 1.1rem; display: flex; align-items: center; gap: 12px;">
-      <i class="fa-solid fa-box-open" style="width: 24px; color: var(--rms-yellow);"></i> Mystery Boxes
-    </a>
-    <a href="/wealth-center.html" class="mobile-link" style="color: white; text-decoration: none; font-size: 1.1rem; display: flex; align-items: center; gap: 12px;">
-      <i class="fa-solid fa-gem" style="width: 24px; color: var(--rms-yellow);"></i> Wealth Center
-    </a>
-    <a href="/team.html" class="mobile-link" style="color: white; text-decoration: none; font-size: 1.1rem; display: flex; align-items: center; gap: 12px;">
-      <i class="fa-solid fa-users" style="width: 24px; color: var(--rms-yellow);"></i> My Team
-    </a>
-    <hr style="border-color: var(--rms-border); opacity: 0.5;">
-    <a href="/login.html" class="mobile-link" style="color: var(--rms-text-muted); text-decoration: none; font-size: 1rem; display: flex; align-items: center; gap: 12px;">
-      <i class="fa-solid fa-right-to-bracket" style="width: 24px;"></i> Login
-    </a>
-    <a href="/register.html" class="mobile-link" style="color: var(--rms-text-muted); text-decoration: none; font-size: 1rem; display: flex; align-items: center; gap: 12px;">
-      <i class="fa-solid fa-user-plus" style="width: 24px;"></i> Register
-    </a>
-  </div>
-</div>
+<style>
+  .vip-indicator {
+    display: flex;
+    align-items: center;
+    background: linear-gradient(135deg, var(--rms-yellow), #e6c200);
+    color: #0a0e27;
+    padding: 8px 14px;
+    border-radius: 20px;
+    font-weight: 800;
+    font-size: 0.85rem;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s;
+    box-shadow: 0 2px 8px rgba(255,215,0,0.3);
+  }
+  .vip-indicator:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(255,215,0,0.4);
+  }
+  .vip-indicator .fa-crown {
+    font-size: 0.9rem;
+  }
+  .vip-indicator.m0 { background: linear-gradient(135deg, #95a5a6, #7f8c8d); color: white; box-shadow: 0 2px 8px rgba(149,165,166,0.3); }
+  .vip-indicator.m1 { background: linear-gradient(135deg, #cd7f32, #a0522d); color: white; box-shadow: 0 2px 8px rgba(205,127,50,0.3); }
+  .vip-indicator.m2 { background: linear-gradient(135deg, #c0c0c0, #a8a8a8); color: #0a0e27; box-shadow: 0 2px 8px rgba(192,192,192,0.3); }
+  .vip-indicator.m3 { background: linear-gradient(135deg, var(--rms-yellow), #e6c200); color: #0a0e27; }
+  .vip-indicator.m4 { background: linear-gradient(135deg, #2ecc71, #27ae60); color: white; box-shadow: 0 2px 8px rgba(46,204,113,0.3); }
+  .vip-indicator.m5 { background: linear-gradient(135deg, #3498db, #2980b9); color: white; box-shadow: 0 2px 8px rgba(52,152,219,0.3); }
+  .vip-indicator.m6 { background: linear-gradient(135deg, #9b59b6, #8e44ad); color: white; box-shadow: 0 2px 8px rgba(155,89,182,0.3); }
+  .vip-indicator.m7 { background: linear-gradient(135deg, var(--rms-vivid-red), #c0392b); color: white; box-shadow: 0 2px 8px rgba(255,26,26,0.3); }
+</style>
 
 <script>
-  // Simple toggle logic for mobile menu
-  document.getElementById('mobile-menu-toggle')?.addEventListener('click', () => {
-    document.getElementById('mobile-menu').style.transform = 'translateX(0)';
-  });
-  document.getElementById('close-mobile-menu')?.addEventListener('click', () => {
-    document.getElementById('mobile-menu').style.transform = 'translateX(100%)';
-  });
+  // Load VIP level into header
+  async function loadVipIndicator() {
+    try {
+      const { data: { user } } = await window.supabase.auth.getUser();
+      if (!user) return;
+      
+      const { data: profile } = await window.supabase
+        .from('profiles')
+        .select('vip_level')
+        .eq('id', user.id)
+        .single();
+      
+      if (profile && profile.vip_level) {
+        const levelText = document.getElementById('vip-level-text');
+        const indicator = document.getElementById('vip-indicator');
+        if (levelText) levelText.textContent = profile.vip_level.toUpperCase();
+        if (indicator) {
+          indicator.className = 'vip-indicator ' + profile.vip_level.toLowerCase();
+          indicator.onclick = () => window.location.href = '/vip.html';
+        }
+      }
+    } catch (err) {
+      console.error('VIP indicator error:', err);
+    }
+  }
+  
+  // Run when Supabase is ready
+  if (window.supabase) {
+    loadVipIndicator();
+  } else {
+    document.addEventListener('DOMContentLoaded', () => {
+      if (window.supabase) loadVipIndicator();
+    });
+  }
 </script>
