@@ -2,12 +2,14 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>RMS — VIP Tiers</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="assets/css/style.css">
+  <meta name="theme-color" content="#0a0e27">
   <style>
     .vip-container { padding: 20px 16px 100px 16px; max-width: 600px; margin: 0 auto; }
+    
     .balance-card {
       background: linear-gradient(135deg, var(--rms-bg-card), #1a2050);
       border: 1px solid var(--rms-yellow);
@@ -16,30 +18,74 @@
       text-align: center;
       margin-bottom: 24px;
     }
-    .balance-amount { font-size: 2rem; font-weight: 800; color: var(--rms-yellow); }
+    .balance-label { font-size: 0.85rem; color: var(--rms-text-muted); margin-bottom: 8px; }
+    .balance-amount { font-size: 2rem; font-weight: 800; color: var(--rms-yellow); margin: 0; }
+    
     .tier-card { 
       background: var(--rms-bg-card); 
       border: 2px solid var(--rms-border); 
       border-radius: 16px; 
       padding: 20px; 
       margin-bottom: 20px; 
+      position: relative;
+      transition: all 0.3s ease;
     }
-    .tier-card.current { border-color: var(--rms-yellow); }
-    .tier-header { display: flex; justify-content: space-between; margin-bottom: 16px; }
-    .tier-name { font-size: 1.8rem; font-weight: 800; }
+    .tier-card:hover { 
+      transform: translateY(-3px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+    }
+    .tier-card.current { 
+      border-color: var(--rms-yellow); 
+      box-shadow: 0 0 20px rgba(255,215,0,0.2);
+    }
+    .tier-card.current::after { 
+      content: 'CURRENT TIER'; 
+      position: absolute; 
+      top: 12px; 
+      right: -30px; 
+      background: var(--rms-yellow); 
+      color: #0a0e27; 
+      font-size: 0.6rem; 
+      font-weight: 800; 
+      padding: 4px 30px; 
+      transform: rotate(45deg);
+    }
+    .tier-card.locked { opacity: 0.7; }
+    
+    .tier-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+    .tier-name { font-size: 1.8rem; font-weight: 800; color: var(--rms-white); }
     .tier-price { font-size: 1.3rem; font-weight: 700; color: var(--rms-yellow); }
-    .tier-benefits { background: rgba(255,255,255,0.03); border-radius: 12px; padding: 16px; margin-bottom: 16px; }
-    .benefit-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+    
+    .tier-benefits { 
+      background: rgba(255,255,255,0.03); 
+      border-radius: 12px; 
+      padding: 16px; 
+      margin-bottom: 16px; 
+    }
+    .benefit-row { 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      padding: 8px 0; 
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
     .benefit-row:last-child { border-bottom: none; }
-    .benefit-label { color: var(--rms-text-muted); }
-    .benefit-value { font-weight: 700; color: var(--rms-yellow); }
+    .benefit-label { color: var(--rms-text-muted); font-size: 0.9rem; }
+    .benefit-value { font-weight: 700; color: var(--rms-white); font-size: 0.95rem; }
+    .benefit-value.highlight { color: var(--rms-yellow); }
+    
     .withdrawal-day { 
       background: linear-gradient(90deg, rgba(255,26,26,0.15), transparent); 
       border-left: 3px solid var(--rms-vivid-red); 
       padding: 10px 14px; 
       border-radius: 0 8px 8px 0;
+      font-size: 0.85rem; 
+      display: flex; 
+      align-items: center; 
+      gap: 8px;
       margin-bottom: 16px;
     }
+    
     .upgrade-btn { 
       width: 100%; 
       padding: 14px; 
@@ -48,21 +94,26 @@
       border: none; 
       border-radius: 12px; 
       cursor: pointer;
+      transition: all 0.2s;
     }
-    .upgrade-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-    .upgrade-btn.current { background: rgba(46,204,113,0.2); color: #2ecc71; }
-    .upgrade-btn.upgrade { background: linear-gradient(135deg, var(--rms-yellow), #e6c200); color: #0a0e27; }
-    .debug-box { 
-      background: rgba(255,0,0,0.1); 
-      border: 1px solid red; 
-      border-radius: 8px; 
-      padding: 16px; 
-      margin-bottom: 20px; 
-      font-family: monospace; 
-      font-size: 0.75rem; 
-      color: #ff6b6b; 
-      white-space: pre-wrap;
+    .upgrade-btn:disabled { 
+      opacity: 0.5; 
+      cursor: not-allowed; 
     }
+    .upgrade-btn.current { 
+      background: rgba(46,204,113,0.2); 
+      color: #2ecc71;
+      cursor: default;
+    }
+    .upgrade-btn.upgrade { 
+      background: linear-gradient(135deg, var(--rms-yellow), #e6c200); 
+      color: #0a0e27;
+    }
+    .upgrade-btn.upgrade:hover:not(:disabled) { 
+      transform: scale(1.02);
+      box-shadow: 0 4px 12px rgba(255,215,0,0.3);
+    }
+    
     .loading-box { text-align: center; padding: 40px; color: var(--rms-text-muted); }
     .error-box { 
       background: rgba(255,26,26,0.1); 
@@ -70,6 +121,7 @@
       border-radius: 12px; 
       padding: 20px; 
       text-align: center;
+      margin-bottom: 20px;
     }
   </style>
 </head>
@@ -81,13 +133,15 @@
     <p class="text-muted" style="margin-bottom: 24px;">Upgrade to unlock higher earnings and benefits.</p>
 
     <div class="balance-card">
-      <div style="font-size: 0.85rem; color: var(--rms-text-muted); margin-bottom: 8px;">Available Balance</div>
+      <div class="balance-label">Available Balance</div>
       <div class="balance-amount">₦<span id="wallet-balance">0</span></div>
     </div>
 
-    <div id="debug-container"></div>
     <div id="tiers-list">
-      <div class="loading-box"><i class="fa-solid fa-circle-notch fa-spin"></i><p>Loading...</p></div>
+      <div class="loading-box">
+        <i class="fa-solid fa-circle-notch fa-spin" style="font-size: 2rem;"></i>
+        <p style="margin-top: 10px;">Loading VIP tiers...</p>
+      </div>
     </div>
   </div>
 
@@ -99,147 +153,143 @@
     window.supabase = supabase;
 
     const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-    const debugDiv = document.getElementById('debug-container');
 
     async function loadVIPPage() {
-      const debug = [];
-      
       try {
-        debug.push('🔍 Starting VIP page load...');
-        
-        // Check auth
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-        debug.push(`Auth: ${session ? '✅ Logged in' : '❌ Not logged in'}`);
-        
-        if (!session) {
+        if (sessionError || !session) {
           window.location.href = '/login.html';
           return;
         }
 
-        // Get wallet
-        const { data: wallet, error: walletError } = await supabase
-          .from('wallets')
-          .select('balance')
-          .eq('user_id', session.user.id)
-          .single();
-
-        debug.push(`Wallet: ${walletError ? '❌ ' + walletError.message : '✅ ₦' + wallet.balance}`);
-        document.getElementById('wallet-balance').textContent = wallet ? Number(wallet.balance).toLocaleString() : '0';
-
-        // Get profile
         const { data: profile, error: profileError } = await supabase
           .from('profiles')
           .select('vip_level')
           .eq('id', session.user.id)
           .single();
 
-        debug.push(`Profile: ${profileError ? '❌ ' + profileError.message : '✅ ' + profile.vip_level}`);
+        const { data: wallet, error: walletError } = await supabase
+          .from('wallets')
+          .select('balance')
+          .eq('user_id', session.user.id)
+          .single();
 
-        // Fetch tiers
-        debug.push('📊 Fetching rms_tiers table...');
+        if (profileError || walletError) {
+          throw new Error('Failed to load user data');
+        }
+
+        document.getElementById('wallet-balance').textContent = Number(wallet.balance).toLocaleString();
+
         const { data: tiers, error: tiersError } = await supabase
           .from('rms_tiers')
           .select('*')
           .order('upgrade_cost', { ascending: true });
 
-        debug.push(`Tiers Query: ${tiersError ? ' ' + tiersError.message : '✅ Found ' + (tiers?.length || 0) + ' tiers'}`);
-        
-        if (tiersError) {
-          debug.push(`Error details: ${JSON.stringify(tiersError, null, 2)}`);
-        }
-
-        if (tiers && tiers.length > 0) {
-          debug.push(`Tier data: ${JSON.stringify(tiers[0], null, 2)}`);
-        }
+        if (tiersError) throw tiersError;
 
         const list = document.getElementById('tiers-list');
 
         if (!tiers || tiers.length === 0) {
-          debug.push('⚠️ No tiers found - showing error');
           list.innerHTML = `
             <div class="error-box">
               <i class="fa-solid fa-triangle-exclamation" style="font-size: 2rem; color: var(--rms-vivid-red); margin-bottom: 10px;"></i>
               <p style="color: var(--rms-vivid-red);">No VIP tiers configured</p>
-              <p style="font-size: 0.85rem;">Check debug info above</p>
+              <p style="font-size: 0.85rem; margin-top: 10px;">Please contact support</p>
             </div>
           `;
-        } else {
-          debug.push('✅ Rendering tiers...');
-          list.innerHTML = tiers.map(tier => {
-            const isCurrent = tier.tier === profile.vip_level;
-            const canAfford = Number(wallet.balance) >= Number(tier.upgrade_cost);
-            
-            return `
-              <div class="tier-card ${isCurrent ? 'current' : ''}">
-                <div class="tier-header">
-                  <div class="tier-name">${tier.tier}</div>
-                  <div class="tier-price">₦${Number(tier.upgrade_cost).toLocaleString()}</div>
-                </div>
-                <div class="tier-benefits">
-                  <div class="benefit-row">
-                    <span class="benefit-label">Daily Boxes</span>
-                    <span class="benefit-value">${tier.daily_boxes}/day</span>
-                  </div>
-                  <div class="benefit-row">
-                    <span class="benefit-label">Per Box</span>
-                    <span class="benefit-value">₦${Number(tier.box_earning).toLocaleString()}</span>
-                  </div>
-                  <div class="benefit-row">
-                    <span class="benefit-label">Daily Income</span>
-                    <span class="benefit-value">₦${(tier.daily_boxes * tier.box_earning).toLocaleString()}</span>
-                  </div>
-                </div>
-                <div class="withdrawal-day">
-                  <i class="fa-regular fa-calendar-check"></i> Withdrawal: <strong>${days[tier.withdrawal_day]}</strong>
-                </div>
-                ${isCurrent ? `
-                  <button class="upgrade-btn current" disabled>
-                    <i class="fa-solid fa-check-circle"></i> Your Current Tier
-                  </button>
-                ` : `
-                  <button 
-                    class="upgrade-btn upgrade" 
-                    onclick="upgradeToTier('${tier.tier}', ${tier.upgrade_cost})"
-                    ${!canAfford ? 'disabled' : ''}
-                  >
-                    ${canAfford ? 'Upgrade to ' + tier.tier : 'Insufficient Balance'}
-                  </button>
-                `}
-              </div>
-            `;
-          }).join('');
+          return;
         }
 
-        debugDiv.innerHTML = `<div class="debug-box">${debug.join('\n')}</div>`;
+        list.innerHTML = tiers.map(tier => {
+          const isCurrent = tier.tier === profile.vip_level;
+          const canAfford = Number(wallet.balance) >= Number(tier.upgrade_cost);
+
+          return `
+            <div class="tier-card ${isCurrent ? 'current' : ''} ${!isCurrent && !canAfford ? 'locked' : ''}">
+              <div class="tier-header">
+                <div class="tier-name">${tier.tier}</div>
+                <div class="tier-price">${Number(tier.upgrade_cost).toLocaleString()}</div>
+              </div>
+              
+              <div class="tier-benefits">
+                <div class="benefit-row">
+                  <span class="benefit-label"><i class="fa-solid fa-box" style="margin-right: 8px; color: var(--rms-yellow);"></i>Daily Mystery Boxes</span>
+                  <span class="benefit-value highlight">${tier.daily_boxes} boxes/day</span>
+                </div>
+                <div class="benefit-row">
+                  <span class="benefit-label"><i class="fa-solid fa-coins" style="margin-right: 8px; color: var(--rms-yellow);"></i>Earnings per Box</span>
+                  <span class="benefit-value highlight">₦${Number(tier.box_earning).toLocaleString()}</span>
+                </div>
+                <div class="benefit-row">
+                  <span class="benefit-label"><i class="fa-solid fa-calendar-day" style="margin-right: 8px; color: var(--rms-yellow);"></i>Daily Income</span>
+                  <span class="benefit-value">₦${(tier.daily_boxes * tier.box_earning).toLocaleString()}</span>
+                </div>
+              </div>
+
+              <div class="withdrawal-day">
+                <i class="fa-regular fa-calendar-check text-red"></i> 
+                <strong>Withdrawal Day:</strong> ${days[tier.withdrawal_day] || 'None'}
+              </div>
+
+              ${isCurrent ? `
+                <button class="upgrade-btn current" disabled>
+                  <i class="fa-solid fa-check-circle"></i> Your Current Tier
+                </button>
+              ` : `
+                <button 
+                  class="upgrade-btn upgrade" 
+                  onclick="upgradeToTier('${tier.tier}', ${tier.upgrade_cost})"
+                  ${!canAfford ? 'disabled' : ''}
+                >
+                  ${canAfford ? `<i class="fa-solid fa-arrow-up"></i> Upgrade to ${tier.tier}` : '<i class="fa-solid fa-lock"></i> Insufficient Balance'}
+                </button>
+              `}
+            </div>
+          `;
+        }).join('');
 
       } catch (err) {
-        debug.push(`💥 Fatal error: ${err.message}`);
-        debugDiv.innerHTML = `<div class="debug-box">${debug.join('\n')}</div>`;
-        console.error('VIP Error:', err);
+        console.error('VIP page error:', err);
+        document.getElementById('tiers-list').innerHTML = `
+          <div class="error-box">
+            <i class="fa-solid fa-triangle-exclamation" style="font-size: 2rem; color: var(--rms-vivid-red); margin-bottom: 10px;"></i>
+            <p style="color: var(--rms-vivid-red);">Error: ${err.message}</p>
+            <button onclick="loadVIPPage()" class="rms-btn rms-btn-outline" style="margin-top: 10px;">Retry</button>
+          </div>
+        `;
       }
     }
 
     window.upgradeToTier = async (tierName, cost) => {
-      if (!confirm(`Upgrade to ${tierName} for ₦${Number(cost).toLocaleString()}?`)) return;
-      
+      if (!confirm(`Upgrade to ${tierName} for ₦${Number(cost).toLocaleString()}?`)) {
+        return;
+      }
+
       try {
         const token = (await supabase.auth.getSession()).data.session.access_token;
+        
         const res = await fetch('/api/admin?action=upgradeTier', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`
           },
-          body: JSON.stringify({ target_tier: tierName })
+          body: JSON.stringify({ 
+            target_tier: tierName 
+          })
         });
-        
+
         const data = await res.json();
-        if (!res.ok) throw new Error(data.error || 'Upgrade failed');
-        
-        alert('✅ Successfully upgraded to ' + tierName + '!');
+
+        if (!res.ok) {
+          throw new Error(data.error || 'Upgrade failed');
+        }
+
+        alert(`✅ Successfully upgraded to ${tierName}!`);
         loadVIPPage();
+        
       } catch (err) {
-        alert('❌ ' + err.message);
+        alert(`❌ Upgrade failed: ${err.message}`);
       }
     };
 
