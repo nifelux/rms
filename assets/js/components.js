@@ -1,7 +1,10 @@
 // ============================================================
 // Site-wide header/footer loader + auth-aware navigation builder
 // ============================================================
+// Load notifications system globally
+document.write('<script src="/assets/js/notifications.js"><\/script>');
 
+// ... rest of your components.js code ...
 async function loadComponents() {
   try {
     const headerRes = await fetch('/assets/html/header.html');
