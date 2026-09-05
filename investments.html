@@ -30,161 +30,53 @@
       overflow: visible;
     }
     
-    .mystery-box:hover {
-      transform: scale(1.05);
-      border-color: var(--rms-yellow);
-      box-shadow: 0 0 20px rgba(255,215,0,0.3);
-    }
+    .mystery-box:hover { transform: scale(1.05); border-color: var(--rms-yellow); box-shadow: 0 0 20px rgba(255,215,0,0.3); }
+    .mystery-box.opened { border-color: var(--rms-text-muted); opacity: 0.5; cursor: default; pointer-events: none; }
+    .mystery-box.opening { animation: boxShake 0.5s ease; }
     
-    .mystery-box.opened {
-      border-color: var(--rms-text-muted);
-      opacity: 0.5;
-      cursor: default;
-      pointer-events: none;
-    }
+    .box-icon { font-size: 2.5rem; color: var(--rms-yellow); margin-bottom: 8px; transition: all 0.3s ease; position: relative; z-index: 2; }
+    .mystery-box:hover .box-icon { transform: rotate(-10deg) scale(1.1); }
+    .mystery-box.opening .box-icon { animation: boxLidFly 0.6s ease forwards; }
     
-    .mystery-box.opening {
-      animation: boxShake 0.5s ease;
-    }
-    
-    .box-icon {
-      font-size: 2.5rem;
-      color: var(--rms-yellow);
-      margin-bottom: 8px;
-      transition: all 0.3s ease;
-      position: relative;
-      z-index: 2;
-    }
-    
-    .mystery-box:hover .box-icon {
-      transform: rotate(-10deg) scale(1.1);
-    }
-    
-    .mystery-box.opening .box-icon {
-      animation: boxLidFly 0.6s ease forwards;
-    }
-    
-    .box-label {
-      font-size: 0.8rem;
-      font-weight: 600;
-      position: relative;
-      z-index: 2;
-    }
+    .box-label { font-size: 0.8rem; font-weight: 600; position: relative; z-index: 2; }
     
     .box-reward {
-      position: absolute;
-      inset: 0;
-      background: rgba(10,14,39,0.95);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.2rem;
-      font-weight: 800;
-      color: var(--rms-yellow);
-      opacity: 0;
-      transition: opacity 0.3s;
-      z-index: 3;
+      position: absolute; inset: 0; background: rgba(10,14,39,0.95);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.2rem; font-weight: 800; color: var(--rms-yellow);
+      opacity: 0; transition: opacity 0.3s; z-index: 3;
     }
+    .mystery-box.opened .box-reward { opacity: 1; }
+    .mystery-box.opened .box-icon, .mystery-box.opened .box-label { display: none; }
     
-    .mystery-box.opened .box-reward {
-      opacity: 1;
-    }
-    
-    .mystery-box.opened .box-icon {
-      display: none;
-    }
-    
-    .mystery-box.opened .box-label {
-      display: none;
-    }
-    
-    /* Shine/Sparkle Effects */
     .sparkle {
-      position: absolute;
-      width: 8px;
-      height: 8px;
-      background: var(--rms-yellow);
-      border-radius: 50%;
-      pointer-events: none;
-      z-index: 10;
-      box-shadow: 0 0 10px var(--rms-yellow), 0 0 20px var(--rms-yellow);
+      position: fixed; border-radius: 50%; pointer-events: none; z-index: 999999;
+      box-shadow: 0 0 10px currentColor, 0 0 20px currentColor;
     }
     
     @keyframes sparkleBurst {
-      0% {
-        transform: translate(0, 0) scale(0);
-        opacity: 1;
-      }
-      100% {
-        transform: translate(var(--tx), var(--ty)) scale(1);
-        opacity: 0;
-      }
+      0% { transform: translate(0, 0) scale(0); opacity: 1; }
+      100% { transform: translate(var(--tx), var(--ty)) scale(1); opacity: 0; }
     }
-    
     @keyframes boxShake {
       0%, 100% { transform: translateX(0); }
       10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
       20%, 40%, 60%, 80% { transform: translateX(5px); }
     }
-    
     @keyframes boxLidFly {
-      0% {
-        transform: translateY(0) rotate(0);
-        opacity: 1;
-      }
-      100% {
-        transform: translateY(-50px) rotate(-30deg);
-        opacity: 0;
-      }
+      0% { transform: translateY(0) rotate(0); opacity: 1; }
+      100% { transform: translateY(-50px) rotate(-30deg); opacity: 0; }
     }
-    
     @keyframes rewardReveal {
-      0% {
-        transform: scale(0) rotate(-180deg);
-        opacity: 0;
-      }
-      50% {
-        transform: scale(1.3) rotate(10deg);
-        opacity: 1;
-      }
-      100% {
-        transform: scale(1) rotate(0);
-        opacity: 1;
-      }
+      0% { transform: scale(0) rotate(-180deg); opacity: 0; }
+      50% { transform: scale(1.3) rotate(10deg); opacity: 1; }
+      100% { transform: scale(1) rotate(0); opacity: 1; }
     }
+    .reward-amount { animation: rewardReveal 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards; text-shadow: 0 0 20px var(--rms-yellow); }
     
-    .reward-amount {
-      animation: rewardReveal 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
-      text-shadow: 0 0 20px var(--rms-yellow), 0 0 40px var(--rms-yellow);
-    }
-    
-    @keyframes glowPulse {
-      0%, 100% { box-shadow: 0 0 20px rgba(255,215,0,0.5); }
-      50% { box-shadow: 0 0 40px rgba(255,215,0,0.8), 0 0 60px rgba(255,215,0,0.6); }
-    }
-    
-    .mystery-box.opening {
-      animation: glowPulse 0.5s ease;
-    }
-
     .tier-badge { display: inline-block; background: rgba(255,26,26,0.1); color: var(--rms-vivid-red); padding: 6px 16px; border-radius: 20px; font-size: 0.85rem; font-weight: 700; margin-bottom: 10px; }
-    .tier-badge.weekend { background: rgba(52,152,219,0.15); color: #3498db; }
-    
     .error-box { text-align: center; padding: 40px 20px; grid-column: 1 / -1; }
-    .error-box i { font-size: 3rem; margin-bottom: 16px; opacity: 0.5; }
     .loading-box { text-align: center; padding: 40px; color: var(--rms-text-muted); }
-    
-    .weekend-info {
-      background: rgba(52,152,219,0.1);
-      border: 1px solid #3498db;
-      border-radius: 12px;
-      padding: 20px;
-      margin-top: 20px;
-      text-align: center;
-    }
-    .weekend-info i { font-size: 2.5rem; color: #3498db; margin-bottom: 12px; }
-    .weekend-info h3 { color: #3498db; margin: 0 0 8px 0; font-size: 1.2rem; }
-    .weekend-info p { color: var(--rms-text-muted); margin: 0; font-size: 0.9rem; }
   </style>
 </head>
 <body class="rv-shell">
@@ -214,6 +106,7 @@
   <script src="/assets/js/notifications.js"></script>
   <script type="module">
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+    // ⚠️ REPLACE WITH YOUR ACTUAL KEYS ️
     const supabase = createClient('https://ofysznsajwxnjqaumwch.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9meXN6bnNhand4bmpxYXVtd2NoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgyMzM4NDgsImV4cCI6MjEwMzgwOTg0OH0.XaHkP5WZ2nJVJXVdbG-D13rrD63g_09HxmJoZn7ZoWA');
     window.supabase = supabase;
 
@@ -224,14 +117,19 @@
       if (!user) return window.location.href = '/login.html';
 
       const grid = document.getElementById('box-grid');
-      grid.innerHTML = '<div class="loading-box"><i class="fa-solid fa-circle-notch fa-spin"></i><p>Loading...</p></div>';
-
+      
       try {
         const token = (await supabase.auth.getSession()).data.session.access_token;
         const res = await fetch('/api/task?action=getTaskStatus', { 
           headers: { 'Authorization': `Bearer ${token}` } 
         });
         
+        // Handle non-JSON responses (like 500 errors)
+        const contentType = res.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+          throw new Error('Server error. Please check Vercel logs.');
+        }
+
         if (!res.ok) {
           const errorData = await res.json();
           throw new Error(errorData.error || 'Failed to load tasks');
@@ -241,52 +139,23 @@
 
         if (taskStatus.weekend_closed) {
           document.getElementById('current-tier').textContent = 'Weekend Break';
-          document.getElementById('current-tier').className = 'tier-badge weekend';
-          document.getElementById('progress-text').textContent = '0 / 0';
-          document.getElementById('progress-fill').style.width = '0%';
-          
-          grid.innerHTML = `
-            <div class="error-box" style="grid-column: 1/-1;">
-              <div class="weekend-info">
-                <i class="fa-solid fa-calendar-xmark"></i>
-                <h3>Weekend Break</h3>
-                <p>${taskStatus.message || 'Tasks are closed on Saturdays and Sundays'}</p>
-                <p style="margin-top: 12px; font-size: 0.85rem;"><i class="fa-solid fa-clock" style="margin-right: 6px;"></i>Come back on Monday to claim your boxes!</p>
-              </div>
-            </div>
-          `;
+          grid.innerHTML = `<div class="error-box"><i class="fa-solid fa-calendar-xmark"></i><p>${taskStatus.message}</p></div>`;
           return;
         }
 
         if (!taskStatus.tier || taskStatus.tier === 'newbie') {
-          document.getElementById('current-tier').textContent = 'No Tier - Upgrade Required';
-          document.getElementById('current-tier').style.background = 'rgba(255,26,26,0.2)';
-          document.getElementById('progress-text').textContent = '0 / 0';
-          grid.innerHTML = `
-            <div class="error-box" style="grid-column: 1/-1;">
-              <i class="fa-solid fa-lock" style="color: var(--rms-text-muted);"></i>
-              <p style="color: var(--rms-text-muted); margin: 16px 0;">Upgrade to M0 or higher to unlock Mystery Boxes</p>
-              <a href="/vip.html" class="rms-btn rms-btn-primary" style="text-decoration:none; display: inline-block;">View VIP Tiers</a>
-            </div>
-          `;
+          document.getElementById('current-tier').textContent = 'Upgrade Required';
+          grid.innerHTML = `<div class="error-box"><i class="fa-solid fa-lock"></i><p>Upgrade to M0+ to unlock boxes.</p><a href="/vip.html" class="rms-btn rms-btn-primary" style="text-decoration:none; display:inline-block; margin-top:10px;">View VIP</a></div>`;
           return;
         }
 
         if (taskStatus.m0_expired) {
           document.getElementById('current-tier').textContent = 'M0 Expired';
-          document.getElementById('current-tier').style.background = 'rgba(255,26,26,0.2)';
-          grid.innerHTML = `
-            <div class="error-box" style="grid-column: 1/-1;">
-              <i class="fa-solid fa-clock" style="color: var(--rms-text-muted);"></i>
-              <p style="color: var(--rms-text-muted); margin: 16px 0;">${taskStatus.message || 'Your free trial has expired'}</p>
-              <a href="/vip.html" class="rms-btn rms-btn-primary" style="text-decoration:none; display: inline-block;">Upgrade Now</a>
-            </div>
-          `;
+          grid.innerHTML = `<div class="error-box"><i class="fa-solid fa-clock"></i><p>${taskStatus.message}</p><a href="/vip.html" class="rms-btn rms-btn-primary" style="text-decoration:none; display:inline-block; margin-top:10px;">Upgrade</a></div>`;
           return;
         }
 
         document.getElementById('current-tier').textContent = `Tier: ${taskStatus.tier.toUpperCase()}`;
-        document.getElementById('current-tier').style.background = 'rgba(255,215,0,0.15)';
         document.getElementById('progress-text').textContent = `${taskStatus.boxes_opened} / ${taskStatus.max_boxes}`;
         document.getElementById('progress-fill').style.width = `${taskStatus.max_boxes > 0 ? (taskStatus.boxes_opened / taskStatus.max_boxes) * 100 : 0}%`;
 
@@ -294,14 +163,7 @@
       } catch (err) {
         console.error('Task loading error:', err);
         document.getElementById('current-tier').textContent = 'Error';
-        document.getElementById('current-tier').style.background = 'rgba(255,26,26,0.2)';
-        grid.innerHTML = `
-          <div class="error-box" style="grid-column: 1/-1;">
-            <i class="fa-solid fa-triangle-exclamation" style="color: var(--rms-vivid-red);"></i>
-            <p style="color: var(--rms-vivid-red);">${err.message}</p>
-            <button onclick="loadTasks()" class="rms-btn rms-btn-outline" style="margin-top: 10px;">Retry</button>
-          </div>
-        `;
+        grid.innerHTML = `<div class="error-box"><i class="fa-solid fa-triangle-exclamation" style="color:red;"></i><p style="color:red;">${err.message}</p><button onclick="loadTasks()" class="rms-btn rms-btn-outline" style="margin-top:10px;">Retry</button></div>`;
       }
     }
 
@@ -311,7 +173,7 @@
       const max = taskStatus.max_boxes || 0;
       
       if (max === 0) {
-        grid.innerHTML = '<div class="error-box" style="grid-column: 1/-1;"><p>No boxes available for this tier.</p></div>';
+        grid.innerHTML = '<div class="error-box"><p>No boxes available.</p></div>';
         return;
       }
 
@@ -321,107 +183,44 @@
         box.className = `mystery-box ${isOpened ? 'opened' : ''}`;
         box.innerHTML = `
           <i class="fa-solid fa-gift box-icon"></i>
-          <div class="box-label">${isOpened ? 'Opened' : 'Tap to Open'}</div>
-          <div class="box-reward">
-            <div class="reward-amount">+₦${taskStatus.earning_per_box.toLocaleString()}</div>
-          </div>
+          <div class="box-label">${isOpened ? 'Opened' : 'Tap'}</div>
+          <div class="box-reward"><div class="reward-amount">+₦${taskStatus.earning_per_box.toLocaleString()}</div></div>
         `;
-        if (!isOpened && taskStatus.can_open) {
-          box.onclick = () => openBox(box);
-        }
+        if (!isOpened && taskStatus.can_open) box.onclick = () => openBox(box);
         grid.appendChild(box);
       }
     }
 
     function createSparkles(boxElement) {
-      // Get box center position relative to document
       const rect = boxElement.getBoundingClientRect();
-      const scrollX = window.scrollX || window.pageXOffset;
-      const scrollY = window.scrollY || window.pageYOffset;
-      const centerX = rect.left + scrollX + (rect.width / 2);
-      const centerY = rect.top + scrollY + (rect.height / 2);
+      const centerX = rect.left + window.scrollX + (rect.width / 2);
+      const centerY = rect.top + window.scrollY + (rect.height / 2);
       
-      // Create 100 sparkles for a massive burst
       for (let i = 0; i < 100; i++) {
         const sparkle = document.createElement('div');
-        
         const angle = (Math.PI * 2 * i) / 100;
         const distance = 100 + Math.random() * 150;
         const tx = Math.cos(angle) * distance;
         const ty = Math.sin(angle) * distance;
-        
-        // Random size between 4px and 12px
         const size = 4 + Math.random() * 8;
-        
-        // Random colors: Gold, White, Red, Blue
         const colors = ['#ffd700', '#ffffff', '#ff1a1a', '#2ecc71', '#3498db'];
         const color = colors[Math.floor(Math.random() * colors.length)];
         
-        // Random delay for staggered effect (0 to 1 second)
-        const delay = Math.random() * 1;
-        
+        sparkle.className = 'sparkle';
         sparkle.style.cssText = `
-          position: fixed !important;
-          left: ${centerX}px !important;
-          top: ${centerY}px !important;
-          width: ${size}px !important;
-          height: ${size}px !important;
-          background: ${color} !important;
-          border-radius: 50% !important;
-          box-shadow: 0 0 10px ${color}, 0 0 20px ${color}, 0 0 30px ${color} !important;
-          pointer-events: none !important;
-          z-index: 999999 !important;
-          --tx: ${tx}px;
-          --ty: ${ty}px;
-          animation: sparkleBurst 4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards !important;
-          animation-delay: ${delay}s !important;
-          opacity: 1 !important;
+          left: ${centerX}px; top: ${centerY}px; width: ${size}px; height: ${size}px;
+          background: ${color}; color: ${color};
+          --tx: ${tx}px; --ty: ${ty}px;
+          animation: sparkleBurst 4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+          animation-delay: ${Math.random()}s;
         `;
-        
         document.body.appendChild(sparkle);
-        
-        // Remove after animation completes (4s + max 1s delay = 5s total)
-        setTimeout(() => {
-          if (sparkle.parentNode) sparkle.parentNode.removeChild(sparkle);
-        }, 5000);
+        setTimeout(() => sparkle.remove(), 5000);
       }
-      
-      // Add extra large golden sparkles for emphasis
-      for (let i = 0; i < 20; i++) {
-        const bigSparkle = document.createElement('div');
-        const angle = Math.random() * Math.PI * 2;
-        const distance = 50 + Math.random() * 100;
-        const tx = Math.cos(angle) * distance;
-        const ty = Math.sin(angle) * distance;
-        const size = 10 + Math.random() * 15;
-        
-        bigSparkle.style.cssText = `
-          position: fixed !important;
-          left: ${centerX}px !important;
-          top: ${centerY}px !important;
-          width: ${size}px !important;
-          height: ${size}px !important;
-          background: #ffd700 !important;
-          border-radius: 50% !important;
-          box-shadow: 0 0 20px #ffd700, 0 0 40px #ffd700, 0 0 60px #ffed4e, 0 0 80px #ffed4e !important;
-          pointer-events: none !important;
-          z-index: 999998 !important;
-          --tx: ${tx}px;
-          --ty: ${ty}px;
-          animation: sparkleBurst 4s ease-out forwards !important;
-          animation-delay: ${Math.random() * 0.5}s !important;
-        `;
-        
-        document.body.appendChild(bigSparkle);
-        setTimeout(() => {
-          if (bigSparkle.parentNode) bigSparkle.parentNode.removeChild(bigSparkle);
-        }, 5000);
-      }
-    }                                  }
+    }
 
     async function openBox(boxElement) {
       if (boxElement.classList.contains('opened') || boxElement.classList.contains('opening')) return;
-      
       boxElement.classList.add('opening');
       createSparkles(boxElement);
       
@@ -433,24 +232,16 @@
         });
         
         const data = await res.json();
-        if (!res.ok) throw new Error(data.error || 'Failed to open box');
+        if (!res.ok) throw new Error(data.error || 'Failed');
 
         setTimeout(() => {
           boxElement.classList.remove('opening');
           boxElement.classList.add('opened');
-          
           taskStatus.boxes_opened++;
           document.getElementById('progress-text').textContent = `${taskStatus.boxes_opened} / ${taskStatus.max_boxes}`;
           document.getElementById('progress-fill').style.width = `${(taskStatus.boxes_opened / taskStatus.max_boxes) * 100}%`;
-          
-          if (taskStatus.boxes_opened >= taskStatus.max_boxes) {
-            taskStatus.can_open = false;
-            document.querySelectorAll('.mystery-box:not(.opened)').forEach(b => b.style.pointerEvents = 'none');
-          }
-          
-          showToast(`🎉 You earned ₦${data.amount.toLocaleString()}!`, 'success');
+          showToast(` You earned ₦${data.amount.toLocaleString()}!`, 'success');
         }, 600);
-        
       } catch (err) {
         boxElement.classList.remove('opening');
         showToast(err.message, 'error');
