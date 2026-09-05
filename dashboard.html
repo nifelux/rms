@@ -5,69 +5,310 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>RMS — Dashboard</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="assets/css/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <meta name="theme-color" content="#0a0e27">
   <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+    
+    body {
+      background: linear-gradient(135deg, #0a0e27 0%, #1a1f4e 50%, #0a0e27 100%);
+      min-height: 100vh;
+      color: white;
+      overflow-x: hidden;
+    }
+
     .dashboard-container { padding: 0 16px 100px 16px; max-width: 600px; margin: 0 auto; }
     
-    .welcome-section { display: flex; justify-content: space-between; align-items: center; margin: 20px 0; }
-    .welcome-text h2 { margin: 0; font-size: 1.4rem; }
-    .welcome-text p { margin: 4px 0 0; color: var(--rms-text-muted); font-size: 0.9rem; }
+    /* Welcome Section */
+    .welcome-section { 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      margin: 20px 0;
+      padding: 0 4px;
+    }
+    .welcome-text h2 { 
+      font-size: 1.5rem; 
+      font-weight: 800;
+      background: linear-gradient(135deg, #ffffff, #00d4ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .welcome-text p { 
+      margin: 4px 0 0; 
+      color: rgba(255,255,255,0.6); 
+      font-size: 0.9rem; 
+    }
+    .notif-btn {
+      width: 42px;
+      height: 42px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,215,0,0.2);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 1.2rem;
+      cursor: pointer;
+      position: relative;
+      transition: all 0.3s;
+    }
+    .notif-btn:hover { background: rgba(255,215,0,0.1); border-color: var(--rms-yellow); }
+    .notif-badge {
+      position: absolute;
+      top: -4px;
+      right: -4px;
+      width: 10px;
+      height: 10px;
+      background: #ff1a1a;
+      border-radius: 50%;
+      border: 2px solid #0a0e27;
+    }
     
-    .balance-card { 
-      position: relative; overflow: hidden; text-align: center; 
-      padding: 28px 20px; margin-bottom: 24px;
+    /* Balance Card */
+    .balance-card {
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(135deg, #0066ff 0%, #00d4ff 50%, #0099ff 100%);
+      border-radius: 24px;
+      padding: 32px 24px;
+      margin-bottom: 24px;
+      box-shadow: 0 20px 60px rgba(0,102,255,0.3), 0 0 40px rgba(0,212,255,0.2);
     }
     .balance-card::before {
-      content: ''; position: absolute; top: -50%; right: -50%; width: 200%; height: 200%;
-      background: radial-gradient(circle, rgba(255,26,26,0.1) 0%, transparent 70%);
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255,215,0,0.15) 0%, transparent 60%);
       pointer-events: none;
     }
-    .balance-label { color: var(--rms-text-muted); font-size: 0.9rem; margin-bottom: 8px; position: relative; z-index: 1; }
-    .balance-amount { font-size: 2.5rem; font-weight: 800; margin-bottom: 24px; letter-spacing: -1px; position: relative; z-index: 1; }
-    .balance-actions { display: flex; gap: 12px; justify-content: center; position: relative; z-index: 1; }
-    
-    .icon-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 24px 0; }
-    .icon-item {
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      background: var(--rms-bg-card); border: 1px solid var(--rms-border);
-      border-radius: 12px; padding: 16px 8px; text-decoration: none; color: var(--rms-white);
-      transition: all 0.2s ease; cursor: pointer;
+    .balance-card::after {
+      content: '';
+      position: absolute;
+      bottom: -30%;
+      left: -30%;
+      width: 150%;
+      height: 150%;
+      background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 50%);
+      pointer-events: none;
     }
-    .icon-item:hover { transform: translateY(-2px); border-color: var(--rms-yellow); }
-    .icon-item .icon { font-size: 1.5rem; margin-bottom: 8px; }
-    .icon-item .label { font-size: 0.7rem; text-align: center; font-weight: 500; }
-    .icon-item .icon.fa-gem { color: var(--rms-yellow); }
-    .icon-item .icon.fa-dharmachakra { color: var(--rms-vivid-red); }
+    .balance-label { 
+      color: rgba(255,255,255,0.8); 
+      font-size: 0.85rem; 
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 12px;
+      position: relative;
+      z-index: 1;
+    }
+    .balance-amount { 
+      font-size: 3rem; 
+      font-weight: 900; 
+      color: white;
+      margin-bottom: 24px;
+      letter-spacing: -1px;
+      text-shadow: 0 4px 20px rgba(0,0,0,0.3);
+      position: relative;
+      z-index: 1;
+    }
+    .balance-amount span { font-size: 2rem; }
+    .balance-actions { 
+      display: flex; 
+      gap: 12px; 
+      position: relative; 
+      z-index: 1;
+    }
+    .balance-btn {
+      flex: 1;
+      padding: 14px 20px;
+      border-radius: 14px;
+      font-weight: 700;
+      font-size: 0.95rem;
+      cursor: pointer;
+      text-decoration: none;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.3s;
+    }
+    .balance-btn.primary {
+      background: linear-gradient(135deg, #ffd700, #e6c200);
+      color: #0a0e27;
+      box-shadow: 0 8px 24px rgba(255,215,0,0.4);
+    }
+    .balance-btn.primary:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(255,215,0,0.5); }
+    .balance-btn.secondary {
+      background: rgba(255,255,255,0.15);
+      color: white;
+      border: 1px solid rgba(255,255,255,0.3);
+      backdrop-filter: blur(10px);
+    }
+    .balance-btn.secondary:hover { background: rgba(255,255,255,0.25); }
     
-    .dashboard-grid { display: grid; grid-template-columns: 1fr; gap: 16px; margin-top: 24px; }
-    @media (min-width: 768px) { .dashboard-grid { grid-template-columns: 1fr 1fr; } }
+    /* Quick Actions Grid */
+    .quick-actions { 
+      display: grid; 
+      grid-template-columns: repeat(4, 1fr); 
+      gap: 12px; 
+      margin: 24px 0; 
+    }
+    .action-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px;
+      padding: 16px 8px;
+      text-decoration: none;
+      color: white;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      backdrop-filter: blur(10px);
+    }
+    .action-item:hover { 
+      transform: translateY(-4px); 
+      border-color: rgba(255,215,0,0.5);
+      background: rgba(255,215,0,0.05);
+      box-shadow: 0 8px 24px rgba(255,215,0,0.1);
+    }
+    .action-icon { 
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      margin-bottom: 8px;
+    }
+    .action-icon.blue { background: linear-gradient(135deg, #0066ff, #00d4ff); color: white; }
+    .action-icon.gold { background: linear-gradient(135deg, #ffd700, #e6c200); color: #0a0e27; }
+    .action-icon.green { background: linear-gradient(135deg, #00d26a, #00ff88); color: white; }
+    .action-icon.red { background: linear-gradient(135deg, #ff1a1a, #ff4444); color: white; }
+    .action-label { font-size: 0.7rem; text-align: center; font-weight: 600; color: rgba(255,255,255,0.8); }
     
-    .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-    .section-header h3 { margin: 0; font-size: 1.1rem; }
-    .section-header a { color: var(--rms-yellow); text-decoration: none; font-size: 0.85rem; font-weight: 600; }
+    /* Stats Cards */
+    .stats-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    .stat-card {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px;
+      padding: 16px;
+      backdrop-filter: blur(10px);
+    }
+    .stat-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    .stat-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+    }
+    .stat-icon.green { background: rgba(0,210,106,0.15); color: #00d26a; }
+    .stat-icon.gold { background: rgba(255,215,0,0.15); color: #ffd700; }
+    .stat-label { font-size: 0.75rem; color: rgba(255,255,255,0.6); font-weight: 500; }
+    .stat-value { font-size: 1.4rem; font-weight: 800; color: white; }
+    
+    /* Sections */
+    .section {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 20px;
+      padding: 20px;
+      margin-bottom: 16px;
+      backdrop-filter: blur(10px);
+    }
+    .section-header { 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      margin-bottom: 16px;
+    }
+    .section-header h3 { 
+      font-size: 1.1rem; 
+      font-weight: 700;
+      color: white;
+    }
+    .section-header a { 
+      color: #00d4ff; 
+      text-decoration: none; 
+      font-size: 0.85rem; 
+      font-weight: 600;
+      transition: color 0.2s;
+    }
+    .section-header a:hover { color: #ffd700; }
 
+    /* Transaction Rows */
     .txn-list { display: flex; flex-direction: column; gap: 12px; }
     .txn-row { 
-      display: flex; justify-content: space-between; align-items: center; 
-      padding-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center;
+      padding: 12px;
+      background: rgba(255,255,255,0.02);
+      border-radius: 12px;
+      transition: all 0.2s;
     }
-    .txn-row:last-child { border-bottom: none; padding-bottom: 0; }
+    .txn-row:hover { background: rgba(255,255,255,0.05); }
+    .txn-left { display: flex; align-items: center; gap: 12px; flex: 1; }
     .txn-icon { 
-      width: 36px; height: 36px; border-radius: 50%; display: flex; 
-      align-items: center; justify-content: center;
-      background: rgba(255,255,255,0.05); margin-right: 12px; font-size: 1rem;
+      width: 40px; 
+      height: 40px; 
+      border-radius: 12px; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center;
+      font-size: 1rem;
     }
-    .txn-icon.in { color: var(--rms-yellow); background: rgba(255,215,0,0.1); }
-    .txn-icon.out { color: var(--rms-vivid-red); background: rgba(255,26,26,0.1); }
+    .txn-icon.income { 
+      background: linear-gradient(135deg, rgba(0,210,106,0.2), rgba(0,255,136,0.1)); 
+      color: #00ff88; 
+    }
+    .txn-icon.expense { 
+      background: linear-gradient(135deg, rgba(255,26,26,0.2), rgba(255,68,68,0.1)); 
+      color: #ff4444; 
+    }
     .txn-body { flex: 1; }
-    .txn-title { font-weight: 600; font-size: 0.9rem; margin-bottom: 2px; }
-    .txn-date { font-size: 0.75rem; color: var(--rms-text-muted); }
-    .txn-amount { font-weight: 700; font-size: 0.95rem; }
-    .txn-amount.is-in { color: var(--rms-yellow); }
-    .txn-amount.is-out { color: var(--rms-vivid-red); }
+    .txn-title { font-weight: 600; font-size: 0.9rem; margin-bottom: 2px; color: white; }
+    .txn-date { font-size: 0.75rem; color: rgba(255,255,255,0.5); }
+    .txn-amount { 
+      font-weight: 700; 
+      font-size: 0.95rem;
+      text-align: right;
+    }
+    .txn-amount.income { color: #00ff88; }
+    .txn-amount.expense { color: #ff4444; }
 
-    .empty-state { text-align: center; padding: 20px 0; color: var(--rms-text-muted); font-size: 0.9rem; }
+    .empty-state { 
+      text-align: center; 
+      padding: 32px 20px; 
+      color: rgba(255,255,255,0.5); 
+      font-size: 0.9rem; 
+    }
+    .empty-state i { font-size: 2.5rem; margin-bottom: 12px; opacity: 0.3; }
   </style>
 </head>
 <body class="rv-shell">
@@ -76,88 +317,92 @@
 
   <div class="dashboard-container">
     
+    <!-- Welcome Section -->
     <div class="welcome-section">
       <div class="welcome-text">
-        <h2>Hello, <span id="user-name">User</span> <span style="font-size: 1.2rem;">👋</span></h2>
+        <h2>Hello, <span id="user-name">User</span> 👋</h2>
         <p>Welcome back to RMS</p>
       </div>
-      <a href="/messages.html" style="color: var(--rms-white); font-size: 1.4rem; text-decoration: none; position: relative;">
+      <button class="notif-btn">
         <i class="fa-regular fa-bell"></i>
-        <span id="notif-badge" style="position:absolute; top:-4px; right:-4px; width:8px; height:8px; background:var(--rms-vivid-red); border-radius:50%; display:none;"></span>
-      </a>
+        <span class="notif-badge" id="notif-badge" style="display:none;"></span>
+      </button>
     </div>
 
-    <div class="rms-card balance-card">
+    <!-- Balance Card -->
+    <div class="balance-card">
       <div class="balance-label">Available Balance</div>
-      <div class="balance-amount">₦<span id="wallet-balance">0.00</span></div>
+      <div class="balance-amount"><span>₦</span><span id="wallet-balance">0.00</span></div>
       <div class="balance-actions">
-        <a href="/deposit.html" class="rms-btn rms-btn-yellow" style="padding: 10px 24px; font-size: 0.9rem; text-decoration: none;">
-          <i class="fa-solid fa-arrow-down" style="margin-right: 6px;"></i> Deposit
+        <a href="/deposit.html" class="balance-btn primary">
+          <i class="fa-solid fa-arrow-down"></i> Deposit
         </a>
-        <a href="/withdraw.html" class="rms-btn rms-btn-outline" style="padding: 10px 24px; font-size: 0.9rem; text-decoration: none;">
-          <i class="fa-solid fa-arrow-up" style="margin-right: 6px;"></i> Withdraw
+        <a href="/withdraw.html" class="balance-btn secondary">
+          <i class="fa-solid fa-arrow-up"></i> Withdraw
         </a>
       </div>
     </div>
 
-    <div class="icon-grid">
-      <a href="/investments.html" class="icon-item">
-        <div class="icon"><i class="fa-solid fa-box-open"></i></div>
-        <div class="label">Mystery Boxes</div>
+    <!-- Quick Actions -->
+    <div class="quick-actions">
+      <a href="/investments.html" class="action-item">
+        <div class="action-icon gold"><i class="fa-solid fa-box-open"></i></div>
+        <div class="action-label">Mystery Box</div>
       </a>
-      <a href="/wealth-center.html" class="icon-item">
-        <div class="icon"><i class="fa-solid fa-gem"></i></div>
-        <div class="label">Wealth Center</div>
+      <a href="/wealth-center.html" class="action-item">
+        <div class="action-icon blue"><i class="fa-solid fa-gem"></i></div>
+        <div class="action-label">Wealth</div>
       </a>
-      <a href="/lucky-wheel.html" class="icon-item">
-        <div class="icon"><i class="fa-solid fa-dharmachakra"></i></div>
-        <div class="label">Lucky Wheel</div>
+      <a href="/lucky-wheel.html" class="action-item">
+        <div class="action-icon red"><i class="fa-solid fa-dharmachakra"></i></div>
+        <div class="action-label">Lucky Wheel</div>
       </a>
-      <a href="/team.html" class="icon-item">
-        <div class="icon"><i class="fa-solid fa-users"></i></div>
-        <div class="label">My Team</div>
-      </a>
-      <a href="/deposit.html" class="icon-item">
-        <div class="icon"><i class="fa-solid fa-wallet"></i></div>
-        <div class="label">Deposit</div>
-      </a>
-      <a href="/withdraw.html" class="icon-item">
-        <div class="icon"><i class="fa-solid fa-building-columns"></i></div>
-        <div class="label">Withdraw</div>
-      </a>
-      <a href="/support.html" class="icon-item">
-        <div class="icon"><i class="fa-solid fa-headset"></i></div>
-        <div class="label">Support</div>
-      </a>
-      <a href="/settings.html" class="icon-item">
-        <div class="icon"><i class="fa-solid fa-gear"></i></div>
-        <div class="label">Settings</div>
+      <a href="/team.html" class="action-item">
+        <div class="action-icon green"><i class="fa-solid fa-users"></i></div>
+        <div class="action-label">My Team</div>
       </a>
     </div>
 
-    <div class="dashboard-grid">
-      
-      <div class="rms-card">
-        <div class="section-header">
-          <h3>Recent Transactions</h3>
-          <a href="/transaction-history.html">View all <i class="fa-solid fa-chevron-right" style="font-size: 0.7rem;"></i></a>
+    <!-- Stats Row -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-header">
+          <div class="stat-icon green"><i class="fa-solid fa-arrow-trend-up"></i></div>
+          <div class="stat-label">Total Earnings</div>
         </div>
-        <div id="transactions-list">
-          <div class="empty-state"><i class="fa-solid fa-circle-notch fa-spin"></i> Loading...</div>
-        </div>
+        <div class="stat-value" id="total-earnings">₦0</div>
       </div>
-
-      <div class="rms-card">
-        <div class="section-header">
-          <h3>Recent Activity</h3>
-          <a href="/investments.html">Do a task <i class="fa-solid fa-chevron-right" style="font-size: 0.7rem;"></i></a>
+      <div class="stat-card">
+        <div class="stat-header">
+          <div class="stat-icon gold"><i class="fa-solid fa-coins"></i></div>
+          <div class="stat-label">Referral Income</div>
         </div>
-        <div id="activity-list">
-          <div class="empty-state"><i class="fa-solid fa-circle-notch fa-spin"></i> Loading...</div>
-        </div>
+        <div class="stat-value" id="referral-income">₦0</div>
       </div>
-
     </div>
+
+    <!-- Recent Transactions -->
+    <div class="section">
+      <div class="section-header">
+        <h3><i class="fa-solid fa-clock-rotate-left" style="color: #00d4ff; margin-right: 8px;"></i>Recent Transactions</h3>
+        <a href="/transaction-history.html">View all <i class="fa-solid fa-chevron-right" style="font-size: 0.7rem;"></i></a>
+      </div>
+      <div id="transactions-list">
+        <div class="empty-state"><i class="fa-solid fa-circle-notch fa-spin"></i><p>Loading...</p></div>
+      </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="section">
+      <div class="section-header">
+        <h3><i class="fa-solid fa-bolt" style="color: #ffd700; margin-right: 8px;"></i>Recent Activity</h3>
+        <a href="/investments.html">Do a task <i class="fa-solid fa-chevron-right" style="font-size: 0.7rem;"></i></a>
+      </div>
+      <div id="activity-list">
+        <div class="empty-state"><i class="fa-solid fa-circle-notch fa-spin"></i><p>Loading...</p></div>
+      </div>
+    </div>
+
   </div>
 
   <div id="footer-container"></div>
@@ -168,6 +413,35 @@
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
     const supabase = createClient('https://ofysznsajwxnjqaumwch.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9meXN6bnNhand4bmpxYXVtd2NoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgyMzM4NDgsImV4cCI6MjEwMzgwOTg0OH0.XaHkP5WZ2nJVJXVdbG-D13rrD63g_09HxmJoZn7ZoWA');
     window.supabase = supabase;
+
+    // Income types (positive, green)
+    const INCOME_TYPES = ['deposit', 'referral_commission', 'task_earning', 'wealth_claim', 'wheel_win', 'admin_credit', 'bonus', 'gift_code'];
+    // Expense types (negative, red)
+    const EXPENSE_TYPES = ['withdraw', 'wealth_invest', 'vip_upgrade', 'fee', 'purchase'];
+
+    function getTransactionType(txn) {
+      if (INCOME_TYPES.includes(txn.type)) return 'income';
+      if (EXPENSE_TYPES.includes(txn.type)) return 'expense';
+      return 'income'; // Default to income for unknown types
+    }
+
+    function formatTransactionTitle(txn) {
+      const titles = {
+        'deposit': 'Deposit',
+        'withdraw': 'Withdrawal',
+        'referral_commission': 'Referral Commission',
+        'task_earning': 'Mystery Box Reward',
+        'wealth_claim': 'Wealth Return',
+        'wealth_invest': 'Wealth Investment',
+        'wheel_win': 'Wheel Prize',
+        'vip_upgrade': 'VIP Upgrade',
+        'admin_credit': 'Admin Credit',
+        'bonus': 'Bonus',
+        'gift_code': 'Gift Code Reward',
+        'fee': 'Fee'
+      };
+      return titles[txn.type] || txn.description || txn.type.replace('_', ' ').toUpperCase();
+    }
 
     async function loadDashboard() {
       const { data: { user } } = await supabase.auth.getUser();
@@ -183,10 +457,7 @@
 
         document.getElementById('user-name').textContent = profile?.full_name || profile?.username || 'User';
         
-        // Update header VIP badge
-        if (window.updateVipBadge) {
-          window.updateVipBadge();
-        }
+        if (window.updateVipBadge) window.updateVipBadge();
 
         // 2. Load Wallet Balance
         const { data: wallet } = await supabase
@@ -201,7 +472,7 @@
           maximumFractionDigits: 2 
         });
 
-        // 3. Load Recent Transactions
+        // 3. Load All Transactions
         const { data: transactions } = await supabase
           .from('transactions')
           .select('*')
@@ -211,13 +482,25 @@
 
         const txnList = document.getElementById('transactions-list');
         
+        // Calculate totals
+        let totalEarnings = 0;
+        let referralIncome = 0;
+
         if (transactions && transactions.length > 0) {
+          transactions.forEach(txn => {
+            const type = getTransactionType(txn);
+            const amount = Number(txn.amount);
+            
+            if (type === 'income') totalEarnings += amount;
+            if (txn.type === 'referral_commission') referralIncome += amount;
+          });
+
           txnList.innerHTML = transactions.map(txn => {
-            const isIn = ['deposit', 'referral_commission', 'task_earning', 'wealth_claim', 'wheel_win', 'admin_credit'].includes(txn.type);
-            const iconClass = isIn ? 'fa-arrow-down' : 'fa-arrow-up';
-            const amountClass = isIn ? 'is-in' : 'is-out';
-            const sign = isIn ? '+' : '-';
-            const title = txn.description || txn.type.replace('_', ' ').toUpperCase();
+            const type = getTransactionType(txn);
+            const iconClass = type === 'income' ? 'fa-arrow-down' : 'fa-arrow-up';
+            const amountClass = type;
+            const sign = type === 'income' ? '+' : '-';
+            const title = formatTransactionTitle(txn);
             const date = new Date(txn.created_at).toLocaleDateString('en-NG', { 
               month: 'short', 
               day: 'numeric',
@@ -227,8 +510,8 @@
             
             return `
               <div class="txn-row">
-                <div style="display: flex; align-items: center;">
-                  <div class="txn-icon ${isIn ? 'in' : 'out'}">
+                <div class="txn-left">
+                  <div class="txn-icon ${type}">
                     <i class="fa-solid ${iconClass}"></i>
                   </div>
                   <div class="txn-body">
@@ -243,10 +526,13 @@
             `;
           }).join('');
         } else {
-          txnList.innerHTML = '<div class="empty-state">No transactions yet. Make a deposit to get started!</div>';
+          txnList.innerHTML = '<div class="empty-state"><i class="fa-solid fa-receipt"></i><p>No transactions yet. Make a deposit to get started!</p></div>';
         }
 
-        // 4. Load Recent Activity (Tasks & Wealth)
+        document.getElementById('total-earnings').textContent = `₦${totalEarnings.toLocaleString()}`;
+        document.getElementById('referral-income').textContent = `${referralIncome.toLocaleString()}`;
+
+        // 4. Load Recent Activity
         const { data: recentTasks } = await supabase
           .from('transactions')
           .select('*')
@@ -262,13 +548,13 @@
             let icon = 'fa-box-open';
             if (t.type === 'wealth_claim') icon = 'fa-gem';
             if (t.type === 'wheel_win') icon = 'fa-dharmachakra';
-            const title = t.description || t.type.replace('_', ' ').toUpperCase();
+            const title = formatTransactionTitle(t);
             const date = new Date(t.created_at).toLocaleDateString('en-NG', { month: 'short', day: 'numeric' });
             
             return `
               <div class="txn-row">
-                <div style="display: flex; align-items: center;">
-                  <div class="txn-icon in">
+                <div class="txn-left">
+                  <div class="txn-icon income">
                     <i class="fa-solid ${icon}"></i>
                   </div>
                   <div class="txn-body">
@@ -276,14 +562,14 @@
                     <div class="txn-date">${date}</div>
                   </div>
                 </div>
-                <div class="txn-amount is-in">
+                <div class="txn-amount income">
                   +₦${Number(t.amount).toLocaleString()}
                 </div>
               </div>
             `;
           }).join('');
         } else {
-          activityList.innerHTML = '<div class="empty-state">No recent activity. Open a Mystery Box!</div>';
+          activityList.innerHTML = '<div class="empty-state"><i class="fa-solid fa-box-open"></i><p>No recent activity. Open a Mystery Box!</p></div>';
         }
 
       } catch (err) {
