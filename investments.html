@@ -29,9 +29,23 @@
     .mystery-box.opened .box-icon { display: none; }
 
     .tier-badge { display: inline-block; background: rgba(255,26,26,0.1); color: var(--rms-vivid-red); padding: 6px 16px; border-radius: 20px; font-size: 0.85rem; font-weight: 700; margin-bottom: 10px; }
+    .tier-badge.weekend { background: rgba(52,152,219,0.15); color: #3498db; }
+    
     .error-box { text-align: center; padding: 40px 20px; grid-column: 1 / -1; }
     .error-box i { font-size: 3rem; margin-bottom: 16px; opacity: 0.5; }
     .loading-box { text-align: center; padding: 40px; color: var(--rms-text-muted); }
+    
+    .weekend-info {
+      background: rgba(52,152,219,0.1);
+      border: 1px solid #3498db;
+      border-radius: 12px;
+      padding: 20px;
+      margin-top: 20px;
+      text-align: center;
+    }
+    .weekend-info i { font-size: 2.5rem; color: #3498db; margin-bottom: 12px; }
+    .weekend-info h3 { color: #3498db; margin: 0 0 8px 0; font-size: 1.2rem; }
+    .weekend-info p { color: var(--rms-text-muted); margin: 0; font-size: 0.9rem; }
   </style>
 </head>
 <body class="rv-shell">
@@ -58,6 +72,7 @@
 
   <div id="footer-container"></div>
   <script src="/assets/js/components.js"></script>
+  <script src="/assets/js/notifications.js"></script>
   <script type="module">
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
     const supabase = createClient('https://ofysznsajwxnjqaumwch.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9meXN6bnNhand4bmpxYXVtd2NoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgyMzM4NDgsImV4cCI6MjEwMzgwOTg0OH0.XaHkP5WZ2nJVJXVdbG-D13rrD63g_09HxmJoZn7ZoWA');
@@ -85,44 +100,68 @@
         
         taskStatus = await res.json();
 
-        if (!taskStatus.tier || taskStatus.tier === 'newbie') {
-          document.getElementById('current-tier').textContent = 'No Tier - Please Upgrade';
-          document.getElementById('current-tier').style.background = 'rgba(255,26,26,0.2)';
+        // 1. CHECK WEEKEND FIRST
+        if (taskStatus.weekend_closed) {
+          document.getElementById('current-tier').textContent = 'Weekend Break';
+          document.getElementById('current-tier').className = 'tier-badge weekend';
           document.getElementById('progress-text').textContent = '0 / 0';
+          document.getElementById('progress-fill').style.width = '0%';
+          
           grid.innerHTML = `
-            <div class="error-box">
-              <i class="fa-solid fa-lock" style="color: var(--rms-text-muted);"></i>
-              <p style="color: var(--rms-text-muted);">Upgrade to M0 or higher to unlock Mystery Boxes</p>
-              <a href="/vip.html" class="rms-btn rms-btn-primary" style="margin-top: 20px; text-decoration:none;">View VIP Tiers</a>
+            <div class="error-box" style="grid-column: 1/-1;">
+              <div class="weekend-info">
+                <i class="fa-solid fa-calendar-xmark"></i>
+                <h3>Weekend Break</h3>
+                <p>${taskStatus.message || 'Tasks are closed on Saturdays and Sundays'}</p>
+                <p style="margin-top: 12px; font-size: 0.85rem;"><i class="fa-solid fa-clock" style="margin-right: 6px;"></i>Come back on Monday to claim your boxes!</p>
+              </div>
             </div>
           `;
           return;
         }
 
+        // 2. CHECK NEWBIE
+        if (!taskStatus.tier || taskStatus.tier === 'newbie') {
+          document.getElementById('current-tier').textContent = 'No Tier - Upgrade Required';
+          document.getElementById('current-tier').style.background = 'rgba(255,26,26,0.2)';
+          document.getElementById('progress-text').textContent = '0 / 0';
+          grid.innerHTML = `
+            <div class="error-box" style="grid-column: 1/-1;">
+              <i class="fa-solid fa-lock" style="color: var(--rms-text-muted);"></i>
+              <p style="color: var(--rms-text-muted); margin: 16px 0;">Upgrade to M0 or higher to unlock Mystery Boxes</p>
+              <a href="/vip.html" class="rms-btn rms-btn-primary" style="text-decoration:none; display: inline-block;">View VIP Tiers</a>
+            </div>
+          `;
+          return;
+        }
+
+        // 3. CHECK M0 EXPIRED
         if (taskStatus.m0_expired) {
           document.getElementById('current-tier').textContent = 'M0 Expired';
           document.getElementById('current-tier').style.background = 'rgba(255,26,26,0.2)';
           grid.innerHTML = `
-            <div class="error-box">
+            <div class="error-box" style="grid-column: 1/-1;">
               <i class="fa-solid fa-clock" style="color: var(--rms-text-muted);"></i>
-              <p style="color: var(--rms-text-muted);">${taskStatus.message || 'Your free trial has expired'}</p>
-              <a href="/vip.html" class="rms-btn rms-btn-primary" style="margin-top: 20px; text-decoration:none;">Upgrade Now</a>
+              <p style="color: var(--rms-text-muted); margin: 16px 0;">${taskStatus.message || 'Your free trial has expired'}</p>
+              <a href="/vip.html" class="rms-btn rms-btn-primary" style="text-decoration:none; display: inline-block;">Upgrade Now</a>
             </div>
           `;
           return;
         }
 
+        // 4. NORMAL DISPLAY
         document.getElementById('current-tier').textContent = `Tier: ${taskStatus.tier.toUpperCase()}`;
+        document.getElementById('current-tier').style.background = 'rgba(255,215,0,0.15)';
         document.getElementById('progress-text').textContent = `${taskStatus.boxes_opened} / ${taskStatus.max_boxes}`;
         document.getElementById('progress-fill').style.width = `${taskStatus.max_boxes > 0 ? (taskStatus.boxes_opened / taskStatus.max_boxes) * 100 : 0}%`;
 
         renderBoxes();
       } catch (err) {
         console.error('Task loading error:', err);
-        document.getElementById('current-tier').textContent = 'Error Loading';
-        document.getElementById('current-tier').style.color = 'var(--rms-vivid-red)';
+        document.getElementById('current-tier').textContent = 'Error';
+        document.getElementById('current-tier').style.background = 'rgba(255,26,26,0.2)';
         grid.innerHTML = `
-          <div class="error-box">
+          <div class="error-box" style="grid-column: 1/-1;">
             <i class="fa-solid fa-triangle-exclamation" style="color: var(--rms-vivid-red);"></i>
             <p style="color: var(--rms-vivid-red);">${err.message}</p>
             <button onclick="loadTasks()" class="rms-btn rms-btn-outline" style="margin-top: 10px;">Retry</button>
@@ -137,7 +176,7 @@
       const max = taskStatus.max_boxes || 0;
       
       if (max === 0) {
-        grid.innerHTML = '<div class="error-box"><p>No boxes available for this tier.</p></div>';
+        grid.innerHTML = '<div class="error-box" style="grid-column: 1/-1;"><p>No boxes available for this tier.</p></div>';
         return;
       }
 
@@ -181,9 +220,9 @@
           document.querySelectorAll('.mystery-box:not(.opened)').forEach(b => b.style.pointerEvents = 'none');
         }
         
-        alert(`✅ You earned ₦${data.amount.toLocaleString()}!`);
+        showToast(`✅ You earned ${data.amount.toLocaleString()}!`, 'success');
       } catch (err) {
-        alert(err.message);
+        showToast(err.message, 'error');
         boxElement.style.pointerEvents = 'auto';
       }
     }
