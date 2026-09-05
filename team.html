@@ -2,91 +2,99 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>RMS — My Team</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="assets/css/style.css">
-  <meta name="theme-color" content="#0a0e27">
   <style>
     .team-container { padding: 20px 16px 100px 16px; max-width: 600px; margin: 0 auto; }
-    .referral-card { background: linear-gradient(135deg, #11163a, #1a2050); border: 1px solid var(--rms-yellow); border-radius: 16px; padding: 24px; text-align: center; margin-bottom: 24px; }
-    .ref-code { font-size: 2rem; font-weight: 800; letter-spacing: 3px; color: var(--rms-yellow); margin: 10px 0 16px; }
-    .copy-btn { background: var(--rms-vivid-red); color: white; border: none; padding: 10px 24px; border-radius: 999px; font-weight: 700; cursor: pointer; }
-
-    .stats-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 24px; }
-    .stat-box { background: var(--rms-bg-card); border: 1px solid var(--rms-border); border-radius: 12px; padding: 14px 8px; text-align: center; }
-    .stat-num { font-size: 1.3rem; font-weight: 800; color: var(--rms-white); margin-bottom: 4px; }
-    .stat-lbl { font-size: 0.65rem; color: var(--rms-text-muted); text-transform: uppercase; }
-
-    /* Gift Code Reward Section */
-    .gift-reward-card {
-      background: linear-gradient(135deg, rgba(255,215,0,0.1), rgba(255,26,26,0.1));
-      border: 1px solid var(--rms-yellow);
-      border-radius: 16px;
-      padding: 20px;
-      margin-bottom: 24px;
-      text-align: center;
+    .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; }
+    .stat-card { background: var(--rms-bg-card); border: 1px solid var(--rms-border); border-radius: 12px; padding: 16px; text-align: center; }
+    .stat-value { font-size: 1.5rem; font-weight: 800; color: var(--rms-yellow); margin: 8px 0; }
+    .stat-label { font-size: 0.75rem; color: var(--rms-text-muted); }
+    
+    .referral-card { background: linear-gradient(135deg, #11163a, #1a2050); border: 1px solid var(--rms-yellow); border-radius: 16px; padding: 20px; text-align: center; margin-bottom: 20px; }
+    .ref-code { font-size: 1.8rem; font-weight: 800; color: var(--rms-yellow); margin: 10px 0; letter-spacing: 2px; }
+    
+    .action-section { background: var(--rms-bg-card); border: 1px solid var(--rms-border); border-radius: 12px; padding: 16px; margin-bottom: 16px; }
+    .action-title { font-size: 1rem; font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+    .action-title i { color: var(--rms-yellow); }
+    
+    .action-btn { 
+      width: 100%; padding: 12px; border: none; border-radius: 8px; 
+      background: linear-gradient(135deg, var(--rms-yellow), #e6c200); 
+      color: #0a0e27; font-weight: 700; cursor: pointer; margin-top: 8px;
     }
-    .gift-reward-card h3 { margin: 0 0 8px 0; color: var(--rms-yellow); font-size: 1.1rem; }
-    .gift-reward-card p { margin: 0 0 16px 0; color: var(--rms-text-muted); font-size: 0.9rem; }
-    .claim-btn {
-      background: linear-gradient(135deg, var(--rms-yellow), #e6c200);
-      color: #0a0e27;
-      border: none;
-      padding: 12px 30px;
-      border-radius: 999px;
-      font-weight: 800;
-      font-size: 1rem;
-      cursor: pointer;
-      width: 100%;
-    }
-    .claim-btn:disabled { opacity: 0.5; cursor: not-allowed; background: #555; color: #aaa; }
-
-    .member-card { background: var(--rms-bg-card); border: 1px solid var(--rms-border); border-radius: 12px; padding: 14px 16px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
-    .member-info { display: flex; align-items: center; gap: 12px; }
-    .member-avatar { width: 40px; height: 40px; background: rgba(255,255,255,0.05); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--rms-text-muted); }
-    .member-name { font-weight: 600; font-size: 0.95rem; margin-bottom: 2px; }
-    .member-date { font-size: 0.75rem; color: var(--rms-text-muted); }
-    .status-badge { font-size: 0.7rem; padding: 4px 10px; border-radius: 20px; font-weight: 700; text-transform: uppercase; }
-    .status-active { background: rgba(46,204,113,0.15); color: #2ecc71; }
-    .status-inactive { background: rgba(255,255,255,0.05); color: var(--rms-text-muted); }
-    .empty-team { text-align: center; padding: 40px 20px; color: var(--rms-text-muted); }
+    .action-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .action-btn.secondary { background: rgba(255,255,255,0.1); color: white; }
+    
+    .info-box { background: rgba(255,215,0,0.1); border-left: 3px solid var(--rms-yellow); padding: 12px; margin: 12px 0; border-radius: 0 8px 8px 0; font-size: 0.85rem; }
   </style>
 </head>
 <body class="rv-shell">
   <div id="header-container"></div>
 
   <div class="team-container">
-    <h2 style="margin-bottom: 5px;">My Team</h2>
-    <p class="text-muted" style="margin-bottom: 20px;">Invite friends and earn rewards.</p>
-
+    <h2>My Team</h2>
+    
     <div class="referral-card">
-      <div style="font-size: 0.85rem; color: var(--rms-text-muted);">Your Referral Code</div>
-      <div class="ref-code" id="ref-code">------</div>
-      <button class="copy-btn" onclick="copyReferral()"><i class="fa-regular fa-copy"></i> Copy Link</button>
-    </div>
-
-    <!-- Gift Code Reward Section -->
-    <div class="gift-reward-card" id="gift-reward-section" style="display: none;">
-      <h3><i class="fa-solid fa-gift"></i> Referral Reward Unlocked!</h3>
-      <p>You have <strong id="high-tier-count">0</strong> referrals on M2 or higher. Claim your ₦5,000 Gift Code now!</p>
-      <button class="claim-btn" id="claim-gift-btn" onclick="claimGiftCode()">Claim Gift Code</button>
+      <div>Your Referral Code</div>
+      <div class="ref-code" id="ref-code">---</div>
+      <button class="action-btn" onclick="copyReferral()">Copy Link</button>
     </div>
 
     <div class="stats-grid">
-      <div class="stat-box"><div class="stat-num" id="total-refs">0</div><div class="stat-lbl">Total Refs</div></div>
-      <div class="stat-box"><div class="stat-num text-yellow" id="active-downlines">0</div><div class="stat-lbl">Active (M2+)</div></div>
-      <div class="stat-box"><div class="stat-num text-red" id="wheel-spins">0</div><div class="stat-lbl">Wheel Spins</div></div>
+      <div class="stat-card">
+        <div class="stat-label">Total Referrals</div>
+        <div class="stat-value" id="total-refs">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">VIP Upgrades</div>
+        <div class="stat-value" id="vip-refs">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">M2+ Members</div>
+        <div class="stat-value" id="m2-count">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Wheel Spins</div>
+        <div class="stat-value" id="wheel-spins">0</div>
+      </div>
     </div>
 
-    <div class="team-list-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-      <h3 style="margin:0; font-size: 1.1rem;">Referred Users</h3>
-      <span class="text-muted" style="font-size: 0.85rem;" id="list-count">0 members</span>
+    <!-- 10% Commission Section -->
+    <div class="action-section">
+      <div class="action-title">
+        <i class="fa-solid fa-percent"></i>
+        VIP Upgrade Commission (10%)
+      </div>
+      <div class="info-box">
+        Earn 10% when your referrals upgrade to VIP!<br>
+        M1 (₦3,000) → You get ₦300<br>
+        M2 (₦10,000) → You get ₦1,000
+      </div>
+      <button class="action-btn" onclick="claimCommissions()">
+        <i class="fa-solid fa-coins"></i> Claim Commissions
+      </button>
     </div>
-    
-    <div id="team-list">
-      <div class="empty-team"><i class="fa-solid fa-users-slash"></i><p>Loading team data...</p></div>
+
+    <!-- Gift Code Section -->
+    <div class="action-section">
+      <div class="action-title">
+        <i class="fa-solid fa-gift"></i>
+        Gift Code Rewards (M2+ Only)
+      </div>
+      <div class="info-box">
+        Get gift codes for each M2+ referral:<br>
+        M2: 5% | M3: 8% | M4: 12%<br>
+        M5: 15% | M6: 18% | M7: 20%
+      </div>
+      <button class="action-btn" id="gift-code-btn" onclick="requestGiftCodes()">
+        <i class="fa-solid fa-ticket"></i> Request Gift Codes
+      </button>
     </div>
+
+    <div id="team-list" style="margin-top: 20px;"></div>
   </div>
 
   <div id="footer-container"></div>
@@ -101,106 +109,100 @@
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return window.location.href = '/login.html';
 
+      // Get profile
+      const { data: profile } = await supabase.from('profiles').select('referral_code').eq('id', user.id).single();
+      document.getElementById('ref-code').textContent = profile?.referral_code || 'NONE';
+
+      // Get referrals
+      const { data: referrals } = await supabase.from('profiles')
+        .select('id, email, full_name, vip_level, created_at')
+        .eq('referred_by', user.id);
+
+      let vipCount = 0;
+      let m2Count = 0;
+      const vipTiers = ['M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7'];
+      const m2Tiers = ['M2', 'M3', 'M4', 'M5', 'M6', 'M7'];
+
+      referrals.forEach(ref => {
+        if (vipTiers.includes(ref.vip_level)) vipCount++;
+        if (m2Tiers.includes(ref.vip_level)) m2Count++;
+      });
+
+      document.getElementById('total-refs').textContent = referrals.length;
+      document.getElementById('vip-refs').textContent = vipCount;
+      document.getElementById('m2-count').textContent = m2Count;
+
+      // Get wheel spins from database
       try {
-        const { data: profile } = await supabase.from('profiles').select('referral_code, referral_gift_claimed_at').eq('id', user.id).single();
-        document.getElementById('ref-code').textContent = profile.referral_code;
-
-        const { data: referrals } = await supabase.from('profiles').select('id, full_name, email, created_at, vip_level').eq('referred_by', user.id).order('created_at', { ascending: false });
-
-        document.getElementById('total-refs').textContent = referrals.length;
-        document.getElementById('list-count').textContent = `${referrals.length} members`;
-
-        let activeM2Count = 0;
-        const teamListEl = document.getElementById('team-list');
-        
-        if (referrals.length === 0) {
-          teamListEl.innerHTML = '<div class="empty-team"><i class="fa-solid fa-user-plus"></i><p>You haven\'t referred anyone yet.</p></div>';
-        } else {
-          teamListEl.innerHTML = '';
-          for (const ref of referrals) {
-            // Check if they have made a deposit to be "active"
-            const { count } = await supabase.from('deposits').select('*', { count: 'exact', head: true }).eq('user_id', ref.id).eq('status', 'approved');
-            const isActive = count > 0;
-            const isHighTier = ['M2', 'M3', 'M4', 'M5', 'M6', 'M7'].includes(ref.vip_level);
-            
-            if (isHighTier) activeM2Count++;
-
-            const initials = (ref.full_name || ref.email).substring(0, 2).toUpperCase();
-            const date = new Date(ref.created_at).toLocaleDateString('en-NG', { month: 'short', day: 'numeric' });
-
-            teamListEl.innerHTML += `
-              <div class="member-card">
-                <div class="member-info">
-                  <div class="member-avatar">${initials}</div>
-                  <div>
-                    <div class="member-name">${ref.full_name || 'Anonymous'} <span style="font-size:0.7rem; color:var(--rms-yellow); margin-left:5px;">${ref.vip_level}</span></div>
-                    <div class="member-date">Joined ${date}</div>
-                  </div>
-                </div>
-                <div class="status-badge ${isActive ? 'status-active' : 'status-inactive'}">${isActive ? 'Active' : 'Inactive'}</div>
-              </div>
-            `;
-          }
-        }
-
-        document.getElementById('active-downlines').textContent = activeM2Count;
-        document.getElementById('wheel-spins').textContent = activeM2Count; // Assuming 1 spin per active downline
-
-        // Handle Gift Code Reward UI
-        const giftSection = document.getElementById('gift-reward-section');
-        const claimBtn = document.getElementById('claim-gift-btn');
-        
-        if (activeM2Count >= 2) {
-          giftSection.style.display = 'block';
-          document.getElementById('high-tier-count').textContent = activeM2Count;
-          
-          // Check if already claimed recently
-          if (profile.referral_gift_claimed_at) {
-            const lastClaim = new Date(profile.referral_gift_claimed_at);
-            const daysSince = (Date.now() - lastClaim.getTime()) / (1000 * 60 * 60 * 24);
-            if (daysSince < 30) {
-              claimBtn.disabled = true;
-              claimBtn.textContent = `Claimed (Try again in ${Math.ceil(30 - daysSince)} days)`;
-            }
-          }
-        }
-
+        const token = (await supabase.auth.getSession()).data.session.access_token;
+        const res = await fetch('/api/referral?action=getSpinCount', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await res.json();
+        document.getElementById('wheel-spins').textContent = data.spins || 0;
       } catch (err) {
-        console.error('Team loading error:', err);
-        showToast('Error loading team data', 'error');
+        console.error('Failed to load spins:', err);
+      }
+
+      // Render team list
+      const listEl = document.getElementById('team-list');
+      if (referrals.length === 0) {
+        listEl.innerHTML = '<div style="text-align:center;padding:40px;color:var(--rms-text-muted)">No referrals yet</div>';
+      } else {
+        listEl.innerHTML = referrals.map(ref => `
+          <div style="background:var(--rms-bg-card);border:1px solid var(--rms-border);border-radius:8px;padding:12px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center">
+            <div>
+              <div style="font-weight:600">${ref.full_name || ref.email}</div>
+              <div style="font-size:0.75rem;color:var(--rms-text-muted)">${ref.vip_level || 'Newbie'}</div>
+            </div>
+            <div style="text-align:right">
+              <div style="font-size:0.75rem;color:${vipTiers.includes(ref.vip_level) ? '#2ecc71' : 'var(--rms-text-muted)'}">
+                ${vipTiers.includes(ref.vip_level) ? '✓ Active VIP' : 'Inactive'}
+              </div>
+            </div>
+          </div>
+        `).join('');
       }
     }
 
-    window.claimGiftCode = async () => {
-      showConfirm('Are you sure you want to claim your Referral Gift Code reward?', async () => {
-        const btn = document.getElementById('claim-gift-btn');
-        btn.disabled = true;
-        btn.textContent = 'Processing...';
-
+    window.claimCommissions = async () => {
+      showConfirm('Claim all pending VIP upgrade commissions?', async () => {
         try {
           const token = (await supabase.auth.getSession()).data.session.access_token;
-          const res = await fetch('/api/user?action=claimReferralGift', {
+          const res = await fetch('/api/referral?action=claimCommission', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            body: JSON.stringify({ auto: true }) // Backend will find all pending
           });
-          
           const data = await res.json();
-          if (!res.ok) throw new Error(data.error || 'Failed to claim');
-
-          showToast(`Success! Your code is: ${data.code}`, 'success', 5000);
-          btn.textContent = 'Claimed Successfully';
+          if (!res.ok) throw new Error(data.error);
+          showToast(data.message || 'Commissions claimed!', 'success');
         } catch (err) {
           showToast(err.message, 'error');
-          btn.disabled = false;
-          btn.textContent = 'Claim Gift Code';
+        }
+      });
+    };
+
+    window.requestGiftCodes = async () => {
+      showConfirm('Request gift codes for M2+ referrals?', async () => {
+        try {
+          const token = (await supabase.auth.getSession()).data.session.access_token;
+          const res = await fetch('/api/referral?action=requestGiftCode', {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error);
+          showToast(`Gift code: ${data.code} (${data.percentage}% = ₦${data.amount})`, 'success', 8000);
+        } catch (err) {
+          showToast(err.message, 'error');
         }
       });
     };
 
     window.copyReferral = () => {
       const code = document.getElementById('ref-code').textContent;
-      const link = `${window.location.origin}/register.html?ref=${code}`;
-      navigator.clipboard.writeText(link);
+      navigator.clipboard.writeText(`${window.location.origin}/register.html?ref=${code}`);
       showToast('Referral link copied!', 'success');
     };
 
