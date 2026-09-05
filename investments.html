@@ -14,19 +14,158 @@
     .progress-bar-fill { height: 100%; background: linear-gradient(90deg, var(--rms-yellow), var(--rms-vivid-red)); transition: width 0.5s ease; }
     
     .box-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    
     .mystery-box {
-      aspect-ratio: 1; background: var(--rms-bg-card); border: 2px solid var(--rms-border);
-      border-radius: 16px; display: flex; flex-direction: column; align-items: center; justify-content: center;
-      cursor: pointer; transition: all 0.3s ease; position: relative; overflow: hidden;
+      aspect-ratio: 1;
+      background: var(--rms-bg-card);
+      border: 2px solid var(--rms-border);
+      border-radius: 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: visible;
     }
-    .mystery-box:hover { transform: scale(1.05); border-color: var(--rms-yellow); }
-    .mystery-box.opened { border-color: var(--rms-text-muted); opacity: 0.5; cursor: default; }
-    .mystery-box .box-icon { font-size: 2.5rem; color: var(--rms-yellow); margin-bottom: 8px; transition: transform 0.3s; }
-    .mystery-box:hover .box-icon { transform: rotate(-10deg) scale(1.1); }
-    .mystery-box .box-label { font-size: 0.8rem; font-weight: 600; }
-    .mystery-box .box-reward { position: absolute; inset: 0; background: rgba(10,14,39,0.9); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; font-weight: 800; color: var(--rms-yellow); opacity: 0; transition: opacity 0.3s; }
-    .mystery-box.opened .box-reward { opacity: 1; }
-    .mystery-box.opened .box-icon { display: none; }
+    
+    .mystery-box:hover {
+      transform: scale(1.05);
+      border-color: var(--rms-yellow);
+      box-shadow: 0 0 20px rgba(255,215,0,0.3);
+    }
+    
+    .mystery-box.opened {
+      border-color: var(--rms-text-muted);
+      opacity: 0.5;
+      cursor: default;
+      pointer-events: none;
+    }
+    
+    .mystery-box.opening {
+      animation: boxShake 0.5s ease;
+    }
+    
+    .box-icon {
+      font-size: 2.5rem;
+      color: var(--rms-yellow);
+      margin-bottom: 8px;
+      transition: all 0.3s ease;
+      position: relative;
+      z-index: 2;
+    }
+    
+    .mystery-box:hover .box-icon {
+      transform: rotate(-10deg) scale(1.1);
+    }
+    
+    .mystery-box.opening .box-icon {
+      animation: boxLidFly 0.6s ease forwards;
+    }
+    
+    .box-label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      position: relative;
+      z-index: 2;
+    }
+    
+    .box-reward {
+      position: absolute;
+      inset: 0;
+      background: rgba(10,14,39,0.95);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: var(--rms-yellow);
+      opacity: 0;
+      transition: opacity 0.3s;
+      z-index: 3;
+    }
+    
+    .mystery-box.opened .box-reward {
+      opacity: 1;
+    }
+    
+    .mystery-box.opened .box-icon {
+      display: none;
+    }
+    
+    .mystery-box.opened .box-label {
+      display: none;
+    }
+    
+    /* Shine/Sparkle Effects */
+    .sparkle {
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      background: var(--rms-yellow);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 10;
+      box-shadow: 0 0 10px var(--rms-yellow), 0 0 20px var(--rms-yellow);
+    }
+    
+    @keyframes sparkleBurst {
+      0% {
+        transform: translate(0, 0) scale(0);
+        opacity: 1;
+      }
+      100% {
+        transform: translate(var(--tx), var(--ty)) scale(1);
+        opacity: 0;
+      }
+    }
+    
+    @keyframes boxShake {
+      0%, 100% { transform: translateX(0); }
+      10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+      20%, 40%, 60%, 80% { transform: translateX(5px); }
+    }
+    
+    @keyframes boxLidFly {
+      0% {
+        transform: translateY(0) rotate(0);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(-50px) rotate(-30deg);
+        opacity: 0;
+      }
+    }
+    
+    @keyframes rewardReveal {
+      0% {
+        transform: scale(0) rotate(-180deg);
+        opacity: 0;
+      }
+      50% {
+        transform: scale(1.3) rotate(10deg);
+        opacity: 1;
+      }
+      100% {
+        transform: scale(1) rotate(0);
+        opacity: 1;
+      }
+    }
+    
+    .reward-amount {
+      animation: rewardReveal 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+      text-shadow: 0 0 20px var(--rms-yellow), 0 0 40px var(--rms-yellow);
+    }
+    
+    @keyframes glowPulse {
+      0%, 100% { box-shadow: 0 0 20px rgba(255,215,0,0.5); }
+      50% { box-shadow: 0 0 40px rgba(255,215,0,0.8), 0 0 60px rgba(255,215,0,0.6); }
+    }
+    
+    .mystery-box.opening {
+      animation: glowPulse 0.5s ease;
+    }
 
     .tier-badge { display: inline-block; background: rgba(255,26,26,0.1); color: var(--rms-vivid-red); padding: 6px 16px; border-radius: 20px; font-size: 0.85rem; font-weight: 700; margin-bottom: 10px; }
     .tier-badge.weekend { background: rgba(52,152,219,0.15); color: #3498db; }
@@ -100,7 +239,6 @@
         
         taskStatus = await res.json();
 
-        // 1. CHECK WEEKEND FIRST
         if (taskStatus.weekend_closed) {
           document.getElementById('current-tier').textContent = 'Weekend Break';
           document.getElementById('current-tier').className = 'tier-badge weekend';
@@ -120,7 +258,6 @@
           return;
         }
 
-        // 2. CHECK NEWBIE
         if (!taskStatus.tier || taskStatus.tier === 'newbie') {
           document.getElementById('current-tier').textContent = 'No Tier - Upgrade Required';
           document.getElementById('current-tier').style.background = 'rgba(255,26,26,0.2)';
@@ -135,7 +272,6 @@
           return;
         }
 
-        // 3. CHECK M0 EXPIRED
         if (taskStatus.m0_expired) {
           document.getElementById('current-tier').textContent = 'M0 Expired';
           document.getElementById('current-tier').style.background = 'rgba(255,26,26,0.2)';
@@ -149,7 +285,6 @@
           return;
         }
 
-        // 4. NORMAL DISPLAY
         document.getElementById('current-tier').textContent = `Tier: ${taskStatus.tier.toUpperCase()}`;
         document.getElementById('current-tier').style.background = 'rgba(255,215,0,0.15)';
         document.getElementById('progress-text').textContent = `${taskStatus.boxes_opened} / ${taskStatus.max_boxes}`;
@@ -185,9 +320,11 @@
         const box = document.createElement('div');
         box.className = `mystery-box ${isOpened ? 'opened' : ''}`;
         box.innerHTML = `
-          <i class="fa-solid fa-box box-icon"></i>
+          <i class="fa-solid fa-gift box-icon"></i>
           <div class="box-label">${isOpened ? 'Opened' : 'Tap to Open'}</div>
-          <div class="box-reward">+₦${taskStatus.earning_per_box.toLocaleString()}</div>
+          <div class="box-reward">
+            <div class="reward-amount">+₦${taskStatus.earning_per_box.toLocaleString()}</div>
+          </div>
         `;
         if (!isOpened && taskStatus.can_open) {
           box.onclick = () => openBox(box);
@@ -196,9 +333,38 @@
       }
     }
 
+    function createSparkles(boxElement) {
+      const rect = boxElement.getBoundingClientRect();
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height / 2;
+      
+      for (let i = 0; i < 20; i++) {
+        const sparkle = document.createElement('div');
+        sparkle.className = 'sparkle';
+        
+        const angle = (Math.PI * 2 * i) / 20;
+        const distance = 50 + Math.random() * 50;
+        const tx = Math.cos(angle) * distance;
+        const ty = Math.sin(angle) * distance;
+        
+        sparkle.style.left = centerX + 'px';
+        sparkle.style.top = centerY + 'px';
+        sparkle.style.setProperty('--tx', tx + 'px');
+        sparkle.style.setProperty('--ty', ty + 'px');
+        sparkle.style.animation = `sparkleBurst 0.8s ease-out forwards`;
+        sparkle.style.animationDelay = (Math.random() * 0.2) + 's';
+        
+        document.body.appendChild(sparkle);
+        
+        setTimeout(() => sparkle.remove(), 1000);
+      }
+    }
+
     async function openBox(boxElement) {
-      if (boxElement.classList.contains('opened')) return;
-      boxElement.style.pointerEvents = 'none';
+      if (boxElement.classList.contains('opened') || boxElement.classList.contains('opening')) return;
+      
+      boxElement.classList.add('opening');
+      createSparkles(boxElement);
       
       try {
         const token = (await supabase.auth.getSession()).data.session.access_token;
@@ -210,20 +376,25 @@
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Failed to open box');
 
-        boxElement.classList.add('opened');
-        taskStatus.boxes_opened++;
-        document.getElementById('progress-text').textContent = `${taskStatus.boxes_opened} / ${taskStatus.max_boxes}`;
-        document.getElementById('progress-fill').style.width = `${(taskStatus.boxes_opened / taskStatus.max_boxes) * 100}%`;
+        setTimeout(() => {
+          boxElement.classList.remove('opening');
+          boxElement.classList.add('opened');
+          
+          taskStatus.boxes_opened++;
+          document.getElementById('progress-text').textContent = `${taskStatus.boxes_opened} / ${taskStatus.max_boxes}`;
+          document.getElementById('progress-fill').style.width = `${(taskStatus.boxes_opened / taskStatus.max_boxes) * 100}%`;
+          
+          if (taskStatus.boxes_opened >= taskStatus.max_boxes) {
+            taskStatus.can_open = false;
+            document.querySelectorAll('.mystery-box:not(.opened)').forEach(b => b.style.pointerEvents = 'none');
+          }
+          
+          showToast(`🎉 You earned ₦${data.amount.toLocaleString()}!`, 'success');
+        }, 600);
         
-        if (taskStatus.boxes_opened >= taskStatus.max_boxes) {
-          taskStatus.can_open = false;
-          document.querySelectorAll('.mystery-box:not(.opened)').forEach(b => b.style.pointerEvents = 'none');
-        }
-        
-        showToast(`✅ You earned ${data.amount.toLocaleString()}!`, 'success');
       } catch (err) {
+        boxElement.classList.remove('opening');
         showToast(err.message, 'error');
-        boxElement.style.pointerEvents = 'auto';
       }
     }
 
