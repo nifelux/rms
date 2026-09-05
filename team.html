@@ -5,213 +5,425 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>RMS — My Team</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="assets/css/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <meta name="theme-color" content="#0a0e27">
   <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+    
+    body {
+      background: linear-gradient(135deg, #0a0e27 0%, #1a1f4e 50%, #0a0e27 100%);
+      min-height: 100vh;
+      color: white;
+      overflow-x: hidden;
+    }
+
     .team-container { padding: 20px 16px 100px 16px; max-width: 600px; margin: 0 auto; }
     
+    /* Referral Card */
     .referral-card { 
-      background: linear-gradient(135deg, #11163a, #1a2050); 
-      border: 1px solid var(--rms-yellow); 
-      border-radius: 16px; 
-      padding: 24px; 
+      background: linear-gradient(135deg, #0066ff 0%, #00d4ff 100%);
+      border-radius: 24px; 
+      padding: 28px 24px; 
       text-align: center; 
-      margin-bottom: 24px; 
+      margin-bottom: 24px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 20px 60px rgba(0,102,255,0.3);
+    }
+    .referral-card::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255,215,0,0.2) 0%, transparent 60%);
+      pointer-events: none;
+    }
+    .referral-label { 
+      font-size: 0.85rem; 
+      color: rgba(255,255,255,0.8); 
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 12px;
+      position: relative;
+      z-index: 1;
     }
     .ref-code { 
-      font-size: 2rem; 
-      font-weight: 800; 
-      letter-spacing: 3px; 
-      color: var(--rms-yellow); 
-      margin: 10px 0 16px; 
+      font-size: 2.2rem; 
+      font-weight: 900; 
+      letter-spacing: 4px; 
+      color: white;
+      margin: 12px 0 20px;
+      text-shadow: 0 4px 20px rgba(0,0,0,0.3);
+      position: relative;
+      z-index: 1;
     }
     .copy-btn { 
-      background: var(--rms-vivid-red); 
-      color: white; 
+      background: linear-gradient(135deg, #ffd700, #e6c200);
+      color: #0a0e27; 
       border: none; 
-      padding: 10px 24px; 
-      border-radius: 999px; 
-      font-weight: 700; 
+      padding: 14px 32px; 
+      border-radius: 14px; 
+      font-weight: 800;
+      font-size: 0.95rem;
       cursor: pointer; 
-      transition: transform 0.2s;
+      transition: all 0.3s;
+      position: relative;
+      z-index: 1;
+      box-shadow: 0 8px 24px rgba(255,215,0,0.4);
     }
-    .copy-btn:hover { transform: scale(1.05); }
+    .copy-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(255,215,0,0.5); }
 
-    .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; }
+    /* Stats Grid */
+    .stats-grid { 
+      display: grid; 
+      grid-template-columns: 1fr 1fr; 
+      gap: 12px; 
+      margin-bottom: 24px; 
+    }
     .stat-box { 
-      background: var(--rms-bg-card); 
-      border: 1px solid var(--rms-border); 
-      border-radius: 12px; 
-      padding: 16px; 
-      text-align: center; 
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px; 
+      padding: 18px 16px; 
+      text-align: center;
+      backdrop-filter: blur(10px);
+      transition: all 0.3s;
     }
-    .stat-num { font-size: 1.5rem; font-weight: 800; color: var(--rms-white); margin-bottom: 4px; }
-    .stat-lbl { font-size: 0.7rem; color: var(--rms-text-muted); text-transform: uppercase; }
+    .stat-box:hover { border-color: rgba(255,215,0,0.3); background: rgba(255,215,0,0.05); }
+    .stat-num { 
+      font-size: 1.8rem; 
+      font-weight: 900; 
+      margin-bottom: 6px;
+    }
+    .stat-num.white { color: white; }
+    .stat-num.gold { color: #ffd700; }
+    .stat-num.green { color: #00ff88; }
+    .stat-num.blue { color: #00d4ff; }
+    .stat-lbl { 
+      font-size: 0.7rem; 
+      color: rgba(255,255,255,0.6); 
+      text-transform: uppercase;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
 
+    /* Commission Card */
     .commission-card {
-      background: linear-gradient(135deg, rgba(46,204,113,0.1), rgba(255,215,0,0.1));
-      border: 1px solid #2ecc71;
-      border-radius: 16px;
-      padding: 20px;
+      background: linear-gradient(135deg, rgba(0,210,106,0.15), rgba(0,255,136,0.05));
+      border: 1px solid rgba(0,255,136,0.3);
+      border-radius: 20px;
+      padding: 24px;
       margin-bottom: 24px;
       text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .commission-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, #00d26a, #00ff88, #00d26a);
     }
     .commission-card h3 { 
-      margin: 0 0 8px 0; 
-      color: #2ecc71; 
-      font-size: 1.1rem; 
-      display: flex; 
-      align-items: center; 
-      justify-content: center; 
-      gap: 8px;
-    }
-    .commission-card p { margin: 0 0 12px 0; color: var(--rms-text-muted); font-size: 0.9rem; }
-    .commission-amount { 
-      font-size: 1.8rem; 
-      font-weight: 800; 
-      color: #2ecc71; 
-      margin: 12px 0;
-    }
-
-    .gift-reward-card {
-      background: linear-gradient(135deg, rgba(255,215,0,0.1), rgba(255,26,26,0.1));
-      border: 1px solid var(--rms-yellow);
-      border-radius: 16px;
-      padding: 20px;
-      margin-bottom: 24px;
-      text-align: center;
-    }
-    .gift-reward-card h3 { 
-      margin: 0 0 8px 0; 
-      color: var(--rms-yellow); 
+      margin: 0 0 12px 0; 
+      color: #00ff88; 
       font-size: 1.1rem;
+      font-weight: 700;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 8px;
     }
-    .gift-reward-card p { margin: 0 0 16px 0; color: var(--rms-text-muted); font-size: 0.9rem; }
+    .commission-amount { 
+      font-size: 2.5rem; 
+      font-weight: 900; 
+      color: #00ff88;
+      margin: 16px 0;
+      text-shadow: 0 4px 20px rgba(0,255,136,0.3);
+    }
+    .commission-desc {
+      font-size: 0.85rem;
+      color: rgba(255,255,255,0.7);
+    }
+
+    /* Gift Code Card */
+    .gift-reward-card {
+      background: linear-gradient(135deg, rgba(255,215,0,0.1), rgba(255,26,26,0.05));
+      border: 1px solid rgba(255,215,0,0.3);
+      border-radius: 20px;
+      padding: 24px;
+      margin-bottom: 24px;
+      position: relative;
+      overflow: hidden;
+    }
+    .gift-reward-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, #ffd700, #ff1a1a, #ffd700);
+    }
+    .gift-reward-card h3 { 
+      margin: 0 0 12px 0; 
+      color: #ffd700; 
+      font-size: 1.1rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .gift-reward-card p { 
+      margin: 0 0 16px 0; 
+      color: rgba(255,255,255,0.7); 
+      font-size: 0.9rem;
+    }
+    .gift-code-list {
+      background: rgba(0,0,0,0.2);
+      border-radius: 12px;
+      padding: 12px;
+      margin: 16px 0;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+    .gift-code-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 12px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .gift-code-item:last-child { border-bottom: none; }
+    .gift-code-name { font-size: 0.85rem; color: white; font-weight: 600; }
+    .gift-code-tier { 
+      font-size: 0.7rem; 
+      padding: 3px 8px; 
+      border-radius: 6px;
+      background: rgba(255,215,0,0.15);
+      color: #ffd700;
+      font-weight: 700;
+      margin-left: 8px;
+    }
+    .gift-code-percent { 
+      color: #00ff88; 
+      font-weight: 800;
+      font-size: 0.95rem;
+    }
     .claim-btn {
-      background: linear-gradient(135deg, var(--rms-yellow), #e6c200);
+      background: linear-gradient(135deg, #ffd700, #e6c200);
       color: #0a0e27;
       border: none;
-      padding: 12px 30px;
-      border-radius: 999px;
+      padding: 14px 30px;
+      border-radius: 14px;
       font-weight: 800;
       font-size: 1rem;
       cursor: pointer;
       width: 100%;
-      transition: transform 0.2s;
+      transition: all 0.3s;
+      box-shadow: 0 8px 24px rgba(255,215,0,0.3);
     }
-    .claim-btn:hover:not(:disabled) { transform: scale(1.02); }
-    .claim-btn:disabled { opacity: 0.5; cursor: not-allowed; background: #555; color: #aaa; }
+    .claim-btn:hover:not(:disabled) { 
+      transform: translateY(-2px); 
+      box-shadow: 0 12px 32px rgba(255,215,0,0.4);
+    }
+    .claim-btn:disabled { 
+      opacity: 0.5; 
+      cursor: not-allowed; 
+      background: #555; 
+      color: #aaa;
+      box-shadow: none;
+    }
+    .reward-info {
+      margin-top: 16px;
+      padding: 12px;
+      background: rgba(255,215,0,0.1);
+      border-radius: 10px;
+      font-size: 0.8rem;
+      color: rgba(255,255,255,0.8);
+      line-height: 1.6;
+    }
+    .reward-info strong { color: #ffd700; }
 
+    /* Section Header */
     .section-header { 
       display: flex; 
       justify-content: space-between; 
       align-items: center; 
-      margin-bottom: 12px;
+      margin-bottom: 16px;
       margin-top: 24px;
     }
-    .section-header h3 { margin: 0; font-size: 1.1rem; }
-    .section-header span { font-size: 0.85rem; color: var(--rms-text-muted); }
+    .section-header h3 { 
+      font-size: 1.1rem; 
+      font-weight: 700;
+      color: white;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .section-header h3 i { color: #00d4ff; }
+    .section-header span { 
+      font-size: 0.85rem; 
+      color: rgba(255,255,255,0.6);
+      font-weight: 600;
+    }
 
+    /* Member Cards */
     .member-card { 
-      background: var(--rms-bg-card); 
-      border: 1px solid var(--rms-border); 
-      border-radius: 12px; 
-      padding: 14px 16px; 
-      margin-bottom: 10px; 
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px; 
+      padding: 16px; 
+      margin-bottom: 12px; 
       display: flex; 
       justify-content: space-between; 
-      align-items: center; 
+      align-items: center;
+      transition: all 0.3s;
+      backdrop-filter: blur(10px);
     }
-    .member-info { display: flex; align-items: center; gap: 12px; }
+    .member-card:hover { border-color: rgba(255,215,0,0.3); background: rgba(255,215,0,0.05); }
+    .member-info { display: flex; align-items: center; gap: 14px; }
     .member-avatar { 
-      width: 40px; 
-      height: 40px; 
-      background: rgba(255,255,255,0.05); 
-      border-radius: 50%; 
+      width: 48px; 
+      height: 48px; 
+      background: linear-gradient(135deg, #0066ff, #00d4ff);
+      border-radius: 14px; 
       display: flex; 
       align-items: center; 
       justify-content: center; 
-      color: var(--rms-text-muted);
-      font-weight: bold;
+      color: white;
+      font-weight: 800;
+      font-size: 1.1rem;
     }
-    .member-name { font-weight: 600; font-size: 0.95rem; margin-bottom: 2px; }
-    .member-date { font-size: 0.75rem; color: var(--rms-text-muted); }
+    .member-name { 
+      font-weight: 700; 
+      font-size: 0.95rem; 
+      margin-bottom: 4px;
+      color: white;
+    }
+    .member-date { 
+      font-size: 0.75rem; 
+      color: rgba(255,255,255,0.5);
+    }
     .status-badge { 
       font-size: 0.7rem; 
-      padding: 4px 10px; 
-      border-radius: 20px; 
+      padding: 6px 12px; 
+      border-radius: 10px; 
       font-weight: 700; 
-      text-transform: uppercase; 
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
-    .status-active { background: rgba(46,204,113,0.15); color: #2ecc71; }
-    .status-inactive { background: rgba(255,255,255,0.05); color: var(--rms-text-muted); }
-    .status-vip { background: rgba(255,215,0,0.15); color: var(--rms-yellow); }
+    .status-vip { 
+      background: linear-gradient(135deg, rgba(255,215,0,0.2), rgba(255,215,0,0.1)); 
+      color: #ffd700;
+      border: 1px solid rgba(255,215,0,0.3);
+    }
+    .status-active { 
+      background: linear-gradient(135deg, rgba(0,210,106,0.2), rgba(0,255,136,0.1)); 
+      color: #00ff88;
+      border: 1px solid rgba(0,255,136,0.3);
+    }
+    .status-inactive { 
+      background: rgba(255,255,255,0.05); 
+      color: rgba(255,255,255,0.5);
+      border: 1px solid rgba(255,255,255,0.1);
+    }
     
-    .empty-team { text-align: center; padding: 40px 20px; color: var(--rms-text-muted); }
+    .empty-team { 
+      text-align: center; 
+      padding: 48px 20px; 
+      color: rgba(255,255,255,0.5);
+    }
+    .empty-team i { 
+      font-size: 3rem; 
+      margin-bottom: 16px; 
+      opacity: 0.3;
+      color: #00d4ff;
+    }
+    .empty-team p { font-size: 0.95rem; margin-bottom: 8px; }
+    .empty-team small { font-size: 0.8rem; }
   </style>
 </head>
 <body class="rv-shell">
   <div id="header-container"></div>
 
   <div class="team-container">
-    <h2 style="margin-bottom: 5px;">My Team</h2>
-    <p class="text-muted" style="margin-bottom: 20px;">Invite friends and earn rewards.</p>
+    <h2 style="margin-bottom: 5px; font-size: 1.8rem; font-weight: 900;">My Team</h2>
+    <p style="color: rgba(255,255,255,0.6); margin-bottom: 24px; font-size: 0.95rem;">Invite friends and earn rewards.</p>
 
+    <!-- Referral Code Card -->
     <div class="referral-card">
-      <div style="font-size: 0.85rem; color: var(--rms-text-muted);">Your Referral Code</div>
+      <div class="referral-label">Your Referral Code</div>
       <div class="ref-code" id="ref-code">------</div>
       <button class="copy-btn" onclick="copyReferral()">
         <i class="fa-regular fa-copy"></i> Copy Link
       </button>
     </div>
 
-    <!-- Commission Summary -->
-    <div class="commission-card">
-      <h3><i class="fa-solid fa-coins"></i> Total Commission Earned</h3>
-      <div class="commission-amount" id="total-commission">0</div>
-      <p style="font-size: 0.85rem;">10% from referral deposits</p>
-    </div>
-
+    <!-- Stats Grid -->
     <div class="stats-grid">
       <div class="stat-box">
-        <div class="stat-num" id="total-refs">0</div>
+        <div class="stat-num white" id="total-refs">0</div>
         <div class="stat-lbl">Total Referrals</div>
       </div>
       <div class="stat-box">
-        <div class="stat-num text-yellow" id="vip-refs">0</div>
+        <div class="stat-num gold" id="vip-refs">0</div>
         <div class="stat-lbl">VIP Members</div>
       </div>
       <div class="stat-box">
-        <div class="stat-num" id="m2-count">0</div>
+        <div class="stat-num green" id="m2-count">0</div>
         <div class="stat-lbl">M2+ Members</div>
       </div>
       <div class="stat-box">
-        <div class="stat-num text-red" id="wheel-spins">0</div>
+        <div class="stat-num blue" id="wheel-spins">0</div>
         <div class="stat-lbl">Wheel Spins</div>
       </div>
     </div>
 
-    <!-- Gift Code Reward Section -->
-    <div class="gift-reward-card" id="gift-reward-section" style="display: none;">
-      <h3><i class="fa-solid fa-gift"></i> Gift Code Reward Available!</h3>
-      <p>You have <strong id="high-tier-count">0</strong> referrals on M2 or higher. Claim your gift code now!</p>
-      <button class="claim-btn" id="claim-gift-btn" onclick="claimGiftCode()">
-        <i class="fa-solid fa-ticket"></i> Claim Gift Code
-      </button>
+    <!-- Commission Card -->
+    <div class="commission-card">
+      <h3><i class="fa-solid fa-coins"></i> Total Commission Earned</h3>
+      <div class="commission-amount" id="total-commission">₦0</div>
+      <div class="commission-desc">10% from referral deposits</div>
     </div>
 
+    <!-- Gift Code Reward Section -->
+    <div class="gift-reward-card" id="gift-reward-section" style="display: none;">
+      <h3><i class="fa-solid fa-gift"></i> Gift Code Rewards</h3>
+      <p>You have <strong id="high-tier-count" style="color: #ffd700;">0</strong> M2+ referrals eligible for gift codes:</p>
+      
+      <div class="gift-code-list" id="gift-code-list">
+        <!-- Populated by JavaScript -->
+      </div>
+      
+      <button class="claim-btn" id="claim-gift-btn" onclick="claimGiftCodes()">
+        <i class="fa-solid fa-ticket"></i> Generate Gift Codes
+      </button>
+      
+      <div class="reward-info">
+        <strong>Reward Tiers:</strong><br>
+        M2: 5% | M3: 8% | M4: 12%<br>
+        M5: 15% | M6: 18% | M7: 20%
+      </div>
+    </div>
+
+    <!-- Team List -->
     <div class="section-header">
-      <h3>Referred Users</h3>
+      <h3><i class="fa-solid fa-users"></i> Referred Users</h3>
       <span id="list-count">0 members</span>
     </div>
     
     <div id="team-list">
       <div class="empty-team">
-        <i class="fa-solid fa-users-slash" style="font-size: 2.5rem; margin-bottom: 12px; opacity: 0.5;"></i>
+        <i class="fa-solid fa-users-slash"></i>
         <p>Loading team data...</p>
       </div>
     </div>
@@ -224,6 +436,14 @@
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
     const supabase = createClient('https://ofysznsajwxnjqaumwch.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9meXN6bnNhand4bmpxYXVtd2NoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgyMzM4NDgsImV4cCI6MjEwMzgwOTg0OH0.XaHkP5WZ2nJVJXVdbG-D13rrD63g_09HxmJoZn7ZoWA');
     window.supabase = supabase;
+
+    const vipTiers = ['M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7'];
+    const m2Tiers = ['M2', 'M3', 'M4', 'M5', 'M6', 'M7'];
+
+    function getPercentageForTier(tier) {
+      const percentages = { 'M2': 5, 'M3': 8, 'M4': 12, 'M5': 15, 'M6': 18, 'M7': 20 };
+      return percentages[tier] || 0;
+    }
 
     async function loadTeam() {
       const { data: { user } } = await supabase.auth.getUser();
@@ -248,8 +468,6 @@
 
         let vipCount = 0;
         let m2Count = 0;
-        const vipTiers = ['M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7'];
-        const m2Tiers = ['M2', 'M3', 'M4', 'M5', 'M6', 'M7'];
 
         if (referrals) {
           referrals.forEach(ref => {
@@ -288,9 +506,9 @@
         if (!referrals || referrals.length === 0) {
           teamListEl.innerHTML = `
             <div class="empty-team">
-              <i class="fa-solid fa-user-plus" style="font-size: 2.5rem; margin-bottom: 12px; opacity: 0.5;"></i>
+              <i class="fa-solid fa-user-plus"></i>
               <p>You haven't referred anyone yet.</p>
-              <p style="font-size: 0.85rem; margin-top: 8px;">Share your referral link to start earning!</p>
+              <small>Share your referral link to start earning!</small>
             </div>
           `;
         } else {
@@ -343,6 +561,25 @@
           giftSection.style.display = 'block';
           document.getElementById('high-tier-count').textContent = m2Count;
           
+          // Populate gift code list
+          const giftListEl = document.getElementById('gift-code-list');
+          const eligibleRefs = (referrals || []).filter(ref => m2Tiers.includes(ref.vip_level));
+          
+          if (eligibleRefs.length > 0) {
+            giftListEl.innerHTML = eligibleRefs.map(ref => {
+              const percentage = getPercentageForTier(ref.vip_level);
+              return `
+                <div class="gift-code-item">
+                  <div>
+                    <span class="gift-code-name">${ref.full_name || ref.email}</span>
+                    <span class="gift-code-tier">${ref.vip_level}</span>
+                  </div>
+                  <span class="gift-code-percent">${percentage}%</span>
+                </div>
+              `;
+            }).join('');
+          }
+          
           if (profile?.referral_gift_claimed_at) {
             const lastClaim = new Date(profile.referral_gift_claimed_at);
             const daysSince = (Date.now() - lastClaim.getTime()) / (1000 * 60 * 60 * 24);
@@ -359,34 +596,55 @@
       }
     }
 
-    window.claimGiftCode = async () => {
-      showConfirm('Are you sure you want to claim your Gift Code reward?', async () => {
+    window.claimGiftCodes = async () => {
+      const m2Count = parseInt(document.getElementById('m2-count').textContent);
+      showConfirm(`Generate gift codes for ${m2Count} M2+ referrals?`, async () => {
         const btn = document.getElementById('claim-gift-btn');
         btn.disabled = true;
-        btn.textContent = 'Processing...';
+        btn.textContent = 'Generating...';
 
         try {
-          const token = (await supabase.auth.getSession()).data.session.access_token;
-          const res = await fetch('/api/referral?action=requestGiftCode', {
-            method: 'POST',
-            headers: { 
-              'Content-Type': 'application/json', 
-              'Authorization': `Bearer ${token}` 
-            }
-          });
+          const { data: { user } } = await supabase.auth.getUser();
           
-          const data = await res.json();
-          if (!res.ok) throw new Error(data.error || 'Failed to claim');
+          // Get all M2+ referrals
+          const { data: eligibleRefs } = await supabase
+            .from('profiles')
+            .select('id, vip_level, email, full_name')
+            .eq('referred_by', user.id)
+            .in('vip_level', m2Tiers);
 
-          showToast(`Success! Your code: ${data.code} (${data.percentage}% = ₦${data.amount})`, 'success', 8000);
-          btn.textContent = 'Claimed Successfully';
+          const codes = [];
+          for (const ref of eligibleRefs) {
+            const percentage = getPercentageForTier(ref.vip_level);
+            const baseAmount = 10000;
+            const couponAmount = baseAmount * (percentage / 100);
+            const giftCode = 'GIFT-' + Math.random().toString(36).substring(2, 8).toUpperCase();
+            
+            await supabase.from('gift_codes').insert({
+              code: giftCode,
+              amount: couponAmount,
+              max_uses: 1,
+              is_active: true,
+              created_by: user.id
+            });
+            
+            codes.push(`${ref.full_name || ref.email}: ${giftCode} (${percentage}% = ₦${couponAmount.toLocaleString()})`);
+          }
           
-          // Reload page after 2 seconds
+          await supabase.from('profiles').update({ 
+            referral_gift_claimed_at: new Date().toISOString() 
+          }).eq('id', user.id);
+
+          showToast(`Generated ${codes.length} gift codes!`, 'success', 8000);
+          console.log('Gift codes:', codes);
+          
+          btn.textContent = 'Gift Codes Generated';
           setTimeout(() => loadTeam(), 2000);
+          
         } catch (err) {
           showToast(err.message, 'error');
           btn.disabled = false;
-          btn.textContent = 'Claim Gift Code';
+          btn.textContent = 'Generate Gift Codes';
         }
       });
     };
