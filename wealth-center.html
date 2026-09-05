@@ -42,14 +42,38 @@
 
     .investment-item { 
       background: var(--rms-bg-card); border: 1px solid var(--rms-border); border-radius: 12px; 
-      padding: 14px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; 
+      padding: 16px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; 
     }
-    .inv-info h4 { margin: 0 0 4px 0; font-size: 0.95rem; color: var(--rms-white); }
-    .inv-info p { margin: 0; font-size: 0.75rem; color: var(--rms-text-muted); }
+    .inv-info h4 { margin: 0 0 6px 0; font-size: 1rem; color: var(--rms-white); }
+    .inv-info p { margin: 0 0 8px 0; font-size: 0.75rem; color: var(--rms-text-muted); }
     .inv-amount { font-weight: 800; color: var(--rms-yellow); font-size: 1rem; }
-    .inv-status { font-size: 0.7rem; padding: 3px 8px; border-radius: 10px; font-weight: 700; margin-top: 4px; display: inline-block; }
-    .status-active { background: rgba(46,204,113,0.15); color: #2ecc71; }
-    .status-completed { background: rgba(52,152,219,0.15); color: #3498db; }
+    .inv-return { font-size: 0.75rem; color: #2ecc71; margin-top: 4px; }
+    
+    .inv-status { font-size: 0.7rem; padding: 4px 10px; border-radius: 10px; font-weight: 700; margin-top: 6px; display: inline-block; }
+    .status-active { background: rgba(52,152,219,0.15); color: #3498db; }
+    .status-completed { background: rgba(46,204,113,0.15); color: #2ecc71; }
+    .status-matured { background: rgba(255,215,0,0.15); color: var(--rms-yellow); animation: pulse 2s infinite; }
+
+    .claim-btn {
+      background: linear-gradient(135deg, #2ecc71, #27ae60);
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 6px;
+      animation: pulse 2s infinite;
+      width: 100%;
+    }
+    .claim-btn:hover { transform: scale(1.02); }
+    
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.7); }
+      70% { box-shadow: 0 0 0 6px rgba(46, 204, 113, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(46, 204, 113, 0); }
+    }
 
     .empty-state { text-align: center; padding: 30px 20px; color: var(--rms-text-muted); font-size: 0.9rem; }
     .loading-box { text-align: center; padding: 30px; color: var(--rms-text-muted); }
@@ -97,12 +121,14 @@
         const { data: { session } } = await supabase.auth.getSession();
         if (!session) return window.location.href = '/login.html';
 
-        // 1. Load Stats & Investments
-        const { data: investments } = await supabase
+        // 1. Load Investments
+        const { data: investments, error: invError } = await supabase
           .from('investments')
           .select('*')
           .eq('user_id', session.user.id)
           .order('created_at', { ascending: false });
+
+        if (invError) throw invError;
 
         let totalInvested = 0;
         let totalEarnings = 0;
@@ -111,34 +137,57 @@
         if (investments && investments.length > 0) {
           investments.forEach(inv => {
             totalInvested += Number(inv.amount);
-            if (inv.status === 'completed') totalEarnings += Number(inv.return_amount || 0);
+            if (inv.status === 'completed') totalEarnings += Number(inv.return_amount);
           });
 
-          invList.innerHTML = investments.map(inv => `
-            <div class="investment-item">
-              <div class="inv-info">
-                <h4>${inv.plan_name || 'Wealth Plan'}</h4>
-                <p>Started: ${new Date(inv.created_at).toLocaleDateString()}</p>
-                <span class="inv-status status-${inv.status}">${inv.status.toUpperCase()}</span>
+          // Render Investments with Maturity Logic
+          invList.innerHTML = investments.map(inv => {
+            const startDate = new Date(inv.created_at);
+            const maturityDate = new Date(startDate);
+            maturityDate.setDate(startDate.getDate() + inv.duration_days);
+            
+            const now = new Date();
+            const isMatured = now >= maturityDate && inv.status === 'active';
+            const isCompleted = inv.status === 'completed';
+
+            let actionHtml = '';
+            if (isCompleted) {
+              actionHtml = `<span class="inv-status status-completed"><i class="fa-solid fa-check"></i> COMPLETED</span>`;
+            } else if (isMatured) {
+              actionHtml = `<button class="claim-btn" onclick="claimInvestment('${inv.id}')"><i class="fa-solid fa-gift"></i> Claim ₦${Number(inv.return_amount).toLocaleString()}</button>`;
+            } else {
+              actionHtml = `<span class="inv-status status-active"><i class="fa-solid fa-clock"></i> Active (Matures ${maturityDate.toLocaleDateString()})</span>`;
+            }
+
+            return `
+              <div class="investment-item">
+                <div class="inv-info" style="flex: 1;">
+                  <h4>${inv.plan_name}</h4>
+                  <p>Invested: ${new Date(inv.created_at).toLocaleDateString()}</p>
+                  ${actionHtml}
+                </div>
+                <div style="text-align: right; margin-left: 12px;">
+                  <div class="inv-amount">₦${Number(inv.amount).toLocaleString()}</div>
+                  <div class="inv-return">Return: ₦${Number(inv.return_amount).toLocaleString()}</div>
+                </div>
               </div>
-              <div style="text-align: right;">
-                <div class="inv-amount">₦${Number(inv.amount).toLocaleString()}</div>
-              </div>
-            </div>
-          `).join('');
+            `;
+          }).join('');
         } else {
-          invList.innerHTML = '<div class="empty-state">No active investments yet.</div>';
+          invList.innerHTML = '<div class="empty-state"><i class="fa-solid fa-folder-open" style="font-size: 2rem; margin-bottom: 10px; opacity: 0.5;"></i><p>No active investments yet.</p></div>';
         }
 
         document.getElementById('total-invested').textContent = totalInvested.toLocaleString();
         document.getElementById('total-earnings').textContent = totalEarnings.toLocaleString();
 
         // 2. Load Available Plans
-        const { data: plans } = await supabase
+        const { data: plans, error: plansError } = await supabase
           .from('wealth_plans')
           .select('*')
           .eq('is_active', true)
           .order('invest_amount', { ascending: true });
+
+        if (plansError) throw plansError;
 
         const { data: wallet } = await supabase.from('wallets').select('balance').eq('user_id', session.user.id).single();
         const balance = wallet?.balance || 0;
@@ -175,7 +224,7 @@
 
       } catch (err) {
         console.error('Wealth page error:', err);
-        showToast('Failed to load wealth data', 'error');
+        showToast('Failed to load wealth data: ' + err.message, 'error');
       }
     }
 
@@ -200,6 +249,28 @@
       });
     };
 
+    window.claimInvestment = async (investmentId) => {
+      showConfirm('Are you sure you want to claim your investment returns?', async () => {
+        try {
+          const token = (await supabase.auth.getSession()).data.session.access_token;
+          const res = await fetch('/api/wealth?action=claim', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            body: JSON.stringify({ investment_id: investmentId })
+          });
+
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error || 'Claim failed');
+
+          showToast(`🎉 Successfully claimed! New balance: ₦${Number(data.newBalance).toLocaleString()}`, 'success');
+          setTimeout(() => loadWealthPage(), 1500);
+        } catch (err) {
+          showToast(err.message, 'error');
+        }
+      });
+    };
+
+    // Load page on startup
     loadWealthPage();
   </script>
 </body>
