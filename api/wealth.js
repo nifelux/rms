@@ -10,6 +10,26 @@ const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
 export default async function handler(req, res) {
   const action = req.query.action || req.body?.action;
   
+  try {
+    switch (action) {
+      case 'invest': return await invest(req, res);
+      case 'claim': return await claimInvestment(req, res); // NEW ACTION
+      default: return res.status(400).json({ error: 'Invalid action' });
+    }
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+}
+
+// ... (Keep your existing 'invest' function here) ...
+
+const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
+  auth: { autoRefreshToken: false, persistSession: false }
+});
+
+export default async function handler(req, res) {
+  const action = req.query.action || req.body?.action;
+  
   console.log('Wealth API called with action:', action);
   
   try {
@@ -146,6 +166,66 @@ async function invest(req, res) {
 
   } catch (err) {
     console.error('invest error:', err);
+    return res.status(500).json({ error: err.message });
+  }
+  }
+// NEW: Claim Investment Function
+async function claimInvestment(req, res) {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader) return res.status(401).json({ error: 'No authorization' });
+
+    const token = authHeader.replace('Bearer ', '');
+    const { data: { user }, error: userError } = await supabaseAdmin.auth.getUser(token);
+    if (userError || !user) return res.status(401).json({ error: 'Invalid token' });
+
+    const { investment_id } = req.body;
+
+    // 1. Get the investment
+    const { data: inv, error: invError } = await supabaseAdmin
+      .from('investments')
+      .select('*')
+      .eq('id', investment_id)
+      .eq('user_id', user.id)
+      .single();
+
+    if (invError || !inv) return res.status(404).json({ error: 'Investment not found' });
+    if (inv.status !== 'active') return res.status(400).json({ error: 'Investment already claimed or cancelled' });
+
+    // 2. Check Maturity Date
+    const startDate = new Date(inv.created_at);
+    const maturityDate = new Date(startDate);
+    maturityDate.setDate(startDate.getDate() + inv.duration_days);
+
+    if (new Date() < maturityDate) {
+      return res.status(400).json({ error: `Investment not matured yet. Matures on ${maturityDate.toLocaleDateString()}` });
+    }
+
+    // 3. Credit the Wallet with the Return Amount
+    const { data: wallet } = await supabaseAdmin.from('wallets').select('balance').eq('user_id', user.id).single();
+    const newBalance = Number(wallet.balance) + Number(inv.return_amount);
+
+    await supabaseAdmin.from('wallets').update({ balance: newBalance }).eq('user_id', user.id);
+
+    // 4. Update Investment Status to 'completed'
+    await supabaseAdmin.from('investments').update({ 
+      status: 'completed', 
+      completed_at: new Date() 
+    }).eq('id', investment_id);
+
+    // 5. Record Transaction
+    await supabaseAdmin.from('transactions').insert({
+      user_id: user.id,
+      type: 'wealth_claim',
+      amount: inv.return_amount,
+      status: 'approved',
+      reference: `claim_${inv.id}`,
+      description: `Claimed returns from ${inv.plan_name}`
+    });
+
+    return res.status(200).json({ success: true, message: 'Claimed successfully!', newBalance });
+
+  } catch (err) {
     return res.status(500).json({ error: err.message });
   }
 }
