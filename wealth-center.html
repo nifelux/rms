@@ -9,7 +9,6 @@
   <meta name="theme-color" content="#0a0e27">
   <style>
     .wealth-container { padding: 20px 16px 100px 16px; max-width: 600px; margin: 0 auto; }
-    
     .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; }
     .stat-card { background: var(--rms-bg-card); border: 1px solid var(--rms-border); border-radius: 12px; padding: 16px; text-align: center; }
     .stat-label { font-size: 0.75rem; color: var(--rms-text-muted); margin-bottom: 6px; text-transform: uppercase; }
@@ -19,31 +18,19 @@
     .section-title { font-size: 1.1rem; font-weight: 700; margin: 24px 0 12px 0; display: flex; align-items: center; gap: 8px; }
     .section-title i { color: var(--rms-yellow); }
 
-    .plan-card { 
-      background: var(--rms-bg-card); border: 1px solid var(--rms-border); border-radius: 16px; 
-      padding: 20px; margin-bottom: 16px; position: relative; overflow: hidden; 
-    }
+    .plan-card { background: var(--rms-bg-card); border: 1px solid var(--rms-border); border-radius: 16px; padding: 20px; margin-bottom: 16px; }
     .plan-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
     .plan-name { font-size: 1.2rem; font-weight: 800; color: var(--rms-white); }
     .plan-price { font-size: 1.1rem; font-weight: 700; color: var(--rms-yellow); }
-    
     .plan-details { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
     .plan-detail { background: rgba(255,255,255,0.03); padding: 10px; border-radius: 8px; text-align: center; }
     .plan-detail-val { font-size: 1rem; font-weight: 700; color: var(--rms-white); margin-bottom: 4px; }
     .plan-detail-lbl { font-size: 0.7rem; color: var(--rms-text-muted); text-transform: uppercase; }
 
-    .invest-btn { 
-      width: 100%; padding: 12px; font-size: 1rem; font-weight: 700; border: none; border-radius: 10px; 
-      background: linear-gradient(135deg, var(--rms-yellow), #e6c200); color: #0a0e27; cursor: pointer; 
-      transition: all 0.2s;
-    }
-    .invest-btn:hover:not(:disabled) { transform: scale(1.02); }
+    .invest-btn { width: 100%; padding: 12px; font-size: 1rem; font-weight: 700; border: none; border-radius: 10px; background: linear-gradient(135deg, var(--rms-yellow), #e6c200); color: #0a0e27; cursor: pointer; }
     .invest-btn:disabled { opacity: 0.5; cursor: not-allowed; background: #555; color: #aaa; }
 
-    .investment-item { 
-      background: var(--rms-bg-card); border: 1px solid var(--rms-border); border-radius: 12px; 
-      padding: 16px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; 
-    }
+    .investment-item { background: var(--rms-bg-card); border: 1px solid var(--rms-border); border-radius: 12px; padding: 16px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
     .inv-info h4 { margin: 0 0 6px 0; font-size: 1rem; color: var(--rms-white); }
     .inv-info p { margin: 0 0 8px 0; font-size: 0.75rem; color: var(--rms-text-muted); }
     .inv-amount { font-weight: 800; color: var(--rms-yellow); font-size: 1rem; }
@@ -52,23 +39,13 @@
     .inv-status { font-size: 0.7rem; padding: 4px 10px; border-radius: 10px; font-weight: 700; margin-top: 6px; display: inline-block; }
     .status-active { background: rgba(52,152,219,0.15); color: #3498db; }
     .status-completed { background: rgba(46,204,113,0.15); color: #2ecc71; }
-    .status-matured { background: rgba(255,215,0,0.15); color: var(--rms-yellow); animation: pulse 2s infinite; }
 
     .claim-btn {
       background: linear-gradient(135deg, #2ecc71, #27ae60);
-      color: white;
-      border: none;
-      padding: 8px 16px;
-      border-radius: 8px;
-      font-size: 0.8rem;
-      font-weight: 700;
-      cursor: pointer;
-      margin-top: 6px;
-      animation: pulse 2s infinite;
-      width: 100%;
+      color: white; border: none; padding: 8px 16px; border-radius: 8px;
+      font-size: 0.8rem; font-weight: 700; cursor: pointer; margin-top: 6px;
+      width: 100%; animation: pulse 2s infinite;
     }
-    .claim-btn:hover { transform: scale(1.02); }
-    
     @keyframes pulse {
       0% { box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.7); }
       70% { box-shadow: 0 0 0 6px rgba(46, 204, 113, 0); }
@@ -116,19 +93,23 @@
     const supabase = createClient('https://ofysznsajwxnjqaumwch.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9meXN6bnNhand4bmpxYXVtd2NoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgyMzM4NDgsImV4cCI6MjEwMzgwOTg0OH0.XaHkP5WZ2nJVJXVdbG-D13rrD63g_09HxmJoZn7ZoWA');
     window.supabase = supabase;
 
+    // Helper to format duration text (e.g., "3 Mins" or "5 Days")
+    function formatDuration(days) {
+      const mins = Math.round(days * 1440);
+      return mins >= 1440 ? `${mins / 1440} Days` : `${mins} Mins`;
+    }
+
     async function loadWealthPage() {
       try {
         const { data: { session } } = await supabase.auth.getSession();
         if (!session) return window.location.href = '/login.html';
 
-        // 1. Load Investments
-        const { data: investments, error: invError } = await supabase
-          .from('investments')
+        // 1. Load Investments from 'wealth_investments'
+        const { data: investments } = await supabase
+          .from('wealth_investments')
           .select('*')
           .eq('user_id', session.user.id)
           .order('created_at', { ascending: false });
-
-        if (invError) throw invError;
 
         let totalInvested = 0;
         let totalEarnings = 0;
@@ -140,35 +121,36 @@
             if (inv.status === 'completed') totalEarnings += Number(inv.return_amount);
           });
 
-          // Render Investments with Maturity Logic
           invList.innerHTML = investments.map(inv => {
             const startDate = new Date(inv.created_at);
             const maturityDate = new Date(startDate);
-            maturityDate.setDate(startDate.getDate() + inv.duration_days);
+            const durationMs = inv.duration_days * 24 * 60 * 60 * 1000;
+            maturityDate.setTime(startDate.getTime() + durationMs);
             
             const now = new Date();
             const isMatured = now >= maturityDate && inv.status === 'active';
             const isCompleted = inv.status === 'completed';
+            const durationText = formatDuration(inv.duration_days);
 
             let actionHtml = '';
             if (isCompleted) {
               actionHtml = `<span class="inv-status status-completed"><i class="fa-solid fa-check"></i> COMPLETED</span>`;
             } else if (isMatured) {
-              actionHtml = `<button class="claim-btn" onclick="claimInvestment('${inv.id}')"><i class="fa-solid fa-gift"></i> Claim ₦${Number(inv.return_amount).toLocaleString()}</button>`;
+              actionHtml = `<button class="claim-btn" onclick="claimInvestment('${inv.id}')"><i class="fa-solid fa-gift"></i> Claim ${Number(inv.return_amount).toLocaleString()}</button>`;
             } else {
-              actionHtml = `<span class="inv-status status-active"><i class="fa-solid fa-clock"></i> Active (Matures ${maturityDate.toLocaleDateString()})</span>`;
+              actionHtml = `<span class="inv-status status-active"><i class="fa-solid fa-clock"></i> Active (${durationText})</span>`;
             }
 
             return `
               <div class="investment-item">
                 <div class="inv-info" style="flex: 1;">
                   <h4>${inv.plan_name}</h4>
-                  <p>Invested: ${new Date(inv.created_at).toLocaleDateString()}</p>
+                  <p>Invested: ${new Date(inv.created_at).toLocaleTimeString()}</p>
                   ${actionHtml}
                 </div>
                 <div style="text-align: right; margin-left: 12px;">
                   <div class="inv-amount">₦${Number(inv.amount).toLocaleString()}</div>
-                  <div class="inv-return">Return: ₦${Number(inv.return_amount).toLocaleString()}</div>
+                  <div class="inv-return">Return: ${Number(inv.return_amount).toLocaleString()}</div>
                 </div>
               </div>
             `;
@@ -180,15 +162,8 @@
         document.getElementById('total-invested').textContent = totalInvested.toLocaleString();
         document.getElementById('total-earnings').textContent = totalEarnings.toLocaleString();
 
-        // 2. Load Available Plans
-        const { data: plans, error: plansError } = await supabase
-          .from('wealth_plans')
-          .select('*')
-          .eq('is_active', true)
-          .order('invest_amount', { ascending: true });
-
-        if (plansError) throw plansError;
-
+        // 2. Load Plans
+        const { data: plans } = await supabase.from('wealth_plans').select('*').eq('is_active', true).order('invest_amount', { ascending: true });
         const { data: wallet } = await supabase.from('wallets').select('balance').eq('user_id', session.user.id).single();
         const balance = wallet?.balance || 0;
 
@@ -196,6 +171,8 @@
         if (plans && plans.length > 0) {
           plansList.innerHTML = plans.map(plan => {
             const canAfford = Number(balance) >= Number(plan.invest_amount);
+            const planDurationText = formatDuration(plan.duration_days);
+            
             return `
               <div class="plan-card">
                 <div class="plan-header">
@@ -208,7 +185,7 @@
                     <div class="plan-detail-lbl">Total Return</div>
                   </div>
                   <div class="plan-detail">
-                    <div class="plan-detail-val">${plan.duration_days} Days</div>
+                    <div class="plan-detail-val">${planDurationText}</div>
                     <div class="plan-detail-lbl">Duration</div>
                   </div>
                 </div>
@@ -219,17 +196,17 @@
             `;
           }).join('');
         } else {
-          plansList.innerHTML = '<div class="empty-state">No wealth plans available at the moment.</div>';
+          plansList.innerHTML = '<div class="empty-state">No wealth plans available.</div>';
         }
 
       } catch (err) {
         console.error('Wealth page error:', err);
-        showToast('Failed to load wealth data: ' + err.message, 'error');
+        showToast('Failed to load data: ' + err.message, 'error');
       }
     }
 
     window.investInPlan = async (planId, planName, amount) => {
-      showConfirm(`Invest ₦${Number(amount).toLocaleString()} in ${planName}? This amount will be deducted from your balance.`, async () => {
+      showConfirm(`Invest ₦${Number(amount).toLocaleString()} in ${planName}?`, async () => {
         try {
           const token = (await supabase.auth.getSession()).data.session.access_token;
           const res = await fetch('/api/wealth?action=invest', {
@@ -237,10 +214,8 @@
             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
             body: JSON.stringify({ plan_id: planId, amount: amount })
           });
-
           const data = await res.json();
           if (!res.ok) throw new Error(data.error || 'Investment failed');
-
           showToast(`Successfully invested in ${planName}!`, 'success');
           setTimeout(() => loadWealthPage(), 1500);
         } catch (err) {
@@ -250,7 +225,7 @@
     };
 
     window.claimInvestment = async (investmentId) => {
-      showConfirm('Are you sure you want to claim your investment returns?', async () => {
+      showConfirm('Claim your investment returns now?', async () => {
         try {
           const token = (await supabase.auth.getSession()).data.session.access_token;
           const res = await fetch('/api/wealth?action=claim', {
@@ -258,11 +233,9 @@
             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
             body: JSON.stringify({ investment_id: investmentId })
           });
-
           const data = await res.json();
           if (!res.ok) throw new Error(data.error || 'Claim failed');
-
-          showToast(`🎉 Successfully claimed! New balance: ₦${Number(data.newBalance).toLocaleString()}`, 'success');
+          showToast(`🎉 Claimed! New balance: ₦${Number(data.newBalance).toLocaleString()}`, 'success');
           setTimeout(() => loadWealthPage(), 1500);
         } catch (err) {
           showToast(err.message, 'error');
@@ -270,7 +243,6 @@
       });
     };
 
-    // Load page on startup
     loadWealthPage();
   </script>
 </body>
