@@ -295,41 +295,33 @@
         `;
       }
     }
-
+    
     window.upgradeToTier = async (tierName, cost) => {
-      if (!confirm(`Upgrade to ${tierName} for ₦${Number(cost).toLocaleString()}?`)) {
+  // Use custom confirm modal
+  showConfirm(`Upgrade to ${tierName} for ₦${Number(cost).toLocaleString()}?`, async () => {
+    try {
+      const token = (await supabase.auth.getSession()).data.session.access_token;
+      const res = await fetch('/api/admin?action=upgradeTier', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ target_tier: tierName })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        showToast(data.error || 'Upgrade failed', 'error'); // Red toast
         return;
       }
 
-      try {
-        const token = (await supabase.auth.getSession()).data.session.access_token;
-        
-        const res = await fetch('/api/admin?action=upgradeTier', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify({ 
-            target_tier: tierName 
-          })
-        });
-
-        const data = await res.json();
-
-        if (!res.ok) {
-          throw new Error(data.error || 'Upgrade failed');
-        }
-
-        alert(`✅ Successfully upgraded to ${tierName}!`);
-        loadVIPPage();
-        
-      } catch (err) {
-        alert(`❌ Upgrade failed: ${err.message}`);
-      }
-    };
-
-    loadVIPPage();
+      showToast(`Successfully upgraded to ${tierName}!`, 'success'); // Green toast
+      setTimeout(() => loadVIPPage(), 1000);
+      
+    } catch (err) {
+      showToast(`Upgrade failed: ${err.message}`, 'error');
+    }
+  });
+};
   </script>
 </body>
 </html>
