@@ -3,107 +3,323 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>RMS — Register</title>
+  <title>RMS — Create Account</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="assets/css/style.css">
   <meta name="theme-color" content="#0a0e27">
   <style>
-    /* Reuse auth styles from login.html */
-    .auth-container { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; background: var(--rms-bg); }
-    .auth-card { width: 100%; max-width: 400px; background: var(--rms-bg-card); border: 1px solid var(--rms-border); border-radius: 20px; padding: 30px 24px; box-shadow: var(--rms-shadow); }
-    .logo-center { text-align: center; font-size: 2.5rem; font-weight: 800; margin-bottom: 30px; letter-spacing: -1px; }
-    .input-group { margin-bottom: 16px; }
-    .input-group label { display: block; font-size: 0.85rem; color: var(--rms-text-muted); margin-bottom: 8px; }
+    .auth-container { 
+      padding: 20px 16px; max-width: 500px; margin: 0 auto; 
+      min-height: 100vh; display: flex; flex-direction: column; justify-content: center; 
+    }
+    .auth-card { 
+      background: var(--rms-bg-card); border: 1px solid var(--rms-border); 
+      border-radius: 16px; padding: 24px; 
+    }
+    .auth-header { text-align: center; margin-bottom: 24px; }
+    .auth-header h2 { margin: 0 0 8px 0; color: var(--rms-white); font-size: 1.5rem; }
+    .auth-header p { margin: 0; color: var(--rms-text-muted); font-size: 0.9rem; }
+    
+    .referral-banner {
+      background: rgba(255,215,0,0.1);
+      border: 1px solid var(--rms-yellow);
+      border-radius: 10px;
+      padding: 12px;
+      margin-bottom: 20px;
+      display: none;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.85rem;
+      color: var(--rms-yellow);
+    }
+    .referral-banner i { font-size: 1.2rem; }
+    
+    .form-group { margin-bottom: 16px; }
+    .form-group label { 
+      display: block; font-size: 0.85rem; color: var(--rms-text-muted); 
+      margin-bottom: 8px; font-weight: 600; 
+    }
     .input-wrapper { position: relative; }
-    .input-wrapper i { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--rms-text-muted); }
-    .form-control { width: 100%; padding: 14px 14px 14px 42px; background: rgba(0,0,0,0.3); border: 1px solid var(--rms-border); border-radius: 12px; color: white; font-size: 1rem; box-sizing: border-box; }
+    .form-control { 
+      width: 100%; padding: 14px 16px; background: rgba(0,0,0,0.3); 
+      border: 1px solid var(--rms-border); border-radius: 10px; 
+      color: var(--rms-white); font-size: 1rem; box-sizing: border-box; 
+      font-family: inherit; transition: border-color 0.2s;
+    }
     .form-control:focus { outline: none; border-color: var(--rms-yellow); }
-    .auth-footer { text-align: center; margin-top: 20px; font-size: 0.9rem; color: var(--rms-text-muted); }
+    .form-control.error { border-color: var(--rms-vivid-red); }
+    
+    .toggle-password { 
+      position: absolute; right: 14px; top: 50%; transform: translateY(-50%); 
+      background: none; border: none; color: var(--rms-text-muted); 
+      cursor: pointer; font-size: 1.1rem; padding: 4px;
+    }
+    
+    .password-strength {
+      height: 4px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 2px;
+      margin-top: 8px;
+      overflow: hidden;
+    }
+    .password-strength-bar {
+      height: 100%;
+      width: 0%;
+      transition: all 0.3s;
+      border-radius: 2px;
+    }
+    .strength-weak { width: 33%; background: var(--rms-vivid-red); }
+    .strength-medium { width: 66%; background: var(--rms-yellow); }
+    .strength-strong { width: 100%; background: #2ecc71; }
+    
+    .submit-btn { 
+      width: 100%; padding: 14px; font-size: 1rem; font-weight: 700; 
+      border: none; border-radius: 10px; 
+      background: linear-gradient(135deg, var(--rms-yellow), #e6c200); 
+      color: #0a0e27; cursor: pointer; margin-top: 8px; 
+      transition: all 0.2s;
+    }
+    .submit-btn:hover:not(:disabled) { transform: scale(1.02); }
+    .submit-btn:disabled { opacity: 0.7; cursor: not-allowed; }
+    
+    .auth-footer { text-align: center; margin-top: 20px; color: var(--rms-text-muted); font-size: 0.9rem; }
     .auth-footer a { color: var(--rms-yellow); text-decoration: none; font-weight: 600; }
-    .referral-badge { background: rgba(255,215,0,0.1); color: var(--rms-yellow); padding: 8px; border-radius: 8px; font-size: 0.85rem; text-align: center; margin-bottom: 20px; display: none; }
+    .auth-footer a:hover { text-decoration: underline; }
+    
+    .terms-text {
+      font-size: 0.75rem;
+      color: var(--rms-text-muted);
+      text-align: center;
+      margin-top: 16px;
+      line-height: 1.4;
+    }
+    .terms-text a { color: var(--rms-yellow); text-decoration: none; }
   </style>
 </head>
-<body>
+<body class="rv-shell">
+
   <div class="auth-container">
     <div class="auth-card">
-      <div class="logo-center">RMS<span class="text-red"><i class="fa-solid fa-bolt"></i></span></div>
-      <h3 style="text-align:center; margin-bottom: 10px;">Create Account</h3>
-      
-      <div id="referral-display" class="referral-badge">
-        <i class="fa-solid fa-user-plus"></i> Referred by: <span id="ref-code"></span>
+      <div class="auth-header">
+        <h2>Create Account</h2>
+        <p>Join RMS and start earning today</p>
+      </div>
+
+      <!-- Referral Banner (shows when user comes from referral link) -->
+      <div class="referral-banner" id="referral-banner">
+        <i class="fa-solid fa-user-plus"></i>
+        <span>Referred by: <strong id="ref-code-display">---</strong></span>
       </div>
 
       <form id="register-form">
-        <div class="input-group">
+        <div class="form-group">
           <label>Full Name</label>
-          <div class="input-wrapper">
-            <i class="fa-regular fa-user"></i>
-            <input type="text" id="full_name" class="form-control" placeholder="John Doe" required>
-          </div>
+          <input type="text" id="full-name" class="form-control" placeholder="Enter your full name" required>
         </div>
-        <div class="input-group">
+
+        <div class="form-group">
           <label>Email Address</label>
-          <div class="input-wrapper">
-            <i class="fa-regular fa-envelope"></i>
-            <input type="email" id="email" class="form-control" placeholder="you@example.com" required>
-          </div>
+          <input type="email" id="email" class="form-control" placeholder="Enter your email" required>
         </div>
-        <div class="input-group">
+
+        <div class="form-group">
           <label>Password</label>
           <div class="input-wrapper">
-            <i class="fa-solid fa-lock"></i>
-            <input type="password" id="password" class="form-control" placeholder="Min 6 characters" required minlength="6">
+            <input type="password" id="password" class="form-control" placeholder="Create a password" required minlength="6">
+            <button type="button" class="toggle-password" onclick="togglePass('password', this)">
+              <i class="fa-regular fa-eye"></i>
+            </button>
+          </div>
+          <div class="password-strength">
+            <div class="password-strength-bar" id="strength-bar"></div>
           </div>
         </div>
-        <button type="submit" class="rms-btn rms-btn-primary" style="width: 100%; padding: 14px; margin-top: 10px;">
-          <i class="fa-solid fa-user-plus" style="margin-right: 8px;"></i> Sign Up
+
+        <div class="form-group">
+          <label>Confirm Password</label>
+          <div class="input-wrapper">
+            <input type="password" id="confirm-password" class="form-control" placeholder="Confirm your password" required>
+            <button type="button" class="toggle-password" onclick="togglePass('confirm-password', this)">
+              <i class="fa-regular fa-eye"></i>
+            </button>
+          </div>
+        </div>
+
+        <button type="submit" class="submit-btn" id="submit-btn">
+          <i class="fa-solid fa-user-plus"></i> Create Account
         </button>
       </form>
-      
+
       <div class="auth-footer">
-        Already have an account? <a href="/login.html">Login</a>
+        Already have an account? <a href="/login.html">Sign In</a>
+      </div>
+
+      <div class="terms-text">
+        By creating an account, you agree to our <a href="/terms.html">Terms of Service</a> and <a href="/privacy.html">Privacy Policy</a>
       </div>
     </div>
   </div>
 
+  <script src="/assets/js/notifications.js"></script>
   <script type="module">
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
     const supabase = createClient('https://ofysznsajwxnjqaumwch.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9meXN6bnNhand4bmpxYXVtd2NoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgyMzM4NDgsImV4cCI6MjEwMzgwOTg0OH0.XaHkP5WZ2nJVJXVdbG-D13rrD63g_09HxmJoZn7ZoWA');
+    window.supabase = supabase;
 
-    // Check for referral code in URL
+    // 1. Capture referral code from URL
     const urlParams = new URLSearchParams(window.location.search);
     const refCode = urlParams.get('ref');
+
+    // Show referral banner if code exists
     if (refCode) {
-      document.getElementById('ref-code').textContent = refCode;
-      document.getElementById('referral-display').style.display = 'block';
+      const banner = document.getElementById('referral-banner');
+      const display = document.getElementById('ref-code-display');
+      banner.style.display = 'flex';
+      display.textContent = refCode;
     }
 
+    // 2. Password visibility toggle
+    window.togglePass = (id, btn) => {
+      const input = document.getElementById(id);
+      const icon = btn.querySelector('i');
+      if (input.type === 'password') {
+        input.type = 'text';
+        icon.className = 'fa-regular fa-eye-slash';
+      } else {
+        input.type = 'password';
+        icon.className = 'fa-regular fa-eye';
+      }
+    };
+
+    // 3. Password strength indicator
+    const passwordInput = document.getElementById('password');
+    const strengthBar = document.getElementById('strength-bar');
+
+    passwordInput.addEventListener('input', (e) => {
+      const val = e.target.value;
+      strengthBar.className = 'password-strength-bar';
+      
+      if (val.length === 0) return;
+      if (val.length < 6) {
+        strengthBar.classList.add('strength-weak');
+      } else if (val.length < 10 || !/[A-Z]/.test(val) || !/[0-9]/.test(val)) {
+        strengthBar.classList.add('strength-medium');
+      } else {
+        strengthBar.classList.add('strength-strong');
+      }
+    });
+
+    // 4. Form submission
     document.getElementById('register-form').addEventListener('submit', async (e) => {
       e.preventDefault();
-      const btn = e.target.querySelector('button');
-      btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Creating...';
+
+      const fullName = document.getElementById('full-name').value.trim();
+      const email = document.getElementById('email').value.trim().toLowerCase();
+      const password = document.getElementById('password').value;
+      const confirmPassword = document.getElementById('confirm-password').value;
+      const btn = document.getElementById('submit-btn');
+
+      // Validation
+      if (!fullName) {
+        showToast('Please enter your full name', 'error');
+        return;
+      }
+
+      if (!email || !email.includes('@')) {
+        showToast('Please enter a valid email address', 'error');
+        return;
+      }
+
+      if (password.length < 6) {
+        showToast('Password must be at least 6 characters', 'error');
+        return;
+      }
+
+      if (password !== confirmPassword) {
+        showToast('Passwords do not match!', 'error');
+        document.getElementById('confirm-password').classList.add('error');
+        setTimeout(() => {
+          document.getElementById('confirm-password').classList.remove('error');
+        }, 2000);
+        return;
+      }
+
+      // Disable button and show loading
       btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Creating account...';
 
-      const { data, error } = await supabase.auth.signUp({
-        email: document.getElementById('email').value,
-        password: document.getElementById('password').value,
-        options: { data: { full_name: document.getElementById('full_name').value } }
-      });
-
-      if (error) {
-        alert(error.message);
-        btn.innerHTML = '<i class="fa-solid fa-user-plus"></i> Sign Up';
-        btn.disabled = false;
-      } else {
-        // Link referral if exists
-        if (refCode && data.user) {
-          const { data: referrer } = await supabase.from('profiles').select('id').eq('referral_code', refCode).single();
-          if (referrer) {
-            await supabase.from('profiles').update({ referred_by: referrer.id }).eq('id', data.user.id);
+      try {
+        // 5. Create the user account
+        const { data, error } = await supabase.auth.signUp({
+          email: email,
+          password: password,
+          options: {
+            data: { 
+              full_name: fullName,
+              referred_by_code: refCode || null 
+            }
           }
+        });
+
+        if (error) throw error;
+
+        if (data.user) {
+          showToast('Account created successfully! Please verify your email.', 'success');
+
+          // 6. Link referral in database (with delay to let profile trigger run)
+          if (refCode) {
+            setTimeout(async () => {
+              try {
+                // Find the referrer's ID
+                const { data: referrer, error: refError } = await supabase
+                  .from('profiles')
+                  .select('id')
+                  .eq('referral_code', refCode)
+                  .single();
+
+                if (refError) {
+                  console.error('Referrer lookup error:', refError);
+                  return;
+                }
+
+                if (referrer) {
+                  // Update the new user's profile to link them to the referrer
+                  const { error: updateError } = await supabase
+                    .from('profiles')
+                    .update({ referred_by: referrer.id })
+                    .eq('id', data.user.id);
+
+                  if (updateError) {
+                    console.error('Failed to link referral:', updateError);
+                  } else {
+                    console.log('✅ Referral successfully linked to:', referrer.id);
+                  }
+                }
+              } catch (err) {
+                console.error('Referral linking error:', err);
+              }
+            }, 2000);
+          }
+
+          // Redirect to login after 3 seconds
+          setTimeout(() => {
+            window.location.href = '/login.html';
+          }, 3000);
         }
-        alert('Account created! Please check your email to verify.');
-        window.location.href = '/login.html';
+
+      } catch (err) {
+        console.error('Registration error:', err);
+        
+        let message = err.message || 'Registration failed';
+        if (message.includes('already registered')) {
+          message = 'This email is already registered. Please sign in.';
+        } else if (message.includes('password')) {
+          message = 'Password is too weak. Use at least 6 characters.';
+        }
+        
+        showToast(message, 'error');
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-user-plus"></i> Create Account';
       }
     });
   </script>
