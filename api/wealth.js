@@ -1,25 +1,48 @@
-import supabaseAdmin from '../lib/supabase.js';
-import { verifyUser } from '../lib/auth.js';
+import { createClient } from '@supabase/supabase-js';
+
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
+  auth: { autoRefreshToken: false, persistSession: false }
+});
 
 export default async function handler(req, res) {
   const action = req.query.action || req.body?.action;
   
+  console.log('Wealth API called with action:', action);
+  
   try {
     switch (action) {
       case 'invest': return await invest(req, res);
-      case 'getPlans': return await getPlans(req, res); // Optional: if you move plan fetching here
-      default: return res.status(400).json({ error: 'Invalid action' });
+      default: return res.status(400).json({ error: 'Invalid action: ' + action });
     }
   } catch (err) {
     console.error('Wealth API Error:', err);
-    return res.status(500).json({ error: err.message });
+    return res.status(500).json({ error: err.message, stack: err.stack });
   }
 }
 
 async function invest(req, res) {
   try {
-    const user = await verifyUser(req);
-    if (!user) return res.status(401).json({ error: 'Unauthorized' });
+    console.log('Invest request received');
+    
+    // 1. Verify User from Token
+    const authHeader = req.headers.authorization;
+    if (!authHeader) {
+      console.error('No auth header');
+      return res.status(401).json({ error: 'No authorization header' });
+    }
+
+    const token = authHeader.replace('Bearer ', '');
+    const { data: { user }, error: userError } = await supabaseAdmin.auth.getUser(token);
+    
+    if (userError || !user) {
+      console.error('User verification failed:', userError);
+      return res.status(401).json({ error: 'Invalid token' });
+    }
+
+    console.log('User verified:', user.email);
 
     const { plan_id, amount } = req.body;
     const investAmount = Number(amount);
@@ -28,7 +51,7 @@ async function invest(req, res) {
       return res.status(400).json({ error: 'Invalid investment details' });
     }
 
-    // 1. Get Plan Details
+    // 2. Get Plan Details
     const { data: plan, error: planError } = await supabaseAdmin
       .from('wealth_plans')
       .select('*')
@@ -36,15 +59,13 @@ async function invest(req, res) {
       .single();
 
     if (planError || !plan) {
+      console.error('Plan not found:', planError);
       return res.status(404).json({ error: 'Wealth plan not found' });
     }
 
-    // Ensure the amount matches the plan (security check)
-    if (investAmount !== Number(plan.invest_amount)) {
-      return res.status(400).json({ error: 'Investment amount does not match plan' });
-    }
+    console.log('Plan found:', plan.name);
 
-    // 2. Check User Balance
+    // 3. Check User Balance
     const { data: wallet, error: walletError } = await supabaseAdmin
       .from('wallets')
       .select('balance')
@@ -52,25 +73,32 @@ async function invest(req, res) {
       .single();
 
     if (walletError || !wallet) {
+      console.error('Wallet error:', walletError);
       return res.status(500).json({ error: 'Could not load wallet' });
     }
 
-    if (Number(wallet.balance) < investAmount) {
-      return res.status(400).json({ error: 'Insufficient balance' });
+    const currentBalance = Number(wallet.balance);
+    if (currentBalance < investAmount) {
+      return res.status(400).json({ error: `Insufficient balance. You have ₦${currentBalance.toLocaleString()}, need ₦${investAmount.toLocaleString()}` });
     }
 
-    // 3. Deduct Balance
-    const newBalance = Number(wallet.balance) - investAmount;
+    console.log('Balance check passed. Current:', currentBalance, 'Investing:', investAmount);
+
+    // 4. Deduct Balance
+    const newBalance = currentBalance - investAmount;
     const { error: updateWalletError } = await supabaseAdmin
       .from('wallets')
       .update({ balance: newBalance, updated_at: new Date() })
       .eq('user_id', user.id);
 
     if (updateWalletError) {
+      console.error('Wallet update failed:', updateWalletError);
       return res.status(500).json({ error: 'Failed to update wallet' });
     }
 
-    // 4. Save the Investment
+    console.log('Wallet updated. New balance:', newBalance);
+
+    // 5. Save the Investment
     const { data: investment, error: invError } = await supabaseAdmin
       .from('investments')
       .insert({
@@ -78,21 +106,24 @@ async function invest(req, res) {
         plan_id: plan.id,
         plan_name: plan.name,
         amount: investAmount,
-        return_amount: plan.return_amount,
-        duration_days: plan.duration_days,
+        return_amount: Number(plan.return_amount),
+        duration_days: Number(plan.duration_days),
         status: 'active'
       })
       .select()
       .single();
 
     if (invError) {
-      // Rollback wallet if investment fails (optional but recommended)
-      await supabaseAdmin.from('wallets').update({ balance: Number(wallet.balance) }).eq('user_id', user.id);
-      return res.status(500).json({ error: 'Failed to save investment' });
+      console.error('Investment save failed:', invError);
+      // Rollback wallet
+      await supabaseAdmin.from('wallets').update({ balance: currentBalance }).eq('user_id', user.id);
+      return res.status(500).json({ error: 'Failed to save investment: ' + invError.message });
     }
 
-    // 5. Record the Transaction
-    await supabaseAdmin.from('transactions').insert({
+    console.log('Investment saved:', investment.id);
+
+    // 6. Record Transaction
+    const { error: txnError } = await supabaseAdmin.from('transactions').insert({
       user_id: user.id,
       type: 'wealth_invest',
       amount: investAmount,
@@ -101,19 +132,20 @@ async function invest(req, res) {
       description: `Invested in ${plan.name}`
     });
 
+    if (txnError) {
+      console.error('Transaction log failed:', txnError);
+      // Don't fail the request, just log it
+    }
+
     return res.status(200).json({ 
       success: true, 
       message: 'Investment successful',
-      investment: investment
+      investment: investment,
+      newBalance: newBalance
     });
 
   } catch (err) {
     console.error('invest error:', err);
     return res.status(500).json({ error: err.message });
   }
-}
-
-async function getPlans(req, res) {
-  const { data: plans } = await supabaseAdmin.from('wealth_plans').select('*').eq('is_active', true);
-  return res.status(200).json({ plans: plans || [] });
 }
