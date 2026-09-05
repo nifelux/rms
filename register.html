@@ -5,110 +5,359 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>RMS — Create Account</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="assets/css/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <meta name="theme-color" content="#0a0e27">
   <style>
-    .auth-container { 
-      padding: 20px 16px; max-width: 500px; margin: 0 auto; 
-      min-height: 100vh; display: flex; flex-direction: column; justify-content: center; 
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', sans-serif;
     }
-    .auth-card { 
-      background: var(--rms-bg-card); border: 1px solid var(--rms-border); 
-      border-radius: 16px; padding: 24px; 
+
+    body {
+      background: linear-gradient(135deg, #0a0e27 0%, #1a1f4e 50%, #0a0e27 100%);
+      min-height: 100vh;
+      color: white;
+      overflow-x: hidden;
     }
-    .auth-header { text-align: center; margin-bottom: 24px; }
-    .auth-header h2 { margin: 0 0 8px 0; color: var(--rms-white); font-size: 1.5rem; }
-    .auth-header p { margin: 0; color: var(--rms-text-muted); font-size: 0.9rem; }
-    
-    .referral-banner {
+
+    /* Premium Header */
+    .auth-header-bar {
+      background: linear-gradient(135deg, rgba(10,14,39,0.95), rgba(26,31,78,0.95));
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(255,215,0,0.2);
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+    }
+
+    .brand-mark {
+      width: 42px;
+      height: 42px;
+      background: linear-gradient(135deg, #ffd700, #e6c200);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: #0a0e27;
+      box-shadow: 0 4px 12px rgba(255,215,0,0.3);
+    }
+
+    .brand-copy {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .brand-name {
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: white;
+      letter-spacing: 1px;
+    }
+
+    .brand-name span {
+      color: #ff1a1a;
+      font-size: 1.1rem;
+    }
+
+    .brand-tag {
+      font-size: 0.65rem;
+      color: rgba(255,255,255,0.6);
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    .header-badge {
       background: rgba(255,215,0,0.1);
-      border: 1px solid var(--rms-yellow);
-      border-radius: 10px;
-      padding: 12px;
-      margin-bottom: 20px;
+      border: 1px solid rgba(255,215,0,0.3);
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      color: #ffd700;
+      font-weight: 600;
+    }
+
+    /* Main Container */
+    .auth-container {
+      padding: 24px 20px 40px 20px;
+      max-width: 500px;
+      margin: 0 auto;
+    }
+
+    .auth-card {
+      background: linear-gradient(135deg, rgba(17,22,58,0.8), rgba(26,32,80,0.8));
+      border: 1px solid rgba(255,215,0,0.15);
+      border-radius: 20px;
+      padding: 28px 24px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    }
+
+    .auth-title {
+      text-align: center;
+      margin-bottom: 8px;
+    }
+
+    .auth-title h2 {
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: white;
+      margin-bottom: 8px;
+    }
+
+    .auth-title p {
+      color: rgba(255,255,255,0.6);
+      font-size: 0.9rem;
+    }
+
+    /* Referral Banner */
+    .referral-banner {
+      background: linear-gradient(135deg, rgba(255,215,0,0.15), rgba(255,26,26,0.1));
+      border: 1px solid rgba(255,215,0,0.3);
+      border-radius: 12px;
+      padding: 14px 16px;
+      margin: 20px 0;
       display: none;
       align-items: center;
-      gap: 10px;
+      gap: 12px;
+      animation: slideDown 0.3s ease;
+    }
+
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .referral-banner i {
+      font-size: 1.4rem;
+      color: #ffd700;
+    }
+
+    .referral-banner-text {
+      flex: 1;
+    }
+
+    .referral-banner-text strong {
+      color: #ffd700;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+
+    .referral-banner-text span {
+      display: block;
+      font-size: 0.75rem;
+      color: rgba(255,255,255,0.7);
+      margin-top: 2px;
+    }
+
+    /* Form Styles */
+    .form-group {
+      margin-bottom: 18px;
+    }
+
+    .form-group label {
+      display: block;
       font-size: 0.85rem;
-      color: var(--rms-yellow);
+      color: rgba(255,255,255,0.8);
+      margin-bottom: 8px;
+      font-weight: 600;
     }
-    .referral-banner i { font-size: 1.2rem; }
-    
-    .form-group { margin-bottom: 16px; }
-    .form-group label { 
-      display: block; font-size: 0.85rem; color: var(--rms-text-muted); 
-      margin-bottom: 8px; font-weight: 600; 
+
+    .input-wrapper {
+      position: relative;
     }
-    .input-wrapper { position: relative; }
-    .form-control { 
-      width: 100%; padding: 14px 16px; background: rgba(0,0,0,0.3); 
-      border: 1px solid var(--rms-border); border-radius: 10px; 
-      color: var(--rms-white); font-size: 1rem; box-sizing: border-box; 
-      font-family: inherit; transition: border-color 0.2s;
+
+    .form-control {
+      width: 100%;
+      padding: 14px 16px;
+      background: rgba(0,0,0,0.3);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px;
+      color: white;
+      font-size: 1rem;
+      transition: all 0.3s;
     }
-    .form-control:focus { outline: none; border-color: var(--rms-yellow); }
-    .form-control.error { border-color: var(--rms-vivid-red); }
-    
-    .toggle-password { 
-      position: absolute; right: 14px; top: 50%; transform: translateY(-50%); 
-      background: none; border: none; color: var(--rms-text-muted); 
-      cursor: pointer; font-size: 1.1rem; padding: 4px;
+
+    .form-control:focus {
+      outline: none;
+      border-color: #ffd700;
+      background: rgba(0,0,0,0.4);
+      box-shadow: 0 0 0 3px rgba(255,215,0,0.1);
     }
-    
+
+    .form-control.error {
+      border-color: #ff1a1a;
+      animation: shake 0.3s;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-5px); }
+      75% { transform: translateX(5px); }
+    }
+
+    .toggle-password {
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: rgba(255,255,255,0.5);
+      cursor: pointer;
+      font-size: 1.1rem;
+      padding: 4px;
+      transition: color 0.2s;
+    }
+
+    .toggle-password:hover {
+      color: #ffd700;
+    }
+
+    /* Password Strength */
     .password-strength {
       height: 4px;
       background: rgba(255,255,255,0.1);
       border-radius: 2px;
-      margin-top: 8px;
+      margin-top: 10px;
       overflow: hidden;
     }
+
     .password-strength-bar {
       height: 100%;
       width: 0%;
       transition: all 0.3s;
       border-radius: 2px;
     }
-    .strength-weak { width: 33%; background: var(--rms-vivid-red); }
-    .strength-medium { width: 66%; background: var(--rms-yellow); }
+
+    .strength-weak { width: 33%; background: #ff1a1a; }
+    .strength-medium { width: 66%; background: #ffd700; }
     .strength-strong { width: 100%; background: #2ecc71; }
-    
-    .submit-btn { 
-      width: 100%; padding: 14px; font-size: 1rem; font-weight: 700; 
-      border: none; border-radius: 10px; 
-      background: linear-gradient(135deg, var(--rms-yellow), #e6c200); 
-      color: #0a0e27; cursor: pointer; margin-top: 8px; 
-      transition: all 0.2s;
+
+    /* Submit Button */
+    .submit-btn {
+      width: 100%;
+      padding: 16px;
+      font-size: 1rem;
+      font-weight: 700;
+      border: none;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #ffd700, #e6c200);
+      color: #0a0e27;
+      cursor: pointer;
+      margin-top: 8px;
+      transition: all 0.3s;
+      box-shadow: 0 4px 16px rgba(255,215,0,0.3);
     }
-    .submit-btn:hover:not(:disabled) { transform: scale(1.02); }
-    .submit-btn:disabled { opacity: 0.7; cursor: not-allowed; }
-    
-    .auth-footer { text-align: center; margin-top: 20px; color: var(--rms-text-muted); font-size: 0.9rem; }
-    .auth-footer a { color: var(--rms-yellow); text-decoration: none; font-weight: 600; }
-    .auth-footer a:hover { text-decoration: underline; }
-    
+
+    .submit-btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 24px rgba(255,215,0,0.4);
+    }
+
+    .submit-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    /* Footer */
+    .auth-footer {
+      text-align: center;
+      margin-top: 24px;
+      color: rgba(255,255,255,0.6);
+      font-size: 0.9rem;
+    }
+
+    .auth-footer a {
+      color: #ffd700;
+      text-decoration: none;
+      font-weight: 600;
+      transition: color 0.2s;
+    }
+
+    .auth-footer a:hover {
+      color: #e6c200;
+      text-decoration: underline;
+    }
+
     .terms-text {
       font-size: 0.75rem;
-      color: var(--rms-text-muted);
+      color: rgba(255,255,255,0.5);
       text-align: center;
-      margin-top: 16px;
-      line-height: 1.4;
+      margin-top: 20px;
+      line-height: 1.5;
     }
-    .terms-text a { color: var(--rms-yellow); text-decoration: none; }
+
+    .terms-text a {
+      color: #ffd700;
+      text-decoration: none;
+    }
+
+    .terms-text a:hover {
+      text-decoration: underline;
+    }
+
+    /* Decorative Elements */
+    .auth-container::before {
+      content: '';
+      position: fixed;
+      top: -50%;
+      right: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255,215,0,0.03) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
   </style>
 </head>
-<body class="rv-shell">
+<body>
 
+  <!-- Premium Header -->
+  <header class="auth-header-bar">
+    <a href="/" class="brand">
+      <div class="brand-mark">R</div>
+      <div class="brand-copy">
+        <div class="brand-name">RMS<span><i class="fa-solid fa-bolt"></i></span></div>
+        <div class="brand-tag">Royal Management System</div>
+      </div>
+    </a>
+    <div class="header-badge">
+      <i class="fa-solid fa-shield-halved"></i> Secure
+    </div>
+  </header>
+
+  <!-- Main Content -->
   <div class="auth-container">
     <div class="auth-card">
-      <div class="auth-header">
-        <h2>Create Account</h2>
-        <p>Join RMS and start earning today</p>
+      <div class="auth-title">
+        <h2>Create Your Account</h2>
+        <p>Join thousands earning with RMS today</p>
       </div>
 
-      <!-- Referral Banner (shows when user comes from referral link) -->
+      <!-- Referral Banner -->
       <div class="referral-banner" id="referral-banner">
         <i class="fa-solid fa-user-plus"></i>
-        <span>Referred by: <strong id="ref-code-display">---</strong></span>
+        <div class="referral-banner-text">
+          <strong id="ref-code-display">---</strong>
+          <span>You were referred by a friend</span>
+        </div>
       </div>
 
       <form id="register-form">
@@ -125,7 +374,7 @@
         <div class="form-group">
           <label>Password</label>
           <div class="input-wrapper">
-            <input type="password" id="password" class="form-control" placeholder="Create a password" required minlength="6">
+            <input type="password" id="password" class="form-control" placeholder="Create a strong password" required minlength="6">
             <button type="button" class="toggle-password" onclick="togglePass('password', this)">
               <i class="fa-regular fa-eye"></i>
             </button>
@@ -256,7 +505,7 @@
           options: {
             data: { 
               full_name: fullName,
-              referred_by_code: refCode || null 
+              referred_by_code: refCode || null
             }
           }
         });
@@ -265,41 +514,6 @@
 
         if (data.user) {
           showToast('Account created successfully! Please verify your email.', 'success');
-
-          // 6. Link referral in database (with delay to let profile trigger run)
-          if (refCode) {
-            setTimeout(async () => {
-              try {
-                // Find the referrer's ID
-                const { data: referrer, error: refError } = await supabase
-                  .from('profiles')
-                  .select('id')
-                  .eq('referral_code', refCode)
-                  .single();
-
-                if (refError) {
-                  console.error('Referrer lookup error:', refError);
-                  return;
-                }
-
-                if (referrer) {
-                  // Update the new user's profile to link them to the referrer
-                  const { error: updateError } = await supabase
-                    .from('profiles')
-                    .update({ referred_by: referrer.id })
-                    .eq('id', data.user.id);
-
-                  if (updateError) {
-                    console.error('Failed to link referral:', updateError);
-                  } else {
-                    console.log('✅ Referral successfully linked to:', referrer.id);
-                  }
-                }
-              } catch (err) {
-                console.error('Referral linking error:', err);
-              }
-            }, 2000);
-          }
 
           // Redirect to login after 3 seconds
           setTimeout(() => {
