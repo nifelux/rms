@@ -192,9 +192,10 @@
     }
 
     function createSparkles(boxElement) {
+      // Get the exact center of the box relative to the screen
       const rect = boxElement.getBoundingClientRect();
-      const centerX = rect.left + window.scrollX + (rect.width / 2);
-      const centerY = rect.top + window.scrollY + (rect.height / 2);
+      const centerX = rect.left + (rect.width / 2);
+      const centerY = rect.top + (rect.height / 2);
       
       for (let i = 0; i < 100; i++) {
         const sparkle = document.createElement('div');
@@ -207,13 +208,27 @@
         const color = colors[Math.floor(Math.random() * colors.length)];
         
         sparkle.className = 'sparkle';
+        
+        // We add !important to EVERYTHING to force it to the center
         sparkle.style.cssText = `
-          left: ${centerX}px; top: ${centerY}px; width: ${size}px; height: ${size}px;
-          background: ${color}; color: ${color};
-          --tx: ${tx}px; --ty: ${ty}px;
-          animation: sparkleBurst 4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
-          animation-delay: ${Math.random()}s;
+          position: fixed !important;
+          left: ${centerX}px !important;
+          top: ${centerY}px !important;
+          width: ${size}px !important;
+          height: ${size}px !important;
+          background: ${color} !important;
+          color: ${color} !important;
+          border-radius: 50% !important;
+          pointer-events: none !important;
+          z-index: 999999 !important;
+          margin: 0 !important;
+          padding: 0 !important;
+          --tx: ${tx}px;
+          --ty: ${ty}px;
+          animation: sparkleBurst 4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards !important;
+          animation-delay: ${Math.random()}s !important;
         `;
+        
         document.body.appendChild(sparkle);
         setTimeout(() => sparkle.remove(), 5000);
       }
