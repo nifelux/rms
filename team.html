@@ -9,33 +9,48 @@
   <meta name="theme-color" content="#0a0e27">
   <style>
     .team-container { padding: 20px 16px 100px 16px; max-width: 600px; margin: 0 auto; }
-    .referral-card { background: linear-gradient(135deg, #11163a, #1a2050); border: 1px solid var(--rms-yellow); border-radius: 16px; padding: 24px; text-align: center; margin-bottom: 24px; position: relative; overflow: hidden; }
-    .referral-card::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(255,215,0,0.05) 0%, transparent 70%); }
-    .ref-label { font-size: 0.85rem; color: var(--rms-text-muted); margin-bottom: 8px; position: relative; }
-    .ref-code { font-size: 2rem; font-weight: 800; letter-spacing: 3px; color: var(--rms-yellow); margin-bottom: 16px; position: relative; }
-    .copy-btn { background: var(--rms-vivid-red); color: white; border: none; padding: 10px 24px; border-radius: 999px; font-weight: 700; font-size: 0.9rem; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; position: relative; transition: transform 0.2s; }
-    .copy-btn:active { transform: scale(0.95); }
+    .referral-card { background: linear-gradient(135deg, #11163a, #1a2050); border: 1px solid var(--rms-yellow); border-radius: 16px; padding: 24px; text-align: center; margin-bottom: 24px; }
+    .ref-code { font-size: 2rem; font-weight: 800; letter-spacing: 3px; color: var(--rms-yellow); margin: 10px 0 16px; }
+    .copy-btn { background: var(--rms-vivid-red); color: white; border: none; padding: 10px 24px; border-radius: 999px; font-weight: 700; cursor: pointer; }
 
     .stats-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 24px; }
     .stat-box { background: var(--rms-bg-card); border: 1px solid var(--rms-border); border-radius: 12px; padding: 14px 8px; text-align: center; }
     .stat-num { font-size: 1.3rem; font-weight: 800; color: var(--rms-white); margin-bottom: 4px; }
     .stat-lbl { font-size: 0.65rem; color: var(--rms-text-muted); text-transform: uppercase; }
 
-    .team-list-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-    .team-list-header h3 { margin: 0; font-size: 1.1rem; }
-    
+    /* Gift Code Reward Section */
+    .gift-reward-card {
+      background: linear-gradient(135deg, rgba(255,215,0,0.1), rgba(255,26,26,0.1));
+      border: 1px solid var(--rms-yellow);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 24px;
+      text-align: center;
+    }
+    .gift-reward-card h3 { margin: 0 0 8px 0; color: var(--rms-yellow); font-size: 1.1rem; }
+    .gift-reward-card p { margin: 0 0 16px 0; color: var(--rms-text-muted); font-size: 0.9rem; }
+    .claim-btn {
+      background: linear-gradient(135deg, var(--rms-yellow), #e6c200);
+      color: #0a0e27;
+      border: none;
+      padding: 12px 30px;
+      border-radius: 999px;
+      font-weight: 800;
+      font-size: 1rem;
+      cursor: pointer;
+      width: 100%;
+    }
+    .claim-btn:disabled { opacity: 0.5; cursor: not-allowed; background: #555; color: #aaa; }
+
     .member-card { background: var(--rms-bg-card); border: 1px solid var(--rms-border); border-radius: 12px; padding: 14px 16px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
     .member-info { display: flex; align-items: center; gap: 12px; }
-    .member-avatar { width: 40px; height: 40px; background: rgba(255,255,255,0.05); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--rms-text-muted); font-size: 1rem; }
+    .member-avatar { width: 40px; height: 40px; background: rgba(255,255,255,0.05); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--rms-text-muted); }
     .member-name { font-weight: 600; font-size: 0.95rem; margin-bottom: 2px; }
     .member-date { font-size: 0.75rem; color: var(--rms-text-muted); }
-    
     .status-badge { font-size: 0.7rem; padding: 4px 10px; border-radius: 20px; font-weight: 700; text-transform: uppercase; }
     .status-active { background: rgba(46,204,113,0.15); color: #2ecc71; }
     .status-inactive { background: rgba(255,255,255,0.05); color: var(--rms-text-muted); }
-
     .empty-team { text-align: center; padding: 40px 20px; color: var(--rms-text-muted); }
-    .empty-team i { font-size: 3rem; margin-bottom: 16px; opacity: 0.3; }
   </style>
 </head>
 <body class="rv-shell">
@@ -46,21 +61,26 @@
     <p class="text-muted" style="margin-bottom: 20px;">Invite friends and earn rewards.</p>
 
     <div class="referral-card">
-      <div class="ref-label">Your Referral Code</div>
+      <div style="font-size: 0.85rem; color: var(--rms-text-muted);">Your Referral Code</div>
       <div class="ref-code" id="ref-code">------</div>
-      <button class="copy-btn" onclick="copyReferral()">
-        <i class="fa-regular fa-copy"></i> Copy Referral Link
-      </button>
+      <button class="copy-btn" onclick="copyReferral()"><i class="fa-regular fa-copy"></i> Copy Link</button>
+    </div>
+
+    <!-- Gift Code Reward Section -->
+    <div class="gift-reward-card" id="gift-reward-section" style="display: none;">
+      <h3><i class="fa-solid fa-gift"></i> Referral Reward Unlocked!</h3>
+      <p>You have <strong id="high-tier-count">0</strong> referrals on M2 or higher. Claim your ₦5,000 Gift Code now!</p>
+      <button class="claim-btn" id="claim-gift-btn" onclick="claimGiftCode()">Claim Gift Code</button>
     </div>
 
     <div class="stats-grid">
       <div class="stat-box"><div class="stat-num" id="total-refs">0</div><div class="stat-lbl">Total Refs</div></div>
-      <div class="stat-box"><div class="stat-num text-yellow" id="active-downlines">0</div><div class="stat-lbl">Active <i class="fa-solid fa-circle-info" style="font-size:0.6rem;"></i></div></div>
+      <div class="stat-box"><div class="stat-num text-yellow" id="active-downlines">0</div><div class="stat-lbl">Active (M2+)</div></div>
       <div class="stat-box"><div class="stat-num text-red" id="wheel-spins">0</div><div class="stat-lbl">Wheel Spins</div></div>
     </div>
 
-    <div class="team-list-header">
-      <h3>Referred Users</h3>
+    <div class="team-list-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+      <h3 style="margin:0; font-size: 1.1rem;">Referred Users</h3>
       <span class="text-muted" style="font-size: 0.85rem;" id="list-count">0 members</span>
     </div>
     
@@ -71,9 +91,9 @@
 
   <div id="footer-container"></div>
   <script src="/assets/js/components.js"></script>
+  <script src="/assets/js/notifications.js"></script>
   <script type="module">
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
-    // ⚠️ REPLACE WITH YOUR ACTUAL KEYS ⚠️
     const supabase = createClient('https://ofysznsajwxnjqaumwch.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9meXN6bnNhand4bmpxYXVtd2NoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgyMzM4NDgsImV4cCI6MjEwMzgwOTg0OH0.XaHkP5WZ2nJVJXVdbG-D13rrD63g_09HxmJoZn7ZoWA');
     window.supabase = supabase;
 
@@ -82,87 +102,106 @@
       if (!user) return window.location.href = '/login.html';
 
       try {
-        // 1. Get Profile & Ref Code
-        const { data: profile, error: profileError } = await supabase.from('profiles').select('referral_code').eq('id', user.id).single();
-        if (profileError || !profile) throw profileError;
-        
+        const { data: profile } = await supabase.from('profiles').select('referral_code, referral_gift_claimed_at').eq('id', user.id).single();
         document.getElementById('ref-code').textContent = profile.referral_code;
 
-        // 2. Fetch all direct referrals
-        const { data: referrals, error: refError } = await supabase
-          .from('profiles')
-          .select('id, full_name, email, created_at')
-          .eq('referred_by', user.id)
-          .order('created_at', { ascending: false });
-
-        if (refError) throw refError;
+        const { data: referrals } = await supabase.from('profiles').select('id, full_name, email, created_at, vip_level').eq('referred_by', user.id).order('created_at', { ascending: false });
 
         document.getElementById('total-refs').textContent = referrals.length;
         document.getElementById('list-count').textContent = `${referrals.length} members`;
 
-        // 3. Calculate Active Downlines
-        let activeCount = 0;
+        let activeM2Count = 0;
         const teamListEl = document.getElementById('team-list');
         
         if (referrals.length === 0) {
-          teamListEl.innerHTML = '<div class="empty-team"><i class="fa-solid fa-user-plus"></i><p>You haven\'t referred anyone yet.<br>Share your link to start earning!</p></div>';
+          teamListEl.innerHTML = '<div class="empty-team"><i class="fa-solid fa-user-plus"></i><p>You haven\'t referred anyone yet.</p></div>';
         } else {
           teamListEl.innerHTML = '';
           for (const ref of referrals) {
-            const { count } = await supabase.from('deposits').select('*', { count: 'exact', head: true })
-              .eq('user_id', ref.id).eq('status', 'approved');
-            
+            // Check if they have made a deposit to be "active"
+            const { count } = await supabase.from('deposits').select('*', { count: 'exact', head: true }).eq('user_id', ref.id).eq('status', 'approved');
             const isActive = count > 0;
-            if (isActive) activeCount++;
+            const isHighTier = ['M2', 'M3', 'M4', 'M5', 'M6', 'M7'].includes(ref.vip_level);
+            
+            if (isHighTier) activeM2Count++;
 
             const initials = (ref.full_name || ref.email).substring(0, 2).toUpperCase();
-            const date = new Date(ref.created_at).toLocaleDateString('en-NG', { month: 'short', day: 'numeric', year: 'numeric' });
+            const date = new Date(ref.created_at).toLocaleDateString('en-NG', { month: 'short', day: 'numeric' });
 
             teamListEl.innerHTML += `
               <div class="member-card">
                 <div class="member-info">
                   <div class="member-avatar">${initials}</div>
                   <div>
-                    <div class="member-name">${ref.full_name || 'Anonymous User'}</div>
+                    <div class="member-name">${ref.full_name || 'Anonymous'} <span style="font-size:0.7rem; color:var(--rms-yellow); margin-left:5px;">${ref.vip_level}</span></div>
                     <div class="member-date">Joined ${date}</div>
                   </div>
                 </div>
-                <div class="status-badge ${isActive ? 'status-active' : 'status-inactive'}">
-                  ${isActive ? 'Active' : 'Inactive'}
-                </div>
+                <div class="status-badge ${isActive ? 'status-active' : 'status-inactive'}">${isActive ? 'Active' : 'Inactive'}</div>
               </div>
             `;
           }
         }
 
-        document.getElementById('active-downlines').textContent = activeCount;
-        document.getElementById('wheel-spins').textContent = activeCount;
+        document.getElementById('active-downlines').textContent = activeM2Count;
+        document.getElementById('wheel-spins').textContent = activeM2Count; // Assuming 1 spin per active downline
+
+        // Handle Gift Code Reward UI
+        const giftSection = document.getElementById('gift-reward-section');
+        const claimBtn = document.getElementById('claim-gift-btn');
+        
+        if (activeM2Count >= 2) {
+          giftSection.style.display = 'block';
+          document.getElementById('high-tier-count').textContent = activeM2Count;
+          
+          // Check if already claimed recently
+          if (profile.referral_gift_claimed_at) {
+            const lastClaim = new Date(profile.referral_gift_claimed_at);
+            const daysSince = (Date.now() - lastClaim.getTime()) / (1000 * 60 * 60 * 24);
+            if (daysSince < 30) {
+              claimBtn.disabled = true;
+              claimBtn.textContent = `Claimed (Try again in ${Math.ceil(30 - daysSince)} days)`;
+            }
+          }
+        }
 
       } catch (err) {
         console.error('Team loading error:', err);
-        document.getElementById('team-list').innerHTML = `
-          <div class="empty-team">
-            <i class="fa-solid fa-triangle-exclamation" style="color: var(--rms-vivid-red);"></i>
-            <p>Error loading team: ${err.message}</p>
-            <button onclick="loadTeam()" class="rms-btn rms-btn-outline" style="margin-top: 10px;">Retry</button>
-          </div>
-        `;
+        showToast('Error loading team data', 'error');
       }
     }
+
+    window.claimGiftCode = async () => {
+      showConfirm('Are you sure you want to claim your Referral Gift Code reward?', async () => {
+        const btn = document.getElementById('claim-gift-btn');
+        btn.disabled = true;
+        btn.textContent = 'Processing...';
+
+        try {
+          const token = (await supabase.auth.getSession()).data.session.access_token;
+          const res = await fetch('/api/user?action=claimReferralGift', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }
+          });
+          
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error || 'Failed to claim');
+
+          showToast(`Success! Your code is: ${data.code}`, 'success', 5000);
+          btn.textContent = 'Claimed Successfully';
+        } catch (err) {
+          showToast(err.message, 'error');
+          btn.disabled = false;
+          btn.textContent = 'Claim Gift Code';
+        }
+      });
+    };
 
     window.copyReferral = () => {
       const code = document.getElementById('ref-code').textContent;
       const link = `${window.location.origin}/register.html?ref=${code}`;
       navigator.clipboard.writeText(link);
-      
-      const btn = document.querySelector('.copy-btn');
-      const originalHTML = btn.innerHTML;
-      btn.innerHTML = '<i class="fa-solid fa-check"></i> Copied!';
-      btn.style.background = '#2ecc71';
-      setTimeout(() => {
-        btn.innerHTML = originalHTML;
-        btn.style.background = 'var(--rms-vivid-red)';
-      }, 2000);
+      showToast('Referral link copied!', 'success');
     };
 
     loadTeam();
