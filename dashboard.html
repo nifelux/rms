@@ -7,308 +7,72 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
   <meta name="theme-color" content="#0a0e27">
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+    /* Scoped styles to prevent breaking header/footer */
+    .dashboard-container { padding: 0 16px 20px 16px; max-width: 600px; margin: 0 auto; font-family: 'Inter', sans-serif; }
     
-    body {
-      background: linear-gradient(135deg, #0a0e27 0%, #1a1f4e 50%, #0a0e27 100%);
-      min-height: 100vh;
-      color: white;
-      overflow-x: hidden;
-    }
-
-    .dashboard-container { padding: 0 16px 100px 16px; max-width: 600px; margin: 0 auto; }
+    .welcome-section { display: flex; justify-content: space-between; align-items: center; margin: 20px 0; padding: 0 4px; }
+    .welcome-text h2 { font-size: 1.5rem; font-weight: 800; color: white; margin-bottom: 4px; }
+    .welcome-text p { color: rgba(255,255,255,0.6); font-size: 0.9rem; margin: 0; }
     
-    /* Welcome Section */
-    .welcome-section { 
-      display: flex; 
-      justify-content: space-between; 
-      align-items: center; 
-      margin: 20px 0;
-      padding: 0 4px;
-    }
-    .welcome-text h2 { 
-      font-size: 1.5rem; 
-      font-weight: 800;
-      background: linear-gradient(135deg, #ffffff, #00d4ff);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-    .welcome-text p { 
-      margin: 4px 0 0; 
-      color: rgba(255,255,255,0.6); 
-      font-size: 0.9rem; 
-    }
-    .notif-btn {
-      width: 42px;
-      height: 42px;
-      background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(255,215,0,0.2);
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      font-size: 1.2rem;
-      cursor: pointer;
-      position: relative;
-      transition: all 0.3s;
-    }
-    .notif-btn:hover { background: rgba(255,215,0,0.1); border-color: var(--rms-yellow); }
-    .notif-badge {
-      position: absolute;
-      top: -4px;
-      right: -4px;
-      width: 10px;
-      height: 10px;
-      background: #ff1a1a;
-      border-radius: 50%;
-      border: 2px solid #0a0e27;
-    }
+    .notif-btn { width: 42px; height: 42px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,215,0,0.2); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.2rem; cursor: pointer; position: relative; transition: all 0.3s; }
+    .notif-btn:hover { background: rgba(255,215,0,0.1); border-color: #ffd700; }
+    .notif-badge { position: absolute; top: -4px; right: -4px; width: 10px; height: 10px; background: #ff1a1a; border-radius: 50%; border: 2px solid #0a0e27; }
     
-    /* Balance Card */
-    .balance-card {
-      position: relative;
-      overflow: hidden;
-      background: linear-gradient(135deg, #0066ff 0%, #00d4ff 50%, #0099ff 100%);
-      border-radius: 24px;
-      padding: 32px 24px;
-      margin-bottom: 24px;
-      box-shadow: 0 20px 60px rgba(0,102,255,0.3), 0 0 40px rgba(0,212,255,0.2);
-    }
-    .balance-card::before {
-      content: '';
-      position: absolute;
-      top: -50%;
-      right: -50%;
-      width: 200%;
-      height: 200%;
-      background: radial-gradient(circle, rgba(255,215,0,0.15) 0%, transparent 60%);
-      pointer-events: none;
-    }
-    .balance-card::after {
-      content: '';
-      position: absolute;
-      bottom: -30%;
-      left: -30%;
-      width: 150%;
-      height: 150%;
-      background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 50%);
-      pointer-events: none;
-    }
-    .balance-label { 
-      color: rgba(255,255,255,0.8); 
-      font-size: 0.85rem; 
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      margin-bottom: 12px;
-      position: relative;
-      z-index: 1;
-    }
-    .balance-amount { 
-      font-size: 3rem; 
-      font-weight: 900; 
-      color: white;
-      margin-bottom: 24px;
-      letter-spacing: -1px;
-      text-shadow: 0 4px 20px rgba(0,0,0,0.3);
-      position: relative;
-      z-index: 1;
-    }
-    .balance-amount span { font-size: 2rem; }
-    .balance-actions { 
-      display: flex; 
-      gap: 12px; 
-      position: relative; 
-      z-index: 1;
-    }
-    .balance-btn {
-      flex: 1;
-      padding: 14px 20px;
-      border-radius: 14px;
-      font-weight: 700;
-      font-size: 0.95rem;
-      cursor: pointer;
-      text-decoration: none;
-      text-align: center;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      transition: all 0.3s;
-    }
-    .balance-btn.primary {
-      background: linear-gradient(135deg, #ffd700, #e6c200);
-      color: #0a0e27;
-      box-shadow: 0 8px 24px rgba(255,215,0,0.4);
-    }
+    .balance-card { position: relative; overflow: hidden; background: linear-gradient(135deg, #0066ff 0%, #00d4ff 50%, #0099ff 100%); border-radius: 24px; padding: 32px 24px; margin-bottom: 24px; box-shadow: 0 20px 60px rgba(0,102,255,0.3); }
+    .balance-card::before { content: ''; position: absolute; top: -50%; right: -50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(255,215,0,0.15) 0%, transparent 60%); pointer-events: none; }
+    .balance-label { color: rgba(255,255,255,0.8); font-size: 0.85rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; position: relative; z-index: 1; }
+    .balance-amount { font-size: 3rem; font-weight: 900; color: white; margin-bottom: 24px; letter-spacing: -1px; text-shadow: 0 4px 20px rgba(0,0,0,0.3); position: relative; z-index: 1; }
+    .balance-actions { display: flex; gap: 12px; position: relative; z-index: 1; }
+    .balance-btn { flex: 1; padding: 14px 20px; border-radius: 14px; font-weight: 700; font-size: 0.95rem; cursor: pointer; text-decoration: none; text-align: center; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.3s; }
+    .balance-btn.primary { background: linear-gradient(135deg, #ffd700, #e6c200); color: #0a0e27; box-shadow: 0 8px 24px rgba(255,215,0,0.4); }
     .balance-btn.primary:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(255,215,0,0.5); }
-    .balance-btn.secondary {
-      background: rgba(255,255,255,0.15);
-      color: white;
-      border: 1px solid rgba(255,255,255,0.3);
-      backdrop-filter: blur(10px);
-    }
+    .balance-btn.secondary { background: rgba(255,255,255,0.15); color: white; border: 1px solid rgba(255,255,255,0.3); backdrop-filter: blur(10px); }
     .balance-btn.secondary:hover { background: rgba(255,255,255,0.25); }
     
-    /* Quick Actions Grid */
-    .quick-actions { 
-      display: grid; 
-      grid-template-columns: repeat(4, 1fr); 
-      gap: 12px; 
-      margin: 24px 0; 
-    }
-    .action-item {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      background: rgba(255,255,255,0.03);
-      border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 16px;
-      padding: 16px 8px;
-      text-decoration: none;
-      color: white;
-      transition: all 0.3s ease;
-      cursor: pointer;
-      backdrop-filter: blur(10px);
-    }
-    .action-item:hover { 
-      transform: translateY(-4px); 
-      border-color: rgba(255,215,0,0.5);
-      background: rgba(255,215,0,0.05);
-      box-shadow: 0 8px 24px rgba(255,215,0,0.1);
-    }
-    .action-icon { 
-      width: 48px;
-      height: 48px;
-      border-radius: 14px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.3rem;
-      margin-bottom: 8px;
-    }
+    .quick-actions { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 24px 0; }
+    .action-item { display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 16px 8px; text-decoration: none; color: white; transition: all 0.3s ease; cursor: pointer; backdrop-filter: blur(10px); }
+    .action-item:hover { transform: translateY(-4px); border-color: rgba(255,215,0,0.5); background: rgba(255,215,0,0.05); }
+    .action-icon { width: 48px; height: 48px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; margin-bottom: 8px; }
     .action-icon.blue { background: linear-gradient(135deg, #0066ff, #00d4ff); color: white; }
     .action-icon.gold { background: linear-gradient(135deg, #ffd700, #e6c200); color: #0a0e27; }
     .action-icon.green { background: linear-gradient(135deg, #00d26a, #00ff88); color: white; }
     .action-icon.red { background: linear-gradient(135deg, #ff1a1a, #ff4444); color: white; }
     .action-label { font-size: 0.7rem; text-align: center; font-weight: 600; color: rgba(255,255,255,0.8); }
     
-    /* Stats Cards */
-    .stats-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin-bottom: 24px;
-    }
-    .stat-card {
-      background: rgba(255,255,255,0.03);
-      border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 16px;
-      padding: 16px;
-      backdrop-filter: blur(10px);
-    }
-    .stat-header {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 8px;
-    }
-    .stat-icon {
-      width: 32px;
-      height: 32px;
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.9rem;
-    }
+    .stats-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; }
+    .stat-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 16px; backdrop-filter: blur(10px); }
+    .stat-header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+    .stat-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; }
     .stat-icon.green { background: rgba(0,210,106,0.15); color: #00d26a; }
     .stat-icon.gold { background: rgba(255,215,0,0.15); color: #ffd700; }
     .stat-label { font-size: 0.75rem; color: rgba(255,255,255,0.6); font-weight: 500; }
     .stat-value { font-size: 1.4rem; font-weight: 800; color: white; }
     
-    /* Sections */
-    .section {
-      background: rgba(255,255,255,0.03);
-      border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 20px;
-      padding: 20px;
-      margin-bottom: 16px;
-      backdrop-filter: blur(10px);
-    }
-    .section-header { 
-      display: flex; 
-      justify-content: space-between; 
-      align-items: center; 
-      margin-bottom: 16px;
-    }
-    .section-header h3 { 
-      font-size: 1.1rem; 
-      font-weight: 700;
-      color: white;
-    }
-    .section-header a { 
-      color: #00d4ff; 
-      text-decoration: none; 
-      font-size: 0.85rem; 
-      font-weight: 600;
-      transition: color 0.2s;
-    }
+    .section { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; padding: 20px; margin-bottom: 16px; backdrop-filter: blur(10px); }
+    .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+    .section-header h3 { font-size: 1.1rem; font-weight: 700; color: white; display: flex; align-items: center; gap: 8px; }
+    .section-header a { color: #00d4ff; text-decoration: none; font-size: 0.85rem; font-weight: 600; }
     .section-header a:hover { color: #ffd700; }
 
-    /* Transaction Rows */
     .txn-list { display: flex; flex-direction: column; gap: 12px; }
-    .txn-row { 
-      display: flex; 
-      justify-content: space-between; 
-      align-items: center;
-      padding: 12px;
-      background: rgba(255,255,255,0.02);
-      border-radius: 12px;
-      transition: all 0.2s;
-    }
+    .txn-row { display: flex; justify-content: space-between; align-items: center; padding: 12px; background: rgba(255,255,255,0.02); border-radius: 12px; transition: all 0.2s; }
     .txn-row:hover { background: rgba(255,255,255,0.05); }
     .txn-left { display: flex; align-items: center; gap: 12px; flex: 1; }
-    .txn-icon { 
-      width: 40px; 
-      height: 40px; 
-      border-radius: 12px; 
-      display: flex; 
-      align-items: center; 
-      justify-content: center;
-      font-size: 1rem;
-    }
-    .txn-icon.income { 
-      background: linear-gradient(135deg, rgba(0,210,106,0.2), rgba(0,255,136,0.1)); 
-      color: #00ff88; 
-    }
-    .txn-icon.expense { 
-      background: linear-gradient(135deg, rgba(255,26,26,0.2), rgba(255,68,68,0.1)); 
-      color: #ff4444; 
-    }
+    .txn-icon { width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1rem; }
+    .txn-icon.income { background: linear-gradient(135deg, rgba(0,210,106,0.2), rgba(0,255,136,0.1)); color: #00ff88; }
+    .txn-icon.expense { background: linear-gradient(135deg, rgba(255,26,26,0.2), rgba(255,68,68,0.1)); color: #ff4444; }
     .txn-body { flex: 1; }
     .txn-title { font-weight: 600; font-size: 0.9rem; margin-bottom: 2px; color: white; }
     .txn-date { font-size: 0.75rem; color: rgba(255,255,255,0.5); }
-    .txn-amount { 
-      font-weight: 700; 
-      font-size: 0.95rem;
-      text-align: right;
-    }
+    .txn-amount { font-weight: 700; font-size: 0.95rem; text-align: right; }
     .txn-amount.income { color: #00ff88; }
     .txn-amount.expense { color: #ff4444; }
 
-    .empty-state { 
-      text-align: center; 
-      padding: 32px 20px; 
-      color: rgba(255,255,255,0.5); 
-      font-size: 0.9rem; 
-    }
-    .empty-state i { font-size: 2.5rem; margin-bottom: 12px; opacity: 0.3; }
+    .empty-state { text-align: center; padding: 32px 20px; color: rgba(255,255,255,0.5); font-size: 0.9rem; }
+    .empty-state i { font-size: 2.5rem; margin-bottom: 12px; opacity: 0.3; display: block; }
   </style>
 </head>
 <body class="rv-shell">
@@ -316,8 +80,6 @@
   <div id="header-container"></div>
 
   <div class="dashboard-container">
-    
-    <!-- Welcome Section -->
     <div class="welcome-section">
       <div class="welcome-text">
         <h2>Hello, <span id="user-name">User</span> 👋</h2>
@@ -329,21 +91,15 @@
       </button>
     </div>
 
-    <!-- Balance Card -->
     <div class="balance-card">
       <div class="balance-label">Available Balance</div>
-      <div class="balance-amount"><span>₦</span><span id="wallet-balance">0.00</span></div>
+      <div class="balance-amount">₦<span id="wallet-balance">0.00</span></div>
       <div class="balance-actions">
-        <a href="/deposit.html" class="balance-btn primary">
-          <i class="fa-solid fa-arrow-down"></i> Deposit
-        </a>
-        <a href="/withdraw.html" class="balance-btn secondary">
-          <i class="fa-solid fa-arrow-up"></i> Withdraw
-        </a>
+        <a href="/deposit.html" class="balance-btn primary"><i class="fa-solid fa-arrow-down"></i> Deposit</a>
+        <a href="/withdraw.html" class="balance-btn secondary"><i class="fa-solid fa-arrow-up"></i> Withdraw</a>
       </div>
     </div>
 
-    <!-- Quick Actions -->
     <div class="quick-actions">
       <a href="/investments.html" class="action-item">
         <div class="action-icon gold"><i class="fa-solid fa-box-open"></i></div>
@@ -363,7 +119,6 @@
       </a>
     </div>
 
-    <!-- Stats Row -->
     <div class="stats-row">
       <div class="stat-card">
         <div class="stat-header">
@@ -381,10 +136,9 @@
       </div>
     </div>
 
-    <!-- Recent Transactions -->
     <div class="section">
       <div class="section-header">
-        <h3><i class="fa-solid fa-clock-rotate-left" style="color: #00d4ff; margin-right: 8px;"></i>Recent Transactions</h3>
+        <h3><i class="fa-solid fa-clock-rotate-left" style="color: #00d4ff;"></i>Recent Transactions</h3>
         <a href="/transaction-history.html">View all <i class="fa-solid fa-chevron-right" style="font-size: 0.7rem;"></i></a>
       </div>
       <div id="transactions-list">
@@ -392,17 +146,15 @@
       </div>
     </div>
 
-    <!-- Recent Activity -->
     <div class="section">
       <div class="section-header">
-        <h3><i class="fa-solid fa-bolt" style="color: #ffd700; margin-right: 8px;"></i>Recent Activity</h3>
+        <h3><i class="fa-solid fa-bolt" style="color: #ffd700;"></i>Recent Activity</h3>
         <a href="/investments.html">Do a task <i class="fa-solid fa-chevron-right" style="font-size: 0.7rem;"></i></a>
       </div>
       <div id="activity-list">
         <div class="empty-state"><i class="fa-solid fa-circle-notch fa-spin"></i><p>Loading...</p></div>
       </div>
     </div>
-
   </div>
 
   <div id="footer-container"></div>
@@ -414,31 +166,21 @@
     const supabase = createClient('https://ofysznsajwxnjqaumwch.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9meXN6bnNhand4bmpxYXVtd2NoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgyMzM4NDgsImV4cCI6MjEwMzgwOTg0OH0.XaHkP5WZ2nJVJXVdbG-D13rrD63g_09HxmJoZn7ZoWA');
     window.supabase = supabase;
 
-    // Income types (positive, green)
     const INCOME_TYPES = ['deposit', 'referral_commission', 'task_earning', 'wealth_claim', 'wheel_win', 'admin_credit', 'bonus', 'gift_code'];
-    // Expense types (negative, red)
     const EXPENSE_TYPES = ['withdraw', 'wealth_invest', 'vip_upgrade', 'fee', 'purchase'];
 
     function getTransactionType(txn) {
       if (INCOME_TYPES.includes(txn.type)) return 'income';
       if (EXPENSE_TYPES.includes(txn.type)) return 'expense';
-      return 'income'; // Default to income for unknown types
+      return 'income';
     }
 
     function formatTransactionTitle(txn) {
       const titles = {
-        'deposit': 'Deposit',
-        'withdraw': 'Withdrawal',
-        'referral_commission': 'Referral Commission',
-        'task_earning': 'Mystery Box Reward',
-        'wealth_claim': 'Wealth Return',
-        'wealth_invest': 'Wealth Investment',
-        'wheel_win': 'Wheel Prize',
-        'vip_upgrade': 'VIP Upgrade',
-        'admin_credit': 'Admin Credit',
-        'bonus': 'Bonus',
-        'gift_code': 'Gift Code Reward',
-        'fee': 'Fee'
+        'deposit': 'Deposit', 'withdraw': 'Withdrawal', 'referral_commission': 'Referral Commission',
+        'task_earning': 'Mystery Box Reward', 'wealth_claim': 'Wealth Return', 'wealth_invest': 'Wealth Investment',
+        'wheel_win': 'Wheel Prize', 'vip_upgrade': 'VIP Upgrade', 'admin_credit': 'Admin Credit',
+        'bonus': 'Bonus', 'gift_code': 'Gift Code Reward', 'fee': 'Fee'
       };
       return titles[txn.type] || txn.description || txn.type.replace('_', ' ').toUpperCase();
     }
@@ -448,41 +190,17 @@
       if (!user) return window.location.href = '/login.html';
 
       try {
-        // 1. Load Profile
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('full_name, username, vip_level')
-          .eq('id', user.id)
-          .single();
-
+        const { data: profile } = await supabase.from('profiles').select('full_name, username, vip_level').eq('id', user.id).single();
         document.getElementById('user-name').textContent = profile?.full_name || profile?.username || 'User';
-        
         if (window.updateVipBadge) window.updateVipBadge();
 
-        // 2. Load Wallet Balance
-        const { data: wallet } = await supabase
-          .from('wallets')
-          .select('balance')
-          .eq('user_id', user.id)
-          .single();
-
+        const { data: wallet } = await supabase.from('wallets').select('balance').eq('user_id', user.id).single();
         const balance = wallet?.balance || 0;
-        document.getElementById('wallet-balance').textContent = Number(balance).toLocaleString('en-NG', { 
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2 
-        });
+        document.getElementById('wallet-balance').textContent = Number(balance).toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-        // 3. Load All Transactions
-        const { data: transactions } = await supabase
-          .from('transactions')
-          .select('*')
-          .eq('user_id', user.id)
-          .order('created_at', { ascending: false })
-          .limit(10);
-
+        const { data: transactions } = await supabase.from('transactions').select('*').eq('user_id', user.id).order('created_at', { ascending: false }).limit(10);
         const txnList = document.getElementById('transactions-list');
         
-        // Calculate totals
         let totalEarnings = 0;
         let referralIncome = 0;
 
@@ -490,7 +208,6 @@
           transactions.forEach(txn => {
             const type = getTransactionType(txn);
             const amount = Number(txn.amount);
-            
             if (type === 'income') totalEarnings += amount;
             if (txn.type === 'referral_commission') referralIncome += amount;
           });
@@ -498,49 +215,31 @@
           txnList.innerHTML = transactions.map(txn => {
             const type = getTransactionType(txn);
             const iconClass = type === 'income' ? 'fa-arrow-down' : 'fa-arrow-up';
-            const amountClass = type;
             const sign = type === 'income' ? '+' : '-';
             const title = formatTransactionTitle(txn);
-            const date = new Date(txn.created_at).toLocaleDateString('en-NG', { 
-              month: 'short', 
-              day: 'numeric',
-              hour: '2-digit',
-              minute: '2-digit'
-            });
+            const date = new Date(txn.created_at).toLocaleDateString('en-NG', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
             
             return `
               <div class="txn-row">
                 <div class="txn-left">
-                  <div class="txn-icon ${type}">
-                    <i class="fa-solid ${iconClass}"></i>
-                  </div>
+                  <div class="txn-icon ${type}"><i class="fa-solid ${iconClass}"></i></div>
                   <div class="txn-body">
                     <div class="txn-title">${title}</div>
                     <div class="txn-date">${date} · ${txn.status}</div>
                   </div>
                 </div>
-                <div class="txn-amount ${amountClass}">
-                  ${sign}₦${Number(txn.amount).toLocaleString()}
-                </div>
+                <div class="txn-amount ${type}">${sign}₦${Number(txn.amount).toLocaleString()}</div>
               </div>
             `;
           }).join('');
         } else {
-          txnList.innerHTML = '<div class="empty-state"><i class="fa-solid fa-receipt"></i><p>No transactions yet. Make a deposit to get started!</p></div>';
+          txnList.innerHTML = '<div class="empty-state"><i class="fa-solid fa-receipt"></i><p>No transactions yet.</p></div>';
         }
 
         document.getElementById('total-earnings').textContent = `₦${totalEarnings.toLocaleString()}`;
-        document.getElementById('referral-income').textContent = `${referralIncome.toLocaleString()}`;
+        document.getElementById('referral-income').textContent = `₦${referralIncome.toLocaleString()}`;
 
-        // 4. Load Recent Activity
-        const { data: recentTasks } = await supabase
-          .from('transactions')
-          .select('*')
-          .eq('user_id', user.id)
-          .in('type', ['task_earning', 'wealth_claim', 'wheel_win'])
-          .order('created_at', { ascending: false })
-          .limit(5);
-
+        const { data: recentTasks } = await supabase.from('transactions').select('*').eq('user_id', user.id).in('type', ['task_earning', 'wealth_claim', 'wheel_win']).order('created_at', { ascending: false }).limit(5);
         const activityList = document.getElementById('activity-list');
 
         if (recentTasks && recentTasks.length > 0) {
@@ -550,34 +249,23 @@
             if (t.type === 'wheel_win') icon = 'fa-dharmachakra';
             const title = formatTransactionTitle(t);
             const date = new Date(t.created_at).toLocaleDateString('en-NG', { month: 'short', day: 'numeric' });
-            
             return `
               <div class="txn-row">
                 <div class="txn-left">
-                  <div class="txn-icon income">
-                    <i class="fa-solid ${icon}"></i>
-                  </div>
-                  <div class="txn-body">
-                    <div class="txn-title">${title}</div>
-                    <div class="txn-date">${date}</div>
-                  </div>
+                  <div class="txn-icon income"><i class="fa-solid ${icon}"></i></div>
+                  <div class="txn-body"><div class="txn-title">${title}</div><div class="txn-date">${date}</div></div>
                 </div>
-                <div class="txn-amount income">
-                  +₦${Number(t.amount).toLocaleString()}
-                </div>
+                <div class="txn-amount income">+${Number(t.amount).toLocaleString()}</div>
               </div>
             `;
           }).join('');
         } else {
-          activityList.innerHTML = '<div class="empty-state"><i class="fa-solid fa-box-open"></i><p>No recent activity. Open a Mystery Box!</p></div>';
+          activityList.innerHTML = '<div class="empty-state"><i class="fa-solid fa-box-open"></i><p>No recent activity.</p></div>';
         }
-
       } catch (err) {
         console.error('Dashboard load error:', err);
-        showToast('Failed to load dashboard', 'error');
       }
     }
-
     loadDashboard();
   </script>
 </body>
