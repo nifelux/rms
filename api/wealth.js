@@ -13,56 +13,23 @@ export default async function handler(req, res) {
   try {
     switch (action) {
       case 'invest': return await invest(req, res);
-      case 'claim': return await claimInvestment(req, res); // NEW ACTION
+      case 'claim': return await claimInvestment(req, res);
       default: return res.status(400).json({ error: 'Invalid action' });
     }
   } catch (err) {
-    return res.status(500).json({ error: err.message });
-  }
-}
-
-// ... (Keep your existing 'invest' function here) ...
-
-const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
-  auth: { autoRefreshToken: false, persistSession: false }
-});
-
-export default async function handler(req, res) {
-  const action = req.query.action || req.body?.action;
-  
-  console.log('Wealth API called with action:', action);
-  
-  try {
-    switch (action) {
-      case 'invest': return await invest(req, res);
-      default: return res.status(400).json({ error: 'Invalid action: ' + action });
-    }
-  } catch (err) {
     console.error('Wealth API Error:', err);
-    return res.status(500).json({ error: err.message, stack: err.stack });
+    return res.status(500).json({ error: err.message });
   }
 }
 
 async function invest(req, res) {
   try {
-    console.log('Invest request received');
-    
-    // 1. Verify User from Token
     const authHeader = req.headers.authorization;
-    if (!authHeader) {
-      console.error('No auth header');
-      return res.status(401).json({ error: 'No authorization header' });
-    }
+    if (!authHeader) return res.status(401).json({ error: 'No authorization' });
 
     const token = authHeader.replace('Bearer ', '');
     const { data: { user }, error: userError } = await supabaseAdmin.auth.getUser(token);
-    
-    if (userError || !user) {
-      console.error('User verification failed:', userError);
-      return res.status(401).json({ error: 'Invalid token' });
-    }
-
-    console.log('User verified:', user.email);
+    if (userError || !user) return res.status(401).json({ error: 'Invalid token' });
 
     const { plan_id, amount } = req.body;
     const investAmount = Number(amount);
@@ -71,56 +38,29 @@ async function invest(req, res) {
       return res.status(400).json({ error: 'Invalid investment details' });
     }
 
-    // 2. Get Plan Details
+    // 1. Get Plan Details
     const { data: plan, error: planError } = await supabaseAdmin
       .from('wealth_plans')
       .select('*')
       .eq('id', plan_id)
       .single();
 
-    if (planError || !plan) {
-      console.error('Plan not found:', planError);
-      return res.status(404).json({ error: 'Wealth plan not found' });
+    if (planError || !plan) return res.status(404).json({ error: 'Wealth plan not found' });
+    if (investAmount !== Number(plan.invest_amount)) return res.status(400).json({ error: 'Amount does not match plan' });
+
+    // 2. Check Balance
+    const { data: wallet } = await supabaseAdmin.from('wallets').select('balance').eq('user_id', user.id).single();
+    if (Number(wallet.balance) < investAmount) {
+      return res.status(400).json({ error: 'Insufficient balance' });
     }
 
-    console.log('Plan found:', plan.name);
+    // 3. Deduct Balance
+    const newBalance = Number(wallet.balance) - investAmount;
+    await supabaseAdmin.from('wallets').update({ balance: newBalance }).eq('user_id', user.id);
 
-    // 3. Check User Balance
-    const { data: wallet, error: walletError } = await supabaseAdmin
-      .from('wallets')
-      .select('balance')
-      .eq('user_id', user.id)
-      .single();
-
-    if (walletError || !wallet) {
-      console.error('Wallet error:', walletError);
-      return res.status(500).json({ error: 'Could not load wallet' });
-    }
-
-    const currentBalance = Number(wallet.balance);
-    if (currentBalance < investAmount) {
-      return res.status(400).json({ error: `Insufficient balance. You have ₦${currentBalance.toLocaleString()}, need ₦${investAmount.toLocaleString()}` });
-    }
-
-    console.log('Balance check passed. Current:', currentBalance, 'Investing:', investAmount);
-
-    // 4. Deduct Balance
-    const newBalance = currentBalance - investAmount;
-    const { error: updateWalletError } = await supabaseAdmin
-      .from('wallets')
-      .update({ balance: newBalance, updated_at: new Date() })
-      .eq('user_id', user.id);
-
-    if (updateWalletError) {
-      console.error('Wallet update failed:', updateWalletError);
-      return res.status(500).json({ error: 'Failed to update wallet' });
-    }
-
-    console.log('Wallet updated. New balance:', newBalance);
-
-    // 5. Save the Investment
+    // 4. Save Investment (Using correct table name: wealth_investments)
     const { data: investment, error: invError } = await supabaseAdmin
-      .from('investments')
+      .from('wealth_investments')
       .insert({
         user_id: user.id,
         plan_id: plan.id,
@@ -134,16 +74,13 @@ async function invest(req, res) {
       .single();
 
     if (invError) {
-      console.error('Investment save failed:', invError);
-      // Rollback wallet
-      await supabaseAdmin.from('wallets').update({ balance: currentBalance }).eq('user_id', user.id);
+      // Rollback if save fails
+      await supabaseAdmin.from('wallets').update({ balance: Number(wallet.balance) }).eq('user_id', user.id);
       return res.status(500).json({ error: 'Failed to save investment: ' + invError.message });
     }
 
-    console.log('Investment saved:', investment.id);
-
-    // 6. Record Transaction
-    const { error: txnError } = await supabaseAdmin.from('transactions').insert({
+    // 5. Record Transaction
+    await supabaseAdmin.from('transactions').insert({
       user_id: user.id,
       type: 'wealth_invest',
       amount: investAmount,
@@ -152,24 +89,13 @@ async function invest(req, res) {
       description: `Invested in ${plan.name}`
     });
 
-    if (txnError) {
-      console.error('Transaction log failed:', txnError);
-      // Don't fail the request, just log it
-    }
-
-    return res.status(200).json({ 
-      success: true, 
-      message: 'Investment successful',
-      investment: investment,
-      newBalance: newBalance
-    });
+    return res.status(200).json({ success: true, message: 'Investment successful', newBalance });
 
   } catch (err) {
-    console.error('invest error:', err);
     return res.status(500).json({ error: err.message });
   }
-  }
-// NEW: Claim Investment Function
+}
+
 async function claimInvestment(req, res) {
   try {
     const authHeader = req.headers.authorization;
@@ -181,34 +107,35 @@ async function claimInvestment(req, res) {
 
     const { investment_id } = req.body;
 
-    // 1. Get the investment
+    // 1. Get the investment (Using correct table name)
     const { data: inv, error: invError } = await supabaseAdmin
-      .from('investments')
+      .from('wealth_investments')
       .select('*')
       .eq('id', investment_id)
       .eq('user_id', user.id)
       .single();
 
     if (invError || !inv) return res.status(404).json({ error: 'Investment not found' });
-    if (inv.status !== 'active') return res.status(400).json({ error: 'Investment already claimed or cancelled' });
+    if (inv.status !== 'active') return res.status(400).json({ error: 'Investment already claimed' });
 
-    // 2. Check Maturity Date
+    // 2. Check Maturity (Supports decimals like 0.00208333 for 3 mins)
     const startDate = new Date(inv.created_at);
     const maturityDate = new Date(startDate);
-    maturityDate.setDate(startDate.getDate() + inv.duration_days);
+    const durationMs = inv.duration_days * 24 * 60 * 60 * 1000; 
+    maturityDate.setTime(startDate.getTime() + durationMs);
 
     if (new Date() < maturityDate) {
-      return res.status(400).json({ error: `Investment not matured yet. Matures on ${maturityDate.toLocaleDateString()}` });
+      const remainingMins = Math.ceil((maturityDate - new Date()) / 60000);
+      return res.status(400).json({ error: `Not matured yet. Wait ${remainingMins} more minutes.` });
     }
 
-    // 3. Credit the Wallet with the Return Amount
+    // 3. Credit Wallet
     const { data: wallet } = await supabaseAdmin.from('wallets').select('balance').eq('user_id', user.id).single();
     const newBalance = Number(wallet.balance) + Number(inv.return_amount);
-
     await supabaseAdmin.from('wallets').update({ balance: newBalance }).eq('user_id', user.id);
 
-    // 4. Update Investment Status to 'completed'
-    await supabaseAdmin.from('investments').update({ 
+    // 4. Mark as Completed
+    await supabaseAdmin.from('wealth_investments').update({ 
       status: 'completed', 
       completed_at: new Date() 
     }).eq('id', investment_id);
