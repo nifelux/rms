@@ -16,13 +16,19 @@ export default async function handler(req, res) {
   }
 }
 
-// WAT (UTC+1) Weekend Check
+// ==========================================================
+// TEMPORARY TEST FIX: Weekend restriction disabled
+// ==========================================================
 function isTaskDayOpen() {
-  const now = new Date();
-  const watDate = new Date(now.getTime() + 60 * 60 * 1000);
-  const day = watDate.getUTCDay(); // 0 = Sunday, 6 = Saturday
-  return day !== 0 && day !== 6; 
+  // TO RE-ENABLE WEEKEND BLOCK LATER, REPLACE THIS FUNCTION WITH:
+  // const now = new Date();
+  // const watDate = new Date(now.getTime() + 60 * 60 * 1000);
+  // const day = watDate.getUTCDay(); // 0 = Sunday, 6 = Saturday
+  // return day !== 0 && day !== 6;
+  
+  return true; // Currently allowing tasks every day for testing
 }
+// ==========================================================
 
 function startOfTodayWAT() {
   const now = new Date();
@@ -46,7 +52,7 @@ async function getTaskStatus(req, res) {
       return res.status(500).json({ error: 'Failed to load profile' });
     }
 
-    // 1. Check Weekend
+    // Weekend check (currently bypassed by isTaskDayOpen() returning true)
     if (!isTaskDayOpen()) {
       return res.status(200).json({
         tier: profile.vip_level || 'newbie',
