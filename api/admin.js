@@ -83,99 +83,32 @@ async function processDeposit(req, res) {
   
   const { deposit_id, status } = req.body;
   
-  const { data: deposit, error: depError } = await supabaseAdmin
-    .from('deposits')
-    .select('*')
-    .eq('id', deposit_id)
-    .single();
-
-  if (depError || !deposit) {
-    return res.status(404).json({ error: 'Deposit not found' });
+  if (status !== 'approved') {
+    // Just reject it
+    await supabaseAdmin.from('deposits').update({ 
+      status: 'rejected',
+      updated_at: new Date() 
+    }).eq('id', deposit_id);
+    
+    return res.status(200).json({ message: 'Deposit rejected' });
   }
-
-  // 1. Update deposit status
-  await supabaseAdmin.from('deposits').update({ status, updated_at: new Date() }).eq('id', deposit_id);
-
-  if (status === 'approved') {
-    const depositAmount = Number(deposit.amount);
-
-    // 2. CREDIT THE USER'S WALLET (This was the missing piece!)
-    const { data: userWallet } = await supabaseAdmin
-      .from('wallets')
-      .select('balance, total_deposited')
-      .eq('user_id', deposit.user_id)
-      .single();
-
-    const currentBalance = userWallet ? Number(userWallet.balance) : 0;
-    const newBalance = currentBalance + depositAmount;
-
-    await supabaseAdmin.from('wallets').upsert({
-      user_id: deposit.user_id,
-      balance: newBalance,
-      total_deposited: (userWallet?.total_deposited || 0) + depositAmount,
-      updated_at: new Date()
-    });
-
-    // 3. Record the transaction for the user
-    await supabaseAdmin.from('transactions').insert({
-      user_id: deposit.user_id,
-      type: 'deposit',
-      amount: depositAmount,
-      status: 'approved',
-      reference: `dep_${deposit_id}`,
-      description: 'Deposit approved by admin'
-    });
-
-    // 4. Handle Referral Bonus (10%)
-    const { data: referrer } = await supabaseAdmin
-      .from('profiles')
-      .select('referred_by')
-      .eq('id', deposit.user_id)
-      .single();
-
-    if (referrer?.referred_by) {
-      const bonus = depositAmount * 0.10; // 10% commission
-
-      // Credit referrer's wallet
-      const { data: refWallet } = await supabaseAdmin
-        .from('wallets')
-        .select('balance, total_earned')
-        .eq('user_id', referrer.referred_by)
-        .single();
-
-      const refCurrentBalance = refWallet ? Number(refWallet.balance) : 0;
-      
-      await supabaseAdmin.from('wallets').upsert({
-        user_id: referrer.referred_by,
-        balance: refCurrentBalance + bonus,
-        total_earned: (refWallet?.total_earned || 0) + bonus,
-        updated_at: new Date()
-      });
-
-      // Record commission transaction for referrer
-      await supabaseAdmin.from('transactions').insert({
-        user_id: referrer.referred_by,
-        type: 'referral_commission',
-        amount: bonus,
-        status: 'approved',
-        reference: `ref_bonus_${deposit_id}`,
-        description: '10% commission from referral deposit'
-      });
-
-      // Record in referral_commissions table for tracking
-      await supabaseAdmin.from('referral_commissions').insert({
-        referrer_id: referrer.referred_by,
-        referred_user_id: deposit.user_id,
-        commission_amount: bonus,
-        commission_type: 'deposit_commission',
-        status: 'paid',
-        paid_at: new Date()
-      });
-    }
+  
+  // Call the database function
+  const { data, error } = await supabaseAdmin.rpc('admin_approve_deposit', {
+    deposit_id: deposit_id
+  });
+  
+  if (error) {
+    console.error('RPC Error:', error);
+    return res.status(500).json({ error: error.message });
   }
-
-  return res.status(200).json({ message: `Deposit ${status} successfully` });
-}
+  
+  if (!data.success) {
+    return res.status(400).json({ error: data.error });
+  }
+  
+  return res.status(200).json({ message: 'Deposit approved successfully' });
+} 
 
 // ==========================================
 // 3. WITHDRAWALS
