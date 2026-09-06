@@ -207,27 +207,22 @@ async function generateGiftCodes(req, res) {
     const user = await verifyUser(req);
     if (!user) return res.status(401).json({ error: 'Unauthorized' });
 
-    // Check if user already generated codes recently (30-day cooldown)
+    // 1. Check how many generations they have left
     const { data: profile } = await supabaseAdmin
       .from('profiles')
-      .select('last_gift_code_generation')
+      .select('gift_code_generations_available')
       .eq('id', user.id)
       .single();
 
-    if (profile?.last_gift_code_generation) {
-      const lastGen = new Date(profile.last_gift_code_generation);
-      const now = new Date();
-      const daysSinceLastGen = (now - lastGen) / (1000 * 60 * 60 * 24);
-      
-      if (daysSinceLastGen < 30) {
-        const daysRemaining = Math.ceil(30 - daysSinceLastGen);
-        return res.status(400).json({ 
-          error: `You can only generate gift codes once every 30 days. Try again in ${daysRemaining} day(s).` 
-        });
-      }
+    const availableGenerations = profile?.gift_code_generations_available || 0;
+
+    if (availableGenerations <= 0) {
+      return res.status(400).json({ 
+        error: 'No generations available. Wait for your referrals to upgrade to M2+ to unlock more!' 
+      });
     }
 
-    // Get user's M2+ referrals
+    // 2. Get user's M2+ referrals
     const { data: referrals } = await supabaseAdmin
       .from('profiles')
       .select('id, vip_level, email, full_name')
@@ -235,14 +230,14 @@ async function generateGiftCodes(req, res) {
       .in('vip_level', ['M2', 'M3', 'M4', 'M5', 'M6', 'M7']);
 
     if (!referrals || referrals.length === 0) {
-      return res.status(400).json({ error: 'No eligible M2+ referrals found' });
+      return res.status(400).json({ error: 'No eligible M2+ referrals found to generate codes for.' });
     }
 
     const generatedCodes = [];
 
     for (const ref of referrals) {
       // Generate random amount between 50 and 500
-      const randomAmount = Math.floor(Math.random() * 451) + 50; // 50 to 500
+      const randomAmount = Math.floor(Math.random() * 451) + 50; 
       const code = generateCode();
 
       const { data, error } = await supabaseAdmin
@@ -269,17 +264,18 @@ async function generateGiftCodes(req, res) {
       });
     }
 
-    // Update the last generation timestamp
+    // 3. Decrease the generation counter by 1
     await supabaseAdmin
       .from('profiles')
       .update({ 
-        last_gift_code_generation: new Date().toISOString() 
+        gift_code_generations_available: availableGenerations - 1 
       })
       .eq('id', user.id);
 
     return res.status(200).json({
       success: true,
       codes: generatedCodes,
+      remaining_generations: availableGenerations - 1,
       message: `Generated ${generatedCodes.length} gift codes successfully`
     });
 
