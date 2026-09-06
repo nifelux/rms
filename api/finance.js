@@ -315,26 +315,31 @@ async function redeemGiftCode(req, res) {
       return res.status(400).json({ error: 'This gift code has expired.' });
     }
 
-    
+    // 4. Prevent self-redemption
+    if (giftCode.created_by === user.id) {
+      return res.status(400).json({ error: 'You cannot redeem your own generated gift code.' });
+    }
 
-    // 5. Credit user's wallet
+    // 5. Get current wallet balance
     const { data: wallet } = await supabaseAdmin
       .from('wallets')
       .select('balance')
       .eq('user_id', user.id)
       .single();
 
-    const newBalance = (wallet?.balance || 0) + giftCode.amount;
+    const currentBalance = wallet?.balance || 0;
+    const newBalance = currentBalance + Number(giftCode.amount);
 
+    // 6. Update wallet balance directly
     await supabaseAdmin
       .from('wallets')
-      .upsert({
-        user_id: user.id,
+      .update({ 
         balance: newBalance,
         updated_at: new Date()
-      });
+      })
+      .eq('user_id', user.id);
 
-    // 6. MARK CODE AS USED (Crucial Step for Single-Use)
+    // 7. MARK CODE AS USED
     await supabaseAdmin
       .from('gift_codes')
       .update({ 
@@ -344,7 +349,7 @@ async function redeemGiftCode(req, res) {
       })
       .eq('id', giftCode.id);
 
-    // 7. Record transaction
+    // 8. Record transaction
     await supabaseAdmin
       .from('transactions')
       .insert({
