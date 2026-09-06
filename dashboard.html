@@ -10,15 +10,13 @@
   <link rel="stylesheet" href="assets/css/style.css">
   <meta name="theme-color" content="#0a0e27">
   <style>
-    /* Scoped styles to prevent breaking header/footer */
-    .dashboard-container { padding: 0 16px 20px 16px; max-width: 600px; margin: 0 auto; font-family: 'Inter', sans-serif; }
+    .dashboard-container { padding: 0 16px 100px 16px; max-width: 600px; margin: 0 auto; font-family: 'Inter', sans-serif; }
     
-    .welcome-section { display: flex; justify-content: space-between; align-items: center; margin: 20px 0; padding: 0 4px; }
+    .welcome-section { display: flex; justify-content: space-between; align-items: center; margin: 20px 0; }
     .welcome-text h2 { font-size: 1.5rem; font-weight: 800; color: white; margin-bottom: 4px; }
     .welcome-text p { color: rgba(255,255,255,0.6); font-size: 0.9rem; margin: 0; }
     
-    .notif-btn { width: 42px; height: 42px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,215,0,0.2); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.2rem; cursor: pointer; position: relative; transition: all 0.3s; }
-    .notif-btn:hover { background: rgba(255,215,0,0.1); border-color: #ffd700; }
+    .notif-btn { width: 42px; height: 42px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,215,0,0.2); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.2rem; cursor: pointer; position: relative; }
     .notif-badge { position: absolute; top: -4px; right: -4px; width: 10px; height: 10px; background: #ff1a1a; border-radius: 50%; border: 2px solid #0a0e27; }
     
     .balance-card { position: relative; overflow: hidden; background: linear-gradient(135deg, #0066ff 0%, #00d4ff 50%, #0099ff 100%); border-radius: 24px; padding: 32px 24px; margin-bottom: 24px; box-shadow: 0 20px 60px rgba(0,102,255,0.3); }
@@ -28,9 +26,10 @@
     .balance-actions { display: flex; gap: 12px; position: relative; z-index: 1; }
     .balance-btn { flex: 1; padding: 14px 20px; border-radius: 14px; font-weight: 700; font-size: 0.95rem; cursor: pointer; text-decoration: none; text-align: center; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.3s; }
     .balance-btn.primary { background: linear-gradient(135deg, #ffd700, #e6c200); color: #0a0e27; box-shadow: 0 8px 24px rgba(255,215,0,0.4); }
-    .balance-btn.primary:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(255,215,0,0.5); }
+    .balance-btn.primary:hover { transform: translateY(-2px); }
     .balance-btn.secondary { background: rgba(255,255,255,0.15); color: white; border: 1px solid rgba(255,255,255,0.3); backdrop-filter: blur(10px); }
     .balance-btn.secondary:hover { background: rgba(255,255,255,0.25); }
+    .balance-btn.disabled { opacity: 0.5; cursor: not-allowed; background: rgba(255,255,255,0.1); }
     
     .quick-actions { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 24px 0; }
     .action-item { display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 16px 8px; text-decoration: none; color: white; transition: all 0.3s ease; cursor: pointer; backdrop-filter: blur(10px); }
@@ -55,11 +54,8 @@
     .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
     .section-header h3 { font-size: 1.1rem; font-weight: 700; color: white; display: flex; align-items: center; gap: 8px; }
     .section-header a { color: #00d4ff; text-decoration: none; font-size: 0.85rem; font-weight: 600; }
-    .section-header a:hover { color: #ffd700; }
 
-    .txn-list { display: flex; flex-direction: column; gap: 12px; }
-    .txn-row { display: flex; justify-content: space-between; align-items: center; padding: 12px; background: rgba(255,255,255,0.02); border-radius: 12px; transition: all 0.2s; }
-    .txn-row:hover { background: rgba(255,255,255,0.05); }
+    .txn-row { display: flex; justify-content: space-between; align-items: center; padding: 12px; background: rgba(255,255,255,0.02); border-radius: 12px; margin-bottom: 8px; }
     .txn-left { display: flex; align-items: center; gap: 12px; flex: 1; }
     .txn-icon { width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1rem; }
     .txn-icon.income { background: linear-gradient(135deg, rgba(0,210,106,0.2), rgba(0,255,136,0.1)); color: #00ff88; }
@@ -73,6 +69,39 @@
 
     .empty-state { text-align: center; padding: 32px 20px; color: rgba(255,255,255,0.5); font-size: 0.9rem; }
     .empty-state i { font-size: 2.5rem; margin-bottom: 12px; opacity: 0.3; display: block; }
+
+    /* M0 Task Banner */
+    .m0-task-banner {
+      background: linear-gradient(135deg, #ff1a1a 0%, #ff4444 100%);
+      border-radius: 20px;
+      padding: 24px;
+      margin-bottom: 24px;
+      color: white;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 12px 40px rgba(255,26,26,0.3);
+    }
+    .m0-task-banner::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%);
+      pointer-events: none;
+    }
+    .m0-task-banner h3 { margin: 0 0 8px 0; font-size: 1.2rem; font-weight: 800; position: relative; z-index: 1; }
+    .m0-task-banner p { margin: 0 0 16px 0; font-size: 0.9rem; opacity: 0.9; position: relative; z-index: 1; }
+    .m0-progress { background: rgba(255,255,255,0.2); border-radius: 10px; padding: 14px; margin-bottom: 16px; position: relative; z-index: 1; }
+    .m0-progress-text { font-size: 0.85rem; margin-bottom: 10px; font-weight: 600; }
+    .m0-progress-bar { height: 10px; background: rgba(255,255,255,0.3); border-radius: 5px; overflow: hidden; }
+    .m0-progress-fill { height: 100%; background: linear-gradient(90deg, #ffd700, #e6c200); border-radius: 5px; transition: width 0.5s ease; }
+    .m0-task-btn { display: block; width: 100%; padding: 14px; background: white; color: #ff1a1a; text-align: center; text-decoration: none; border-radius: 12px; font-weight: 800; font-size: 1rem; position: relative; z-index: 1; transition: all 0.3s; border: none; cursor: pointer; }
+    .m0-task-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.2); }
+    .m0-task-btn:disabled { opacity: 0.7; cursor: not-allowed; }
+    .m0-upgrade-notice { background: rgba(255,215,0,0.2); border: 1px solid rgba(255,215,0,0.4); border-radius: 12px; padding: 14px; margin-top: 16px; text-align: center; position: relative; z-index: 1; }
+    .m0-upgrade-notice strong { color: #ffd700; }
   </style>
 </head>
 <body class="rv-shell">
@@ -91,12 +120,15 @@
       </button>
     </div>
 
+    <!-- M0 Task Banner (shown only for M0 users) -->
+    <div id="m0-task-banner" style="display: none;"></div>
+
     <div class="balance-card">
       <div class="balance-label">Available Balance</div>
       <div class="balance-amount">₦<span id="wallet-balance">0.00</span></div>
       <div class="balance-actions">
         <a href="/deposit.html" class="balance-btn primary"><i class="fa-solid fa-arrow-down"></i> Deposit</a>
-        <a href="/withdraw.html" class="balance-btn secondary"><i class="fa-solid fa-arrow-up"></i> Withdraw</a>
+        <a href="/withdraw.html" class="balance-btn secondary" id="withdraw-btn"><i class="fa-solid fa-arrow-up"></i> Withdraw</a>
       </div>
     </div>
 
@@ -190,13 +222,68 @@
       if (!user) return window.location.href = '/login.html';
 
       try {
-        const { data: profile } = await supabase.from('profiles').select('full_name, username, vip_level').eq('id', user.id).single();
+        const { data: profile } = await supabase.from('profiles').select('full_name, username, vip_level, m0_task_days_completed, m0_start_date, last_task_date').eq('id', user.id).single();
         document.getElementById('user-name').textContent = profile?.full_name || profile?.username || 'User';
         if (window.updateVipBadge) window.updateVipBadge();
 
         const { data: wallet } = await supabase.from('wallets').select('balance').eq('user_id', user.id).single();
         const balance = wallet?.balance || 0;
         document.getElementById('wallet-balance').textContent = Number(balance).toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+        // M0 Logic: Show task banner and disable withdrawal
+        const vipLevel = profile?.vip_level || 'newbie';
+        const isM0 = vipLevel === 'newbie' || vipLevel === 'M0';
+        
+        if (isM0) {
+          // Disable withdrawal button
+          const withdrawBtn = document.getElementById('withdraw-btn');
+          withdrawBtn.classList.add('disabled');
+          withdrawBtn.href = '#';
+          withdrawBtn.onclick = (e) => {
+            e.preventDefault();
+            showToast('⚠️ Withdrawal is locked for M0 users. Upgrade to M1 to unlock!', 'error', 5000);
+          };
+
+          // Show M0 task banner
+          const daysCompleted = profile?.m0_task_days_completed || 0;
+          const daysRemaining = 3 - daysCompleted;
+          const progressPercent = (daysCompleted / 3) * 100;
+          
+          const taskBanner = document.getElementById('m0-task-banner');
+          taskBanner.style.display = 'block';
+          
+          if (daysCompleted < 3) {
+            taskBanner.innerHTML = `
+              <h3>📦 M0 Starter Tasks</h3>
+              <p>Complete your daily task to earn ₦50. Only 3 days available!</p>
+              <div class="m0-progress">
+                <div class="m0-progress-text">Day ${daysCompleted} of 3 completed</div>
+                <div class="m0-progress-bar">
+                  <div class="m0-progress-fill" style="width: ${progressPercent}%;"></div>
+                </div>
+              </div>
+              <button class="m0-task-btn" onclick="doM0Task()">
+                <i class="fa-solid fa-play"></i> Do Today's Task (₦50)
+              </button>
+              <div class="m0-upgrade-notice">
+                <strong>️ No withdrawal until M1</strong><br>
+                <span style="font-size: 0.85rem; opacity: 0.9;">Complete all 3 days, then upgrade to unlock withdrawals!</span>
+              </div>
+            `;
+          } else {
+            taskBanner.innerHTML = `
+              <h3>✅ All M0 Tasks Completed!</h3>
+              <p>You've earned ₦150 from your starter tasks.</p>
+              <div class="m0-upgrade-notice" style="background: rgba(0,255,136,0.2); border-color: rgba(0,255,136,0.4);">
+                <strong style="color: #00ff88;"> Ready for M1!</strong><br>
+                <span style="font-size: 0.85rem; opacity: 0.9;">Upgrade now to unlock withdrawals, wealth center, and more tasks!</span>
+              </div>
+              <a href="/vip.html" class="m0-task-btn" style="margin-top: 16px; background: linear-gradient(135deg, #ffd700, #e6c200); color: #0a0e27;">
+                <i class="fa-solid fa-crown"></i> Upgrade to M1 Now
+              </a>
+            `;
+          }
+        }
 
         const { data: transactions } = await supabase.from('transactions').select('*').eq('user_id', user.id).order('created_at', { ascending: false }).limit(10);
         const txnList = document.getElementById('transactions-list');
@@ -266,6 +353,23 @@
         console.error('Dashboard load error:', err);
       }
     }
+
+    window.doM0Task = async () => {
+      try {
+        const token = (await supabase.auth.getSession()).data.session.access_token;
+        const res = await fetch('/api/tasks?action=completeTask', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Task failed');
+        showToast(`✅ Task completed! ₦50 added to your wallet.`, 'success');
+        setTimeout(() => loadDashboard(), 1500);
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    };
+
     loadDashboard();
   </script>
 </body>
