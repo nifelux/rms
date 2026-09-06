@@ -315,10 +315,7 @@ async function redeemGiftCode(req, res) {
       return res.status(400).json({ error: 'This gift code has expired.' });
     }
 
-    // 4. Prevent self-redemption
-    if (giftCode.created_by === user.id) {
-      return res.status(400).json({ error: 'You cannot redeem your own generated gift code.' });
-    }
+    
 
     // 5. Get current wallet balance
     const { data: wallet } = await supabaseAdmin
