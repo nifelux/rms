@@ -12,6 +12,12 @@ export default async function handler(req, res) {
       case 'getWithdrawalEligibility': return await getWithdrawalEligibility(req, res);
       case 'createDeposit': return await createDeposit(req, res);
       case 'createWithdrawal': return await createWithdrawal(req, res);
+      
+      // --- NEW GIFT CODE ACTIONS ---
+      case 'generateGiftCodes': return await generateGiftCodes(req, res);
+      case 'getMyGiftCodes': return await getMyGiftCodes(req, res);
+      case 'redeemGiftCode': return await redeemGiftCode(req, res);
+      
       default: return res.status(400).json({ error: 'Invalid action' });
     }
   } catch (err) {
@@ -44,6 +50,17 @@ function checkWithdrawalWindow(tier) {
   if (watDay !== rules.day) return { allowed: false, reason: `Your tier (${tier}) can only withdraw on ${rules.name}.` };
 
   return { allowed: true };
+}
+
+// --- HELPER: Generate Unique Code ---
+function generateCode() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let code = 'GIFT-';
+  for (let i = 0; i < 8; i++) {
+    code += chars.charAt(Math.floor(Math.random() * chars.length));
+    if (i === 3) code += '-';
+  }
+  return code;
 }
 
 // --- ACTIONS ---
@@ -88,7 +105,6 @@ async function getWithdrawals(req, res) {
   return res.status(200).json({ withdrawals: withdrawals || [] });
 }
 
-// NEW ACTION: Helps the frontend display the exact withdrawal status/rules to the user
 async function getWithdrawalEligibility(req, res) {
   const user = await verifyUser(req);
   if (!user) return res.status(401).json({ error: 'Unauthorized' });
@@ -99,7 +115,6 @@ async function getWithdrawalEligibility(req, res) {
   const windowCheck = checkWithdrawalWindow(tier);
   const rules = getWithdrawalRules(tier);
 
-  // Check if they already withdrew today
   const now = new Date();
   const startOfTodayWAT = new Date(now.getTime() + 60 * 60 * 1000);
   startOfTodayWAT.setUTCHours(0, 0, 0, 0);
@@ -144,17 +159,14 @@ async function createWithdrawal(req, res) {
 
   const { amount, bank_name, account_number, account_name } = req.body;
 
-  // 1. Check Tier & Time Window
   const { data: profile } = await supabaseAdmin.from('profiles').select('vip_level').eq('id', user.id).single();
   const tier = profile?.vip_level || 'newbie';
   const windowCheck = checkWithdrawalWindow(tier);
   if (!windowCheck.allowed) return res.status(400).json({ error: windowCheck.reason });
 
-  // 2. Validate Amount
   const ALLOWED_AMOUNTS = [1800, 3000, 8000, 16000, 32000, 70000, 120000, 300000, 700000, 1000000, 2500000, 3000000];
   if (!amount || !ALLOWED_AMOUNTS.includes(Number(amount))) return res.status(400).json({ error: 'Invalid withdrawal amount.' });
 
-  // 3. One Withdrawal Per Day Check
   const now = new Date();
   const startOfTodayWAT = new Date(now.getTime() + 60 * 60 * 1000);
   startOfTodayWAT.setUTCHours(0, 0, 0, 0);
@@ -164,15 +176,14 @@ async function createWithdrawal(req, res) {
     .eq('user_id', user.id).gte('created_at', startOfTodayUTC.toISOString());
   if (todaysCount > 0) return res.status(400).json({ error: 'You can only make one withdrawal request per day.' });
 
-  // 4. Balance Check (Subtract pending withdrawals from available balance)
   const { data: wallet } = await supabaseAdmin.from('wallets').select('balance').eq('user_id', user.id).single();
-// ADD NULL CHECK:
-if (!wallet) return res.status(400).json({ error: 'Wallet not found. Please contact support.' });  const { data: pending } = await supabaseAdmin.from('withdrawals').select('amount').eq('user_id', user.id).eq('status', 'pending');
+  if (!wallet) return res.status(400).json({ error: 'Wallet not found. Please contact support.' });
+  
+  const { data: pending } = await supabaseAdmin.from('withdrawals').select('amount').eq('user_id', user.id).eq('status', 'pending');
   const pendingTotal = (pending || []).reduce((sum, r) => sum + Number(r.amount), 0);
   
   if (Number(amount) > (wallet.balance - pendingTotal)) return res.status(400).json({ error: 'Insufficient available balance.' });
 
-  // 5. Create Withdrawal & Pending Transaction
   const { data: wd, error: wdErr } = await supabaseAdmin.from('withdrawals').insert({
     user_id: user.id, amount: Number(amount),
     bank_details: { bank_name, account_number, account_name }, status: 'pending'
@@ -185,4 +196,178 @@ if (!wallet) return res.status(400).json({ error: 'Wallet not found. Please cont
   });
 
   return res.status(201).json({ message: 'Withdrawal request submitted.', withdrawal: wd });
+}
+
+// ==========================================
+// NEW GIFT CODE ACTIONS
+// ==========================================
+
+async function generateGiftCodes(req, res) {
+  try {
+    const user = await verifyUser(req);
+    if (!user) return res.status(401).json({ error: 'Unauthorized' });
+
+    // Get user's M2+ referrals
+    const { data: referrals } = await supabaseAdmin
+      .from('profiles')
+      .select('id, vip_level, email, full_name')
+      .eq('referred_by', user.id)
+      .in('vip_level', ['M2', 'M3', 'M4', 'M5', 'M6', 'M7']);
+
+    if (!referrals || referrals.length === 0) {
+      return res.status(400).json({ error: 'No eligible M2+ referrals found' });
+    }
+
+    const tierPercentages = {
+      'M2': 0.05, 'M3': 0.08, 'M4': 0.12,
+      'M5': 0.15, 'M6': 0.18, 'M7': 0.20
+    };
+
+    const baseAmount = 10000;
+    const generatedCodes = [];
+
+    for (const ref of referrals) {
+      const percentage = tierPercentages[ref.vip_level];
+      const couponAmount = baseAmount * percentage;
+      const code = generateCode();
+
+      const { data, error } = await supabaseAdmin
+        .from('gift_codes')
+        .insert({
+          code: code,
+          amount: couponAmount,
+          max_uses: 1,
+          used_count: 0,
+          is_active: true,
+          created_by: user.id,
+          expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      generatedCodes.push({
+        code: code,
+        referral: ref.full_name || ref.email,
+        tier: ref.vip_level,
+        percentage: percentage * 100,
+        amount: couponAmount
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      codes: generatedCodes,
+      message: `Generated ${generatedCodes.length} gift codes successfully`
+    });
+
+  } catch (err) {
+    console.error('Generate codes error:', err);
+    return res.status(500).json({ error: err.message });
+  }
+}
+
+async function getMyGiftCodes(req, res) {
+  try {
+    const user = await verifyUser(req);
+    if (!user) return res.status(401).json({ error: 'Unauthorized' });
+
+    const { data: codes } = await supabaseAdmin
+      .from('gift_codes')
+      .select('*')
+      .eq('created_by', user.id)
+      .order('created_at', { ascending: false })
+      .limit(20);
+
+    return res.status(200).json({ codes: codes || [] });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+}
+
+async function redeemGiftCode(req, res) {
+  try {
+    const user = await verifyUser(req);
+    if (!user) return res.status(401).json({ error: 'Unauthorized' });
+
+    const { code } = req.body;
+    if (!code) return res.status(400).json({ error: 'Code required' });
+
+    // 1. Find the gift code
+    const { data: giftCode, error: findError } = await supabaseAdmin
+      .from('gift_codes')
+      .select('*')
+      .eq('code', code.toUpperCase().trim())
+      .single();
+
+    if (findError || !giftCode) {
+      return res.status(404).json({ error: 'Invalid gift code. Please check and try again.' });
+    }
+
+    // 2. STRICT SINGLE-USE CHECK
+    if (!giftCode.is_active) {
+      return res.status(400).json({ error: 'This gift code has already been used by someone else.' });
+    }
+
+    // 3. Check if expired
+    if (giftCode.expires_at && new Date(giftCode.expires_at) < new Date()) {
+      return res.status(400).json({ error: 'This gift code has expired.' });
+    }
+
+    // 4. Prevent self-redemption
+    if (giftCode.created_by === user.id) {
+      return res.status(400).json({ error: 'You cannot redeem your own generated gift code.' });
+    }
+
+    // 5. Credit user's wallet
+    const { data: wallet } = await supabaseAdmin
+      .from('wallets')
+      .select('balance')
+      .eq('user_id', user.id)
+      .single();
+
+    const newBalance = (wallet?.balance || 0) + giftCode.amount;
+
+    await supabaseAdmin
+      .from('wallets')
+      .upsert({
+        user_id: user.id,
+        balance: newBalance,
+        updated_at: new Date()
+      });
+
+    // 6. MARK CODE AS USED (Crucial Step for Single-Use)
+    await supabaseAdmin
+      .from('gift_codes')
+      .update({ 
+        is_active: false, 
+        used_count: 1,
+        used_by: user.id
+      })
+      .eq('id', giftCode.id);
+
+    // 7. Record transaction
+    await supabaseAdmin
+      .from('transactions')
+      .insert({
+        user_id: user.id,
+        type: 'gift_code',
+        amount: giftCode.amount,
+        status: 'approved',
+        reference: `gift_redeem_${Date.now()}`,
+        description: `Redeemed Gift Code: ${code}`
+      });
+
+    return res.status(200).json({
+      success: true,
+      amount: giftCode.amount,
+      new_balance: newBalance,
+      message: `Success! ₦${giftCode.amount.toLocaleString()} added to your wallet.`
+    });
+
+  } catch (err) {
+    console.error('Redeem code error:', err);
+    return res.status(500).json({ error: err.message });
+  }
 }
