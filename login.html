@@ -3,196 +3,194 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>RMS — Login</title>
+  <title>RMS — Sign In</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <meta name="theme-color" content="#0a0e27">
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
-    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', sans-serif;
+    }
+
     body {
       background: linear-gradient(135deg, #0a0e27 0%, #1a1f4e 50%, #0a0e27 100%);
       min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
       color: white;
-      position: relative;
-      overflow: hidden;
+      overflow-x: hidden;
     }
 
-    /* Animated background elements */
-    .bg-glow {
-      position: fixed;
-      border-radius: 50%;
-      filter: blur(80px);
-      opacity: 0.3;
-      pointer-events: none;
-      animation: float 8s ease-in-out infinite;
-    }
-    .bg-glow-1 {
-      width: 300px;
-      height: 300px;
-      background: #0066ff;
-      top: -100px;
-      left: -100px;
-      animation-delay: 0s;
-    }
-    .bg-glow-2 {
-      width: 250px;
-      height: 250px;
-      background: #ffd700;
-      bottom: -80px;
-      right: -80px;
-      animation-delay: 2s;
-    }
-    .bg-glow-3 {
-      width: 200px;
-      height: 200px;
-      background: #00d4ff;
-      top: 50%;
-      left: 50%;
-      animation-delay: 4s;
+    /* Premium Header */
+    .auth-header-bar {
+      background: linear-gradient(135deg, rgba(10,14,39,0.95), rgba(26,31,78,0.95));
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(255,215,0,0.2);
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
     }
 
-    @keyframes float {
-      0%, 100% { transform: translate(0, 0) scale(1); }
-      50% { transform: translate(30px, -30px) scale(1.1); }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
     }
 
-    .login-container {
-      width: 100%;
-      max-width: 420px;
-      position: relative;
-      z-index: 10;
-    }
-
-    .logo-section {
-      text-align: center;
-      margin-bottom: 32px;
-    }
-
-    .logo-icon {
-      width: 80px;
-      height: 80px;
+    .brand-mark {
+      width: 42px;
+      height: 42px;
       background: linear-gradient(135deg, #ffd700, #e6c200);
-      border-radius: 24px;
+      border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      margin: 0 auto 16px;
-      font-size: 2.5rem;
-      font-weight: 900;
+      font-size: 1.3rem;
+      font-weight: 800;
       color: #0a0e27;
-      box-shadow: 0 8px 32px rgba(255,215,0,0.4);
-      position: relative;
-      overflow: hidden;
-    }
-    .logo-icon::before {
-      content: '';
-      position: absolute;
-      top: -50%;
-      left: -50%;
-      width: 200%;
-      height: 200%;
-      background: linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.3) 50%, transparent 70%);
-      animation: shimmer 3s infinite;
-    }
-    @keyframes shimmer {
-      0% { transform: translateX(-100%) rotate(45deg); }
-      100% { transform: translateX(100%) rotate(45deg); }
+      box-shadow: 0 4px 12px rgba(255,215,0,0.3);
     }
 
-    .logo-title {
-      font-size: 2rem;
-      font-weight: 900;
-      margin-bottom: 8px;
-      background: linear-gradient(135deg, #ffd700, #ffed4e);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
+    .brand-copy {
+      display: flex;
+      flex-direction: column;
     }
-    .logo-subtitle {
+
+    .brand-name {
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: white;
+      letter-spacing: 1px;
+    }
+
+    .brand-name span {
+      color: #ff1a1a;
+      font-size: 1.1rem;
+    }
+
+    .brand-tag {
+      font-size: 0.65rem;
       color: rgba(255,255,255,0.6);
-      font-size: 0.95rem;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
     }
 
-    .login-card {
-      background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 24px;
-      padding: 32px 24px;
-      backdrop-filter: blur(20px);
-      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    .header-badge {
+      background: rgba(255,215,0,0.1);
+      border: 1px solid rgba(255,215,0,0.3);
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      color: #ffd700;
+      font-weight: 600;
     }
 
+    /* Main Container */
+    .auth-container {
+      padding: 40px 20px 60px 20px;
+      max-width: 500px;
+      margin: 0 auto;
+    }
+
+    .auth-card {
+      background: linear-gradient(135deg, rgba(17,22,58,0.8), rgba(26,32,80,0.8));
+      border: 1px solid rgba(255,215,0,0.15);
+      border-radius: 20px;
+      padding: 32px 28px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    }
+
+    .auth-title {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    .auth-title h2 {
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: white;
+      margin-bottom: 8px;
+    }
+
+    .auth-title p {
+      color: rgba(255,255,255,0.6);
+      font-size: 0.9rem;
+    }
+
+    /* Form Styles */
     .form-group {
       margin-bottom: 20px;
     }
 
-    .form-label {
+    .form-group label {
       display: block;
       font-size: 0.85rem;
-      font-weight: 600;
       color: rgba(255,255,255,0.8);
       margin-bottom: 8px;
+      font-weight: 600;
     }
 
     .input-wrapper {
       position: relative;
     }
 
-    .input-icon {
-      position: absolute;
-      left: 16px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: rgba(255,255,255,0.4);
-      font-size: 1.1rem;
-      transition: color 0.3s;
-    }
-
-    .form-input {
+    .form-control {
       width: 100%;
-      padding: 14px 16px 14px 48px;
+      padding: 14px 16px;
       background: rgba(0,0,0,0.3);
       border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 14px;
+      border-radius: 12px;
       color: white;
-      font-size: 0.95rem;
+      font-size: 1rem;
       transition: all 0.3s;
     }
-    .form-input:focus {
+
+    .form-control:focus {
       outline: none;
-      border-color: #00d4ff;
-      background: rgba(0,0,0,0.5);
-      box-shadow: 0 0 0 3px rgba(0,212,255,0.1);
+      border-color: #ffd700;
+      background: rgba(0,0,0,0.4);
+      box-shadow: 0 0 0 3px rgba(255,215,0,0.1);
     }
-    .form-input:focus + .input-icon {
-      color: #00d4ff;
+
+    .form-control.error {
+      border-color: #ff1a1a;
+      animation: shake 0.3s;
     }
-    .form-input::placeholder {
-      color: rgba(255,255,255,0.3);
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-5px); }
+      75% { transform: translateX(5px); }
     }
 
     .toggle-password {
       position: absolute;
-      right: 16px;
+      right: 14px;
       top: 50%;
       transform: translateY(-50%);
       background: none;
       border: none;
-      color: rgba(255,255,255,0.4);
+      color: rgba(255,255,255,0.5);
       cursor: pointer;
       font-size: 1.1rem;
-      transition: color 0.3s;
-    }
-    .toggle-password:hover {
-      color: #00d4ff;
+      padding: 4px;
+      transition: color 0.2s;
     }
 
+    .toggle-password:hover {
+      color: #ffd700;
+    }
+
+    /* Remember & Forgot Row */
     .remember-forgot {
       display: flex;
       justify-content: space-between;
@@ -208,239 +206,133 @@
       color: rgba(255,255,255,0.7);
       cursor: pointer;
     }
-    .remember-me input {
+
+    .remember-me input[type="checkbox"] {
       width: 16px;
       height: 16px;
-      accent-color: #00d4ff;
+      accent-color: #ffd700;
       cursor: pointer;
     }
 
     .forgot-link {
-      color: #00d4ff;
+      color: #ffd700;
       text-decoration: none;
       font-weight: 600;
-      transition: color 0.3s;
-    }
-    .forgot-link:hover {
-      color: #ffd700;
+      transition: color 0.2s;
     }
 
-    .login-btn {
+    .forgot-link:hover {
+      color: #e6c200;
+      text-decoration: underline;
+    }
+
+    /* Submit Button */
+    .submit-btn {
       width: 100%;
       padding: 16px;
-      background: linear-gradient(135deg, #ffd700 0%, #ffed4e 50%, #ffd700 100%);
+      font-size: 1rem;
+      font-weight: 700;
       border: none;
-      border-radius: 14px;
-      font-size: 1.05rem;
-      font-weight: 900;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #ffd700, #e6c200);
       color: #0a0e27;
       cursor: pointer;
+      margin-top: 8px;
       transition: all 0.3s;
-      box-shadow: 0 8px 24px rgba(255,215,0,0.4);
-      position: relative;
-      overflow: hidden;
+      box-shadow: 0 4px 16px rgba(255,215,0,0.3);
     }
-    .login-btn::before {
-      content: '';
-      position: absolute;
-      top: -50%;
-      left: -50%;
-      width: 200%;
-      height: 200%;
-      background: linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.3) 50%, transparent 70%);
-      animation: shimmer 3s infinite;
-    }
-    .login-btn:hover:not(:disabled) {
+
+    .submit-btn:hover:not(:disabled) {
       transform: translateY(-2px);
-      box-shadow: 0 12px 32px rgba(255,215,0,0.5);
+      box-shadow: 0 6px 24px rgba(255,215,0,0.4);
     }
-    .login-btn:disabled {
+
+    .submit-btn:disabled {
       opacity: 0.6;
       cursor: not-allowed;
       background: linear-gradient(135deg, #555, #777);
       color: #aaa;
       box-shadow: none;
     }
-    .login-btn:disabled::before {
-      display: none;
-    }
 
-    .divider {
-      display: flex;
-      align-items: center;
-      margin: 24px 0;
-      color: rgba(255,255,255,0.4);
-      font-size: 0.85rem;
-    }
-    .divider::before,
-    .divider::after {
-      content: '';
-      flex: 1;
-      height: 1px;
-      background: rgba(255,255,255,0.1);
-    }
-    .divider span {
-      padding: 0 16px;
-    }
-
-    .social-login {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin-bottom: 24px;
-    }
-
-    .social-btn {
-      padding: 12px;
-      background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 12px;
-      color: white;
-      font-size: 0.9rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-    }
-    .social-btn:hover {
-      background: rgba(255,255,255,0.1);
-      border-color: rgba(255,255,255,0.2);
-      transform: translateY(-2px);
-    }
-    .social-btn i {
-      font-size: 1.2rem;
-    }
-
-    .register-link {
+    /* Footer */
+    .auth-footer {
       text-align: center;
-      color: rgba(255,255,255,0.7);
+      margin-top: 24px;
+      color: rgba(255,255,255,0.6);
       font-size: 0.9rem;
     }
-    .register-link a {
+
+    .auth-footer a {
       color: #ffd700;
       text-decoration: none;
-      font-weight: 700;
-      transition: color 0.3s;
-    }
-    .register-link a:hover {
-      color: #ffed4e;
-    }
-
-    .error-message {
-      background: rgba(255,26,26,0.1);
-      border: 1px solid rgba(255,26,26,0.3);
-      border-radius: 12px;
-      padding: 12px 16px;
-      margin-bottom: 20px;
-      color: #ff4444;
-      font-size: 0.85rem;
       font-weight: 600;
-      display: none;
-      align-items: center;
-      gap: 8px;
-    }
-    .error-message.show {
-      display: flex;
+      transition: color 0.2s;
     }
 
-    .success-message {
-      background: rgba(0,255,136,0.1);
-      border: 1px solid rgba(0,255,136,0.3);
-      border-radius: 12px;
-      padding: 12px 16px;
-      margin-bottom: 20px;
-      color: #00ff88;
-      font-size: 0.85rem;
-      font-weight: 600;
-      display: none;
-      align-items: center;
-      gap: 8px;
-    }
-    .success-message.show {
-      display: flex;
+    .auth-footer a:hover {
+      color: #e6c200;
+      text-decoration: underline;
     }
 
-    @media (max-width: 480px) {
-      .login-card {
-        padding: 24px 20px;
-      }
-      .logo-icon {
-        width: 70px;
-        height: 70px;
-        font-size: 2.2rem;
-      }
-      .logo-title {
-        font-size: 1.8rem;
-      }
+    /* Decorative Elements */
+    .auth-container::before {
+      content: '';
+      position: fixed;
+      top: -50%;
+      right: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255,215,0,0.03) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
     }
   </style>
 </head>
 <body>
-  <!-- Background glows -->
-  <div class="bg-glow bg-glow-1"></div>
-  <div class="bg-glow bg-glow-2"></div>
-  <div class="bg-glow bg-glow-3"></div>
 
-  <div class="login-container">
-    <!-- Logo Section -->
-    <div class="logo-section">
-      <div class="logo-icon">R</div>
-      <h1 class="logo-title">RMS</h1>
-      <p class="logo-subtitle">Welcome back! Login to continue</p>
-    </div>
-
-    <!-- Login Card -->
-    <div class="login-card">
-      <!-- Error Message -->
-      <div class="error-message" id="error-message">
-        <i class="fa-solid fa-circle-exclamation"></i>
-        <span id="error-text">Invalid credentials</span>
+  <!-- Premium Header -->
+  <header class="auth-header-bar">
+    <a href="/" class="brand">
+      <div class="brand-mark">R</div>
+      <div class="brand-copy">
+        <div class="brand-name">RMS<span><i class="fa-solid fa-bolt"></i></span></div>
+        <div class="brand-tag">Royal Management System</div>
       </div>
+    </a>
+    <div class="header-badge">
+      <i class="fa-solid fa-shield-halved"></i> Secure
+    </div>
+  </header>
 
-      <!-- Success Message -->
-      <div class="success-message" id="success-message">
-        <i class="fa-solid fa-circle-check"></i>
-        <span id="success-text">Login successful!</span>
+  <!-- Main Content -->
+  <div class="auth-container">
+    <div class="auth-card">
+      <div class="auth-title">
+        <h2>Welcome Back</h2>
+        <p>Sign in to access your RMS dashboard</p>
       </div>
 
       <form id="login-form">
-        <!-- Email Input -->
         <div class="form-group">
-          <label class="form-label" for="email">Email Address</label>
+          <label>Email Address</label>
           <div class="input-wrapper">
-            <input 
-              type="email" 
-              id="email" 
-              class="form-input" 
-              placeholder="Enter your email"
-              required
-            >
-            <i class="fa-solid fa-envelope input-icon"></i>
+            <input type="email" id="email" class="form-control" placeholder="Enter your email" required>
+            <i class="fa-solid fa-envelope" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: rgba(255,255,255,0.4);"></i>
+            <input type="email" id="email" class="form-control" placeholder="Enter your email" style="padding-left: 42px;" required>
           </div>
         </div>
 
-        <!-- Password Input -->
         <div class="form-group">
-          <label class="form-label" for="password">Password</label>
+          <label>Password</label>
           <div class="input-wrapper">
-            <input 
-              type="password" 
-              id="password" 
-              class="form-input" 
-              placeholder="Enter your password"
-              required
-            >
-            <i class="fa-solid fa-lock input-icon"></i>
-            <button type="button" class="toggle-password" onclick="togglePassword()">
-              <i class="fa-solid fa-eye" id="toggle-icon"></i>
+            <input type="password" id="password" class="form-control" placeholder="Enter your password" required>
+            <button type="button" class="toggle-password" onclick="togglePass('password', this)">
+              <i class="fa-regular fa-eye"></i>
             </button>
           </div>
         </div>
 
-        <!-- Remember Me & Forgot Password -->
         <div class="remember-forgot">
           <label class="remember-me">
             <input type="checkbox" id="remember">
@@ -449,104 +341,66 @@
           <a href="/forgot-password.html" class="forgot-link">Forgot Password?</a>
         </div>
 
-        <!-- Login Button -->
-        <button type="submit" class="login-btn" id="login-btn">
-          <i class="fa-solid fa-right-to-bracket" style="margin-right: 8px;"></i>
-          Login
+        <button type="submit" class="submit-btn" id="submit-btn">
+          <i class="fa-solid fa-right-to-bracket"></i> Sign In
         </button>
       </form>
 
-      <!-- Divider -->
-      <div class="divider">
-        <span>or continue with</span>
-      </div>
-
-      <!-- Social Login -->
-      <div class="social-login">
-        <button class="social-btn" onclick="socialLogin('google')">
-          <i class="fa-brands fa-google" style="color: #ff4444;"></i>
-          Google
-        </button>
-        <button class="social-btn" onclick="socialLogin('facebook')">
-          <i class="fa-brands fa-facebook" style="color: #0066ff;"></i>
-          Facebook
-        </button>
-      </div>
-
-      <!-- Register Link -->
-      <div class="register-link">
-        Don't have an account? <a href="/register.html">Sign Up</a>
+      <div class="auth-footer">
+        Don't have an account? <a href="/register.html">Create Account</a>
       </div>
     </div>
   </div>
 
+  <script src="/assets/js/notifications.js"></script>
   <script type="module">
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
     const supabase = createClient('https://ofysznsajwxnjqaumwch.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9meXN6bnNhand4bmpxYXVtd2NoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgyMzM4NDgsImV4cCI6MjEwMzgwOTg0OH0.XaHkP5WZ2nJVJXVdbG-D13rrD63g_09HxmJoZn7ZoWA');
     window.supabase = supabase;
 
-    // Toggle password visibility
-    window.togglePassword = () => {
-      const passwordInput = document.getElementById('password');
-      const toggleIcon = document.getElementById('toggle-icon');
-      
-      if (passwordInput.type === 'password') {
-        passwordInput.type = 'text';
-        toggleIcon.className = 'fa-solid fa-eye-slash';
+    // 1. Password visibility toggle
+    window.togglePass = (id, btn) => {
+      const input = document.getElementById(id);
+      const icon = btn.querySelector('i');
+      if (input.type === 'password') {
+        input.type = 'text';
+        icon.className = 'fa-regular fa-eye-slash';
       } else {
-        passwordInput.type = 'password';
-        toggleIcon.className = 'fa-solid fa-eye';
+        input.type = 'password';
+        icon.className = 'fa-regular fa-eye';
       }
     };
 
-    // Social login placeholder
-    window.socialLogin = (provider) => {
-      showToast(`${provider} login coming soon!`, 'info');
-    };
-
-    // Show error message
-    function showError(message) {
-      const errorEl = document.getElementById('error-message');
-      const errorText = document.getElementById('error-text');
-      errorText.textContent = message;
-      errorEl.classList.add('show');
-      setTimeout(() => errorEl.classList.remove('show'), 5000);
+    // 2. Load remembered email
+    const rememberedEmail = localStorage.getItem('rms_remembered_email');
+    if (rememberedEmail) {
+      document.getElementById('email').value = rememberedEmail;
+      document.getElementById('remember').checked = true;
     }
 
-    // Show success message
-    function showSuccess(message) {
-      const successEl = document.getElementById('success-message');
-      const successText = document.getElementById('success-text');
-      successText.textContent = message;
-      successEl.classList.add('show');
-    }
-
-    // Handle login form submission
+    // 3. Form submission
     document.getElementById('login-form').addEventListener('submit', async (e) => {
       e.preventDefault();
-      
-      const email = document.getElementById('email').value.trim();
+
+      const email = document.getElementById('email').value.trim().toLowerCase();
       const password = document.getElementById('password').value;
-      const loginBtn = document.getElementById('login-btn');
+      const remember = document.getElementById('remember').checked;
+      const btn = document.getElementById('submit-btn');
 
-      // Hide previous messages
-      document.getElementById('error-message').classList.remove('show');
-      document.getElementById('success-message').classList.remove('show');
-
-      // Validate
-      if (!email || !password) {
-        showError('Please fill in all fields');
+      // Validation
+      if (!email || !email.includes('@')) {
+        showToast('Please enter a valid email address', 'error');
         return;
       }
 
-      if (!email.includes('@')) {
-        showError('Please enter a valid email');
+      if (!password) {
+        showToast('Please enter your password', 'error');
         return;
       }
 
-      // Disable button
-      loginBtn.disabled = true;
-      loginBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin" style="margin-right: 8px;"></i>Logging in...';
+      // Disable button and show loading
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Signing in...';
 
       try {
         const { data, error } = await supabase.auth.signInWithPassword({
@@ -554,51 +408,43 @@
           password: password
         });
 
-        if (error) {
-          throw new Error(error.message);
-        }
+        if (error) throw error;
 
         if (data.user) {
-          showSuccess('Login successful! Redirecting...');
-          
-          // Save remember me preference
-          if (document.getElementById('remember').checked) {
-            localStorage.setItem('remembered_email', email);
+          // Save remembered email
+          if (remember) {
+            localStorage.setItem('rms_remembered_email', email);
           } else {
-            localStorage.removeItem('remembered_email');
+            localStorage.removeItem('rms_remembered_email');
           }
+
+          showToast('Login successful! Redirecting...', 'success');
 
           // Redirect to dashboard
           setTimeout(() => {
             window.location.href = '/dashboard.html';
           }, 1500);
         }
+
       } catch (err) {
         console.error('Login error:', err);
-        let errorMsg = 'Login failed. Please try again.';
         
+        let message = 'Login failed. Please check your credentials.';
         if (err.message.includes('Invalid login credentials')) {
-          errorMsg = 'Invalid email or password';
+          message = 'Invalid email or password.';
         } else if (err.message.includes('Email not confirmed')) {
-          errorMsg = 'Please verify your email first';
+          message = 'Please verify your email address first.';
         } else if (err.message.includes('Too many requests')) {
-          errorMsg = 'Too many attempts. Please try again later';
+          message = 'Too many attempts. Please try again later.';
         }
         
-        showError(errorMsg);
-        loginBtn.disabled = false;
-        loginBtn.innerHTML = '<i class="fa-solid fa-right-to-bracket" style="margin-right: 8px;"></i>Login';
+        showToast(message, 'error');
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> Sign In';
       }
     });
 
-    // Load remembered email
-    const rememberedEmail = localStorage.getItem('remembered_email');
-    if (rememberedEmail) {
-      document.getElementById('email').value = rememberedEmail;
-      document.getElementById('remember').checked = true;
-    }
-
-    // Check if already logged in
+    // 4. Check if already logged in
     async function checkAuth() {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
