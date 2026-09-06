@@ -541,45 +541,39 @@
           }
         }
 
-        // 6. Show Gift Code Section if eligible
-        const giftSection = document.getElementById('gift-reward-section');
-        const noM2Notice = document.getElementById('no-m2-notice');
-        const claimBtn = document.getElementById('claim-gift-btn');
+        // 6. Check Gift Code Generation Status
+    const giftSection = document.getElementById('gift-reward-section');
+    const noM2Notice = document.getElementById('no-m2-notice');
+    const claimBtn = document.getElementById('claim-gift-btn');
+    
+    if (m2Count >= 1) {
+      giftSection.style.display = 'block';
+      noM2Notice.style.display = 'none';
+      document.getElementById('high-tier-count').textContent = m2Count;
+      
+      // Check if user can generate codes
+      if (profile?.last_gift_code_generation) {
+        const lastGen = new Date(profile.last_gift_code_generation);
+        const now = new Date();
+        const daysSinceLastGen = Math.floor((now - lastGen) / (1000 * 60 * 60 * 24));
         
-        if (m2Count >= 1) {
-          giftSection.style.display = 'block';
-          noM2Notice.style.display = 'none';
-          document.getElementById('high-tier-count').textContent = m2Count;
-          claimBtn.disabled = false;
+        if (daysSinceLastGen < 30) {
+          const daysRemaining = 30 - daysSinceLastGen;
+          claimBtn.disabled = true;
+          claimBtn.innerHTML = `<i class="fa-solid fa-clock"></i> Available in ${daysRemaining} day(s)`;
+          claimBtn.style.background = '#555';
+          claimBtn.style.color = '#aaa';
         } else {
-          giftSection.style.display = 'none';
-          noM2Notice.style.display = 'block';
+          claimBtn.disabled = false;
+          claimBtn.innerHTML = '<i class="fa-solid fa-ticket"></i> Generate Gift Codes';
+          claimBtn.style.background = '';
+          claimBtn.style.color = '';
         }
-
-      } catch (err) {
-        console.error('Team loading error:', err);
-        showToast('Error loading team data', 'error');
       }
+    } else {
+      giftSection.style.display = 'none';
+      noM2Notice.style.display = 'block';
     }
-
-    window.claimGiftCodes = async () => {
-      const btn = document.getElementById('claim-gift-btn');
-      btn.disabled = true;
-      btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Generating...';
-
-      try {
-        const token = (await supabase.auth.getSession()).data.session.access_token;
-        const res = await fetch('/api/finance?action=generateGiftCodes', {
-          method: 'POST',
-          headers: { 
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}` 
-          }
-        });
-
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error);
-
         // Show generated codes in modal
         showGeneratedCodesModal(data.codes);
         
