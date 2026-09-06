@@ -11,153 +11,54 @@
   <meta name="theme-color" content="#0a0e27">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
-    
-    body {
-      background: linear-gradient(135deg, #0a0e27 0%, #1a1f4e 100%);
-      min-height: 100vh;
-      color: white;
-      padding-bottom: 100px;
-    }
-
+    body { background: linear-gradient(135deg, #0a0e27 0%, #1a1f4e 100%); min-height: 100vh; color: white; padding-bottom: 100px; }
     .wheel-container { padding: 20px 16px; max-width: 600px; margin: 0 auto; }
     
     .page-header { text-align: center; margin-bottom: 24px; }
-    .page-header h2 { font-size: 2rem; font-weight: 900; color: white; margin: 0 0 8px 0; }
-    .page-header p { color: rgba(255,255,255,0.6); font-size: 0.95rem; margin: 0; }
+    .page-header h2 { font-size: 2rem; font-weight: 900; margin-bottom: 8px; }
+    .page-header p { color: rgba(255,255,255,0.6); font-size: 0.95rem; }
 
     .spins-counter {
       background: linear-gradient(135deg, rgba(255,215,0,0.15), rgba(255,193,7,0.05));
       border: 2px solid rgba(255,215,0,0.3);
-      border-radius: 20px;
-      padding: 16px 24px;
-      text-align: center;
-      margin-bottom: 24px;
+      border-radius: 20px; padding: 16px; text-align: center; margin-bottom: 24px;
     }
     .spins-label { font-size: 0.85rem; color: rgba(255,255,255,0.7); margin-bottom: 4px; }
     .spins-value { font-size: 2rem; font-weight: 900; color: #ffd700; }
 
-    .wheel-wrapper {
-      position: relative;
-      width: 100%;
-      max-width: 350px;
-      margin: 0 auto 32px;
-    }
+    .wheel-wrapper { position: relative; width: 100%; max-width: 320px; margin: 0 auto 32px; }
+    .wheel-canvas { width: 100%; height: auto; border-radius: 50%; box-shadow: 0 0 40px rgba(255,215,0,0.2); transition: transform 4s cubic-bezier(0.17, 0.67, 0.12, 0.99); }
+    .wheel-pointer { position: absolute; top: -10px; left: 50%; transform: translateX(-50%); width: 30px; height: 40px; background: #ff1a1a; clip-path: polygon(50% 100%, 0 0, 100% 0); z-index: 10; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.5)); }
+    .wheel-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 50px; height: 50px; background: linear-gradient(135deg, #ffd700, #e6c200); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 900; color: #0a0e27; box-shadow: 0 0 20px rgba(255,215,0,0.5); z-index: 5; }
 
-    .wheel-canvas {
-      width: 100%;
-      height: auto;
-      border-radius: 50%;
-      box-shadow: 0 0 40px rgba(255,215,0,0.3);
-      transition: transform 4s cubic-bezier(0.17, 0.67, 0.12, 0.99);
-    }
-
-    .wheel-pointer {
-      position: absolute;
-      top: -15px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 40px;
-      height: 50px;
-      background: linear-gradient(135deg, #ff1a1a, #ff4444);
-      clip-path: polygon(50% 100%, 0 0, 100% 0);
-      z-index: 10;
-      filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
-    }
-
-    .wheel-center {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 60px;
-      height: 60px;
-      background: linear-gradient(135deg, #ffd700, #e6c200);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 900;
-      color: #0a0e27;
-      font-size: 1.5rem;
-      box-shadow: 0 0 20px rgba(255,215,0,0.5);
-      z-index: 5;
-    }
-
-    .spin-btn {
-      width: 100%;
-      padding: 18px;
-      font-size: 1.2rem;
-      font-weight: 900;
-      border: none;
-      border-radius: 16px;
-      background: linear-gradient(135deg, #ffd700, #e6c200);
-      color: #0a0e27;
-      cursor: pointer;
-      transition: all 0.3s;
-      box-shadow: 0 8px 24px rgba(255,215,0,0.4);
-      margin-bottom: 16px;
-    }
-    .spin-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(255,215,0,0.5); }
+    .spin-btn { width: 100%; padding: 18px; font-size: 1.2rem; font-weight: 900; border: none; border-radius: 16px; background: linear-gradient(135deg, #ffd700, #e6c200); color: #0a0e27; cursor: pointer; transition: all 0.3s; box-shadow: 0 8px 24px rgba(255,215,0,0.4); margin-bottom: 24px; }
+    .spin-btn:hover:not(:disabled) { transform: translateY(-2px); }
     .spin-btn:disabled { opacity: 0.5; cursor: not-allowed; background: #555; color: #aaa; box-shadow: none; }
 
-    .team-quality-card {
-      background: rgba(255,255,255,0.03);
-      border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 16px;
-      padding: 16px;
-      margin-top: 16px;
-    }
-    .team-quality-label { font-size: 0.85rem; color: rgba(255,255,255,0.6); margin-bottom: 8px; }
-    .team-quality-bar { height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden; }
-    .team-quality-fill { height: 100%; background: linear-gradient(90deg, #00d4ff, #00ff88); border-radius: 4px; transition: width 0.5s ease; }
-    .team-quality-text { font-size: 0.8rem; color: rgba(255,255,255,0.5); margin-top: 6px; text-align: center; }
+    .section-title { font-size: 1.1rem; font-weight: 800; margin: 24px 0 16px 0; display: flex; align-items: center; gap: 10px; }
+    .section-title i { color: #00d4ff; }
 
-    .prize-modal {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0,0,0,0.9);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 10000;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.3s;
-    }
+    .history-list { display: flex; flex-direction: column; gap: 10px; }
+    .history-item { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 14px; display: flex; justify-content: space-between; align-items: center; }
+    .history-left { display: flex; align-items: center; gap: 12px; }
+    .history-icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1rem; }
+    .history-icon.win { background: rgba(0,255,136,0.15); color: #00ff88; }
+    .history-icon.lose { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.5); }
+    .history-title { font-weight: 700; font-size: 0.9rem; margin-bottom: 2px; }
+    .history-date { font-size: 0.75rem; color: rgba(255,255,255,0.5); }
+    .history-amount { font-weight: 800; font-size: 1rem; }
+    .history-amount.win { color: #00ff88; }
+    .history-amount.lose { color: rgba(255,255,255,0.4); }
+
+    .prize-modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.9); display: flex; align-items: center; justify-content: center; z-index: 10000; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
     .prize-modal.show { opacity: 1; pointer-events: auto; }
-    .prize-content {
-      background: linear-gradient(135deg, #1a1f4e, #0a0e27);
-      border: 3px solid #ffd700;
-      border-radius: 24px;
-      padding: 40px 32px;
-      text-align: center;
-      max-width: 320px;
-      animation: prizePop 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-    }
-    @keyframes prizePop {
-      0% { transform: scale(0) rotate(-180deg); }
-      100% { transform: scale(1) rotate(0); }
-    }
-    .prize-icon { font-size: 5rem; margin-bottom: 16px; }
-    .prize-title { font-size: 1.5rem; font-weight: 900; color: white; margin-bottom: 8px; }
-    .prize-amount { font-size: 3rem; font-weight: 900; color: #ffd700; margin-bottom: 24px; text-shadow: 0 0 30px rgba(255,215,0,0.5); }
-    .prize-btn {
-      width: 100%;
-      padding: 14px;
-      background: linear-gradient(135deg, #ffd700, #e6c200);
-      border: none;
-      border-radius: 12px;
-      font-weight: 800;
-      font-size: 1rem;
-      color: #0a0e27;
-      cursor: pointer;
-    }
-
-    .empty-state { text-align: center; padding: 60px 20px; color: rgba(255,255,255,0.5); }
-    .empty-state i { font-size: 4rem; margin-bottom: 16px; opacity: 0.3; }
+    .prize-content { background: linear-gradient(135deg, #1a1f4e, #0a0e27); border: 3px solid #ffd700; border-radius: 24px; padding: 40px 32px; text-align: center; max-width: 320px; animation: prizePop 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55); }
+    @keyframes prizePop { 0% { transform: scale(0); } 100% { transform: scale(1); } }
+    .prize-icon { font-size: 4rem; margin-bottom: 16px; }
+    .prize-title { font-size: 1.3rem; font-weight: 900; margin-bottom: 8px; }
+    .prize-amount { font-size: 2.5rem; font-weight: 900; color: #ffd700; margin-bottom: 24px; text-shadow: 0 0 20px rgba(255,215,0,0.5); }
+    .prize-btn { width: 100%; padding: 14px; background: linear-gradient(135deg, #ffd700, #e6c200); border: none; border-radius: 12px; font-weight: 800; font-size: 1rem; color: #0a0e27; cursor: pointer; }
+    .empty-history { text-align: center; padding: 30px; color: rgba(255,255,255,0.4); font-size: 0.9rem; }
   </style>
 </head>
 <body class="rv-shell">
@@ -176,7 +77,7 @@
 
     <div class="wheel-wrapper">
       <div class="wheel-pointer"></div>
-      <canvas id="wheelCanvas" width="350" height="350" class="wheel-canvas"></canvas>
+      <canvas id="wheelCanvas" width="320" height="320" class="wheel-canvas"></canvas>
       <div class="wheel-center"><i class="fa-solid fa-star"></i></div>
     </div>
 
@@ -184,12 +85,9 @@
       <i class="fa-solid fa-play"></i> Spin Now
     </button>
 
-    <div class="team-quality-card">
-      <div class="team-quality-label">Team Quality Score</div>
-      <div class="team-quality-bar">
-        <div class="team-quality-fill" id="team-quality-fill" style="width: 0%"></div>
-      </div>
-      <div class="team-quality-text" id="team-quality-text">Build your team to improve winning chances</div>
+    <div class="section-title"><i class="fa-solid fa-clock-rotate-left"></i> Recent Wins</div>
+    <div class="history-list" id="spin-history">
+      <div class="empty-history"><i class="fa-solid fa-circle-notch fa-spin"></i> Loading...</div>
     </div>
   </div>
 
@@ -197,10 +95,10 @@
 
   <div class="prize-modal" id="prize-modal">
     <div class="prize-content">
-      <div class="prize-icon">🎉</div>
-      <div class="prize-title">Congratulations!</div>
+      <div class="prize-icon" id="modal-icon"></div>
+      <div class="prize-title" id="modal-title">Congratulations!</div>
       <div class="prize-amount" id="prize-amount">₦0</div>
-      <button class="prize-btn" onclick="closePrizeModal()">Claim Prize</button>
+      <button class="prize-btn" onclick="closePrizeModal()">Awesome!</button>
     </div>
   </div>
 
@@ -213,37 +111,26 @@
 
     let wheelConfigs = [];
     let currentRotation = 0;
-    let teamQuality = 0;
 
-    // Initialize wheel
     async function initWheel() {
       try {
         const token = (await supabase.auth.getSession()).data.session.access_token;
-        const res = await fetch('/api/wheel?action=getWheelConfig', {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-
+        const res = await fetch('/api/wheel?action=getWheelConfig', { headers: { 'Authorization': `Bearer ${token}` } });
         if (!res.ok) throw new Error('Failed to load wheel');
         
         const data = await res.json();
         wheelConfigs = data.configs;
         document.getElementById('spins-count').textContent = data.wheel_spins;
         
-        // Update spin button state
         const spinBtn = document.getElementById('spin-btn');
         if (data.wheel_spins < 1) {
           spinBtn.disabled = true;
-          spinBtn.innerHTML = '<i class="fa-solid fa-lock"></i> No Spins Available';
+          spinBtn.innerHTML = '<i class="fa-solid fa-lock"></i> No Spins';
         }
 
-        // Draw wheel
         drawWheel();
-
-        // Calculate team quality display
-        await updateTeamQualityDisplay();
-
+        loadSpinHistory();
       } catch (err) {
-        console.error('Init wheel error:', err);
         showToast('Failed to load wheel', 'error');
       }
     }
@@ -262,68 +149,26 @@
         const startAngle = index * segmentAngle - Math.PI / 2;
         const endAngle = startAngle + segmentAngle;
 
-        // Draw segment
         ctx.beginPath();
         ctx.moveTo(centerX, centerY);
         ctx.arc(centerX, centerY, radius, startAngle, endAngle);
         ctx.closePath();
         ctx.fillStyle = config.color || '#333';
         ctx.fill();
-        ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+        ctx.strokeStyle = 'rgba(0,0,0,0.2)';
         ctx.lineWidth = 2;
         ctx.stroke();
 
-        // Draw text
         ctx.save();
         ctx.translate(centerX, centerY);
         ctx.rotate(startAngle + segmentAngle / 2);
         ctx.textAlign = 'right';
         ctx.fillStyle = '#fff';
-        ctx.font = 'bold 14px Inter';
-        ctx.fillText(`₦${config.prize_amount.toLocaleString()}`, radius - 20, 5);
+        ctx.font = 'bold 12px Inter';
+        const text = config.prize_amount === 0 ? 'TRY AGAIN' : `₦${config.prize_amount}`;
+        ctx.fillText(text, radius - 15, 5);
         ctx.restore();
       });
-    }
-
-    async function updateTeamQualityDisplay() {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
-      // Get referrals
-      const { data: referrals } = await supabase
-        .from('profiles')
-        .select('vip_level')
-        .eq('referred_by', user.id);
-
-      if (!referrals || referrals.length === 0) {
-        teamQuality = 0;
-        document.getElementById('team-quality-fill').style.width = '0%';
-        document.getElementById('team-quality-text').textContent = 'Invite friends to improve your chances!';
-        return;
-      }
-
-      const tierPoints = {
-        'M0': 1, 'M1': 5, 'M2': 10, 'M3': 20,
-        'M4': 35, 'M5': 50, 'M6': 75, 'M7': 100
-      };
-
-      let score = 0;
-      referrals.forEach(ref => {
-        score += tierPoints[ref.vip_level] || 0;
-      });
-
-      const maxPossibleScore = referrals.length * 100;
-      teamQuality = Math.min(100, Math.round((score / maxPossibleScore) * 100));
-
-      document.getElementById('team-quality-fill').style.width = `${teamQuality}%`;
-      
-      let qualityText = '';
-      if (teamQuality >= 80) qualityText = 'Excellent team! High chance of big wins! 🌟';
-      else if (teamQuality >= 60) qualityText = 'Good team! Better winning chances! ';
-      else if (teamQuality >= 40) qualityText = 'Average team. Keep building! 💪';
-      else qualityText = 'Build your team to improve chances! 📈';
-      
-      document.getElementById('team-quality-text').textContent = qualityText;
     }
 
     window.spinWheel = async () => {
@@ -334,44 +179,48 @@
         const token = (await supabase.auth.getSession()).data.session.access_token;
         const res = await fetch('/api/wheel?action=spinWheel', {
           method: 'POST',
-          headers: { 
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}` 
-          },
-          body: JSON.stringify({})
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }
         });
 
         const data = await res.json();
         if (!res.ok) throw new Error(data.error);
 
-        // Animate wheel
         const canvas = document.getElementById('wheelCanvas');
         const segmentAngle = 360 / wheelConfigs.length;
         const winningIndex = wheelConfigs.findIndex(c => c.id === data.segment_id);
         
-        // Calculate rotation to land on winning segment
+        // Calculate rotation to land on winning segment (pointer is at top)
         const targetRotation = 360 * 5 + (360 - (winningIndex * segmentAngle)) - (segmentAngle / 2);
         currentRotation += targetRotation;
         
         canvas.style.transform = `rotate(${currentRotation}deg)`;
 
-        // Show prize after animation
         setTimeout(() => {
-          document.getElementById('prize-amount').textContent = `${data.prize.toLocaleString()}`;
-          document.getElementById('prize-modal').classList.add('show');
-          
-          // Update spins count
-          document.getElementById('spins-count').textContent = data.spins_remaining;
-          if (data.spins_remaining < 1) {
-            spinBtn.innerHTML = '<i class="fa-solid fa-lock"></i> No Spins Available';
+          if (data.is_try_again) {
+            document.getElementById('modal-icon').textContent = '😢';
+            document.getElementById('modal-title').textContent = 'Better Luck Next Time!';
+            document.getElementById('prize-amount').textContent = 'Try Again';
+            document.getElementById('prize-amount').style.color = '#95A5A6';
           } else {
-            spinBtn.disabled = false;
+            document.getElementById('modal-icon').textContent = '🎉';
+            document.getElementById('modal-title').textContent = 'Congratulations!';
+            document.getElementById('prize-amount').textContent = `₦${data.prize.toLocaleString()}`;
+            document.getElementById('prize-amount').style.color = '#ffd700';
+          }
+          
+          document.getElementById('prize-modal').classList.add('show');
+          document.getElementById('spins-count').textContent = data.spins_remaining;
+          
+          if (data.spins_remaining < 1) {
+            spinBtn.innerHTML = '<i class="fa-solid fa-lock"></i> No Spins';
+          } else {
             spinBtn.innerHTML = '<i class="fa-solid fa-play"></i> Spin Again';
           }
+          spinBtn.disabled = false;
+          loadSpinHistory(); // Refresh history
         }, 4000);
 
       } catch (err) {
-        console.error('Spin error:', err);
         showToast(err.message, 'error');
         spinBtn.disabled = false;
       }
@@ -380,6 +229,46 @@
     window.closePrizeModal = () => {
       document.getElementById('prize-modal').classList.remove('show');
     };
+
+    async function loadSpinHistory() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data: history } = await supabase
+        .from('transactions')
+        .select('*')
+        .eq('user_id', user.id)
+        .in('type', ['wheel_win', 'wheel_spin'])
+        .order('created_at', { ascending: false })
+        .limit(5);
+
+      const list = document.getElementById('spin-history');
+      if (!history || history.length === 0) {
+        list.innerHTML = '<div class="empty-history">No spins yet. Try your luck!</div>';
+        return;
+      }
+
+      list.innerHTML = history.map(t => {
+        const isWin = t.type === 'wheel_win' && t.amount > 0;
+        const date = new Date(t.created_at).toLocaleDateString('en-NG', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+        return `
+          <div class="history-item">
+            <div class="history-left">
+              <div class="history-icon ${isWin ? 'win' : 'lose'}">
+                <i class="fa-solid ${isWin ? 'fa-trophy' : 'fa-rotate-right'}"></i>
+              </div>
+              <div>
+                <div class="history-title">${isWin ? 'Wheel Win' : 'Try Again'}</div>
+                <div class="history-date">${date}</div>
+              </div>
+            </div>
+            <div class="history-amount ${isWin ? 'win' : 'lose'}">
+              ${isWin ? `+₦${Number(t.amount).toLocaleString()}` : '₦0'}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
 
     initWheel();
   </script>
