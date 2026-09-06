@@ -3,66 +3,187 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>RMS — Gift Codes</title>
+  <title>RMS — Redeem Gift Code</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/style.css">
   <meta name="theme-color" content="#0a0e27">
   <style>
-    .gift-container { padding: 20px 16px 100px 16px; max-width: 600px; margin: 0 auto; text-align: center; }
-    .gift-icon-large { font-size: 4rem; color: var(--rms-yellow); margin-bottom: 20px; }
-    .input-group { margin-bottom: 20px; text-align: left; }
-    .input-group label { display: block; font-size: 0.85rem; color: var(--rms-text-muted); margin-bottom: 8px; }
-    .form-control { width: 100%; padding: 14px; background: var(--rms-bg-card); border: 1px solid var(--rms-border); border-radius: 10px; color: white; font-size: 1rem; box-sizing: border-box; text-transform: uppercase; letter-spacing: 1px; }
-    .form-control:focus { outline: none; border-color: var(--rms-yellow); }
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+    
+    body {
+      background: linear-gradient(135deg, #0a0e27 0%, #1a1f4e 50%, #0a0e27 100%);
+      min-height: 100vh;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .redeem-card {
+      background: linear-gradient(135deg, rgba(17,22,58,0.8), rgba(26,32,80,0.8));
+      border: 2px solid rgba(255,215,0,0.3);
+      border-radius: 24px;
+      padding: 40px 32px;
+      max-width: 420px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+    }
+
+    .gift-icon {
+      font-size: 4rem;
+      margin-bottom: 20px;
+      animation: bounce 2s infinite;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    h2 {
+      font-size: 1.8rem;
+      margin-bottom: 8px;
+      color: #ffd700;
+    }
+
+    .subtitle {
+      color: rgba(255,255,255,0.6);
+      margin-bottom: 28px;
+      font-size: 0.95rem;
+    }
+
+    .code-input {
+      width: 100%;
+      padding: 16px;
+      background: rgba(0,0,0,0.3);
+      border: 2px solid rgba(255,255,255,0.1);
+      border-radius: 12px;
+      color: white;
+      font-size: 1.3rem;
+      font-weight: 700;
+      text-align: center;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+      transition: all 0.3s;
+    }
+
+    .code-input:focus {
+      outline: none;
+      border-color: #ffd700;
+      box-shadow: 0 0 0 3px rgba(255,215,0,0.1);
+    }
+
+    .redeem-btn {
+      width: 100%;
+      padding: 16px;
+      background: linear-gradient(135deg, #ffd700, #e6c200);
+      border: none;
+      border-radius: 12px;
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: #0a0e27;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .redeem-btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(255,215,0,0.4);
+    }
+
+    .redeem-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .back-link {
+      display: inline-block;
+      margin-top: 20px;
+      color: rgba(255,255,255,0.6);
+      text-decoration: none;
+      font-weight: 600;
+      transition: color 0.3s;
+    }
+
+    .back-link:hover {
+      color: #ffd700;
+    }
   </style>
 </head>
-<body class="rv-shell">
-  <div id="header-container"></div>
-
-  <div class="gift-container">
-    <div class="gift-icon-large"><i class="fa-solid fa-gift"></i></div>
-    <h2 style="margin-bottom: 10px;">Redeem Gift Code</h2>
-    <p class="text-muted" style="margin-bottom: 30px;">Enter your code below to claim your reward.</p>
-
-    <form id="gift-form">
-      <div class="input-group">
-        <label>Gift Code</label>
-        <input type="text" id="gift-code" class="form-control" placeholder="XXXX-XXXX" required>
-      </div>
-      <button type="submit" class="rms-btn rms-btn-primary" style="width: 100%; padding: 16px;">
-        <i class="fa-solid fa-check" style="margin-right: 8px;"></i> Redeem Code
+<body>
+  <div class="redeem-card">
+    <div class="gift-icon">🎁</div>
+    <h2>Redeem Gift Code</h2>
+    <p class="subtitle">Enter your gift code to claim instant rewards</p>
+    
+    <form id="redeem-form">
+      <input 
+        type="text" 
+        id="gift-code" 
+        class="code-input" 
+        placeholder="GIFT-XXXX-XXXX"
+        maxlength="14"
+        required
+        autocomplete="off"
+      >
+      <button type="submit" class="redeem-btn" id="redeem-btn">
+        <i class="fa-solid fa-gift"></i> Redeem Now
       </button>
     </form>
+    
+    <a href="/dashboard.html" class="back-link">← Back to Dashboard</a>
   </div>
 
-  <div id="footer-container"></div>
-  <script src="/assets/js/components.js"></script>
+  <script src="/assets/js/notifications.js"></script>
   <script type="module">
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
     const supabase = createClient('https://ofysznsajwxnjqaumwch.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9meXN6bnNhand4bmpxYXVtd2NoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgyMzM4NDgsImV4cCI6MjEwMzgwOTg0OH0.XaHkP5WZ2nJVJXVdbG-D13rrD63g_09HxmJoZn7ZoWA');
-    window.supabase = supabase;
 
-    document.getElementById('gift-form').addEventListener('submit', async (e) => {
+    document.getElementById('redeem-form').addEventListener('submit', async (e) => {
       e.preventDefault();
-      const btn = e.target.querySelector('button');
-      btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Checking...';
-      btn.disabled = true;
-
+      
       const code = document.getElementById('gift-code').value.trim();
-      const { data: { user } } = await supabase.auth.getUser();
+      const btn = document.getElementById('redeem-btn');
       
-      // Note: This calls the Postgres function we created in the SQL script.
-      const { data, error } = await supabase.rpc('redeem_gift_code', { p_code: code, p_user_id: user.id });
-
-      if (error || !data.success) {
-        alert(data?.message || 'Invalid or expired code.');
-      } else {
-        alert(`Success! ₦${Number(data.amount).toLocaleString()} has been added to your wallet.`);
-        document.getElementById('gift-code').value = '';
+      if (!code) {
+        showToast('Please enter a gift code', 'error');
+        return;
       }
-      
-      btn.innerHTML = '<i class="fa-solid fa-check"></i> Redeem Code';
-      btn.disabled = false;
+
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Processing...';
+
+      try {
+        const token = (await supabase.auth.getSession()).data.session.access_token;
+        const res = await fetch('/api/finance?action=redeemGiftCode', {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}` 
+          },
+          body: JSON.stringify({ code })
+        });
+
+        const data = await res.json();
+        
+        if (!res.ok) throw new Error(data.error);
+
+        showToast(`🎉 Success! ${data.message}`, 'success');
+        
+        setTimeout(() => {
+          window.location.href = '/dashboard.html';
+        }, 2000);
+
+      } catch (err) {
+        showToast(err.message, 'error');
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-gift"></i> Redeem Now';
+      }
     });
   </script>
 </body>
