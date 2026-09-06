@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>RMS — Payment Status</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <meta name="theme-color" content="#0a0e27">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+    body { background: linear-gradient(135deg, #0a0e27 0%, #1a1f4e 50%, #0a0e27 100%); min-height: 100vh; color: white; display: flex; align-items: center; justify-content: center; padding: 20px; }
+    .status-card { background: linear-gradient(135deg, rgba(17,22,58,0.8), rgba(26,32,80,0.8)); border: 1px solid rgba(255,215,0,0.15); border-radius: 24px; padding: 40px 32px; max-width: 420px; width: 100%; text-align: center; backdrop-filter: blur(10px); box-shadow: 0 20px 60px rgba(0,0,0,0.4); }
+    .icon-wrapper { width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; font-size: 2rem; }
+    .icon-wrapper.loading { background: rgba(0,212,255,0.1); border: 2px solid #00d4ff; color: #00d4ff; }
+    .icon-wrapper.success { background: rgba(0,255,136,0.1); border: 2px solid #00ff88; color: #00ff88; }
+    .icon-wrapper.failed { background: rgba(255,68,68,0.1); border: 2px solid #ff4444; color: #ff4444; }
+    h2 { font-size: 1.6rem; font-weight: 800; margin-bottom: 12px; }
+    p { color: rgba(255,255,255,0.7); font-size: 0.95rem; line-height: 1.6; margin-bottom: 24px; }
+    .amount-display { font-size: 2rem; font-weight: 900; color: #ffd700; margin-bottom: 24px; }
+    .btn { display: inline-block; padding: 14px 32px; background: linear-gradient(135deg, #ffd700, #e6c200); color: #0a0e27; text-decoration: none; border-radius: 12px; font-weight: 800; font-size: 1rem; transition: all 0.3s; }
+    .btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(255,215,0,0.4); }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    .fa-spin { animation: spin 1s linear infinite; }
+  </style>
+</head>
+<body>
+  <div class="status-card" id="status-container">
+    <div class="icon-wrapper loading"><i class="fa-solid fa-circle-notch fa-spin"></i></div>
+    <h2>Processing Payment...</h2>
+    <p>Please wait while we confirm your transaction with the bank.</p>
+  </div>
+
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+    const supabase = createClient('https://ofysznsajwxnjqaumwch.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9meXN6bnNhand4bmpxYXVtd2NoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgyMzM4NDgsImV4cCI6MjEwMzgwOTg0OH0.XaHkP5WZ2nJVJXVdbG-D13rrD63g_09HxmJoZn7ZoWA');
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const ref = urlParams.get('ref');
+    const result = urlParams.get('result');
+
+    async function checkStatus() {
+      if (!ref) {
+        renderStatus('failed', 'Invalid Request', 'No transaction reference found.', 0);
+        return;
+      }
+
+      try {
+        const token = (await supabase.auth.getSession()).data.session.access_token;
+        if (!token) throw new Error('Session expired');
+
+        const res = await fetch(`/api/finance?action=getDepositStatus&ref=${encodeURIComponent(ref)}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        if (!res.ok) throw new Error('Status check failed');
+        const data = await res.json();
+
+        if (data.status === 'completed') {
+          renderStatus('success', 'Payment Successful!', `₦${Number(data.amount).toLocaleString()} has been added to your wallet.`, data.amount);
+        } else if (data.status === 'rejected' || result === 'cancelled') {
+          renderStatus('failed', 'Payment Failed', 'The transaction was cancelled or failed. No funds were deducted.', 0);
+        } else {
+          // Still pending, wait and retry
+          setTimeout(checkStatus, 3000);
+        }
+      } catch (err) {
+        console.error(err);
+        setTimeout(checkStatus, 3000); // Retry on network error
+      }
+    }
+
+    function renderStatus(type, title, message, amount) {
+      const container = document.getElementById('status-container');
+      const iconClass = type === 'success' ? 'fa-circle-check' : type === 'failed' ? 'fa-circle-xmark' : 'fa-circle-notch fa-spin';
+      
+      container.innerHTML = `
+        <div class="icon-wrapper ${type}"><i class="fa-solid ${iconClass}"></i></div>
+        <h2>${title}</h2>
+        ${amount ? `<div class="amount-display">₦${Number(amount).toLocaleString()}</div>` : ''}
+        <p>${message}</p>
+        <a href="/dashboard.html" class="btn">Go to Dashboard</a>
+      `;
+    }
+
+    // Start checking
+    if (result === 'cancelled') {
+      renderStatus('failed', 'Payment Cancelled', 'You cancelled the transaction. No funds were deducted.', 0);
+    } else {
+      checkStatus();
+    }
+  </script>
+</body>
+</html>
