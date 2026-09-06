@@ -68,14 +68,6 @@
 
       try {
         const { data: { user } } = await supabase.auth.getUser();
-        if (!user) throw new Error('Please login first');
-
-        const { data: profile } = await supabase.from('profiles').select('full_name, email').eq('id', user.id).single();
-
-        const token = (await supabase.auth.getSession()).data.session.access_token;
-        
-        console.log('🚀 Sending request to API...');
-
         const res = await fetch('/api/finance?action=initiateTargetGrowthDeposit', {
           method: 'POST',
           headers: { 
@@ -89,12 +81,26 @@
           })
         });
 
+        // 1. Check if response is actually JSON before parsing
+        const contentType = res.headers.get("content-type");
+        if (!contentType || !contentType.includes("application/json")) {
+          const text = await res.text();
+          console.error("API returned HTML/Text instead of JSON:", text);
+          throw new Error("Server error. Check Vercel logs.");
+        }
+
         const data = await res.json();
-        console.log('📦 API Response:', data); // <--- THIS IS CRITICAL
+        console.log(' API Response:', data);
 
         if (!res.ok) {
           throw new Error(data.error || 'API request failed');
         }
+
+        if (!data.checkout_url) {
+          throw new Error('No checkout URL returned.');
+        }
+
+        window.location.href = data.checkout_url;  }
 
         if (!data.checkout_url) {
           throw new Error('API did not return a checkout URL. Check Vercel logs.');
