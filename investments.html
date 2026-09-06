@@ -3,60 +3,141 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>RMS — Daily Tasks</title>
+  <title>RMS — Daily Mystery Boxes</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/style.css">
   <meta name="theme-color" content="#0a0e27">
   <style>
-    .task-container { padding: 20px 16px 100px 16px; max-width: 600px; margin: 0 auto; }
-    .progress-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-    .progress-bar-bg { width: 100%; height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden; margin-bottom: 30px; }
-    .progress-bar-fill { height: 100%; background: linear-gradient(90deg, var(--rms-yellow), var(--rms-vivid-red)); transition: width 0.5s ease; }
+    .task-container { padding: 20px 16px 100px 16px; max-width: 600px; margin: 0 auto; font-family: 'Inter', sans-serif; }
     
-    .box-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .page-header { margin-bottom: 24px; }
+    .page-header h2 { font-size: 1.8rem; font-weight: 900; color: white; margin: 0 0 8px 0; }
+    .page-header p { color: rgba(255,255,255,0.6); font-size: 0.95rem; margin: 0; }
+
+    .m0-notice {
+      background: linear-gradient(135deg, rgba(255,215,0,0.1), rgba(255,193,7,0.05));
+      border: 1px solid rgba(255,215,0,0.3);
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 20px;
+      text-align: center;
+      color: #ffd700;
+      font-weight: 600;
+    }
+
+    .progress-card {
+      background: linear-gradient(135deg, rgba(0,102,255,0.1), rgba(0,212,255,0.05));
+      border: 1px solid rgba(0,212,255,0.2);
+      border-radius: 20px;
+      padding: 20px;
+      margin-bottom: 24px;
+    }
+    .progress-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    .progress-title { font-size: 0.9rem; color: rgba(255,255,255,0.7); font-weight: 600; }
+    .progress-count { font-size: 1.1rem; font-weight: 900; color: #ffd700; }
+    .progress-bar { height: 10px; background: rgba(255,255,255,0.1); border-radius: 5px; overflow: hidden; }
+    .progress-fill { height: 100%; background: linear-gradient(90deg, #00d4ff, #0066ff); border-radius: 5px; transition: width 0.5s ease; }
+
+    .day-info {
+      background: rgba(255,215,0,0.1);
+      border: 1px solid rgba(255,215,0,0.3);
+      border-radius: 12px;
+      padding: 12px;
+      margin-bottom: 20px;
+      text-align: center;
+      color: #ffd700;
+      font-weight: 700;
+    }
+
+    .box-grid { display: grid; grid-template-columns: 1fr; gap: 16px; }
     
     .mystery-box {
-      aspect-ratio: 1;
-      background: var(--rms-bg-card);
-      border: 2px solid var(--rms-border);
-      border-radius: 16px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
+      background: linear-gradient(135deg, rgba(255,215,0,0.1), rgba(255,193,7,0.05));
+      border: 2px solid rgba(255,215,0,0.3);
+      border-radius: 20px;
+      padding: 40px 20px;
+      text-align: center;
       cursor: pointer;
-      transition: all 0.3s ease;
+      transition: all 0.3s;
       position: relative;
-      overflow: visible;
+      overflow: hidden;
     }
     
-    .mystery-box:hover { transform: scale(1.05); border-color: var(--rms-yellow); box-shadow: 0 0 20px rgba(255,215,0,0.3); }
-    .mystery-box.opened { border-color: var(--rms-text-muted); opacity: 0.5; cursor: default; pointer-events: none; }
+    .mystery-box:hover:not(.completed):not(.locked) { 
+      transform: translateY(-4px); 
+      box-shadow: 0 8px 24px rgba(255,215,0,0.3); 
+      border-color: #ffd700;
+    }
+    .mystery-box.completed { 
+      opacity: 0.6; 
+      border-color: rgba(0,255,136,0.3); 
+      background: rgba(0,255,136,0.1); 
+      cursor: default; 
+      pointer-events: none; 
+    }
+    .mystery-box.locked { opacity: 0.4; cursor: not-allowed; }
     .mystery-box.opening { animation: boxShake 0.5s ease; }
     
-    .box-icon { font-size: 2.5rem; color: var(--rms-yellow); margin-bottom: 8px; transition: all 0.3s ease; position: relative; z-index: 2; }
-    .mystery-box:hover .box-icon { transform: rotate(-10deg) scale(1.1); }
+    .box-icon { font-size: 4rem; margin-bottom: 16px; transition: all 0.3s ease; }
+    .mystery-box:not(.completed):not(.locked) .box-icon { 
+      animation: bounce 2s infinite;
+      color: #ffd700;
+    }
     .mystery-box.opening .box-icon { animation: boxLidFly 0.6s ease forwards; }
     
-    .box-label { font-size: 0.8rem; font-weight: 600; position: relative; z-index: 2; }
+    .box-title { font-size: 1.2rem; font-weight: 900; color: white; margin-bottom: 8px; }
+    .box-reward { font-size: 1rem; color: #ffd700; font-weight: 800; margin-bottom: 8px; }
+    .box-status { font-size: 0.85rem; color: rgba(255,255,255,0.7); font-weight: 600; }
+    .mystery-box.completed .box-status { color: #00ff88; font-weight: 700; }
     
-    .box-reward {
-      position: absolute; inset: 0; background: rgba(10,14,39,0.95);
+    .box-reward-popup {
+      position: absolute; inset: 0; 
+      background: rgba(10,14,39,0.95);
       display: flex; align-items: center; justify-content: center;
-      font-size: 1.2rem; font-weight: 800; color: var(--rms-yellow);
+      font-size: 1.5rem; font-weight: 900; color: #ffd700;
       opacity: 0; transition: opacity 0.3s; z-index: 3;
     }
-    .mystery-box.opened .box-reward { opacity: 1; }
-    .mystery-box.opened .box-icon, .mystery-box.opened .box-label { display: none; }
-    
+    .mystery-box.completed .box-reward-popup { opacity: 1; }
+    .mystery-box.completed .box-icon, 
+    .mystery-box.completed .box-title,
+    .mystery-box.completed .box-reward,
+    .mystery-box.completed .box-status { display: none; }
+
     .sparkle {
       position: fixed; border-radius: 50%; pointer-events: none; z-index: 999999;
       box-shadow: 0 0 10px currentColor, 0 0 20px currentColor;
     }
+
+    .upgrade-card {
+      background: linear-gradient(135deg, rgba(0,210,106,0.1), rgba(0,255,136,0.05));
+      border: 1px solid rgba(0,255,136,0.3);
+      border-radius: 20px;
+      padding: 32px 20px;
+      text-align: center;
+      margin-top: 20px;
+    }
+    .upgrade-card h3 { color: #00ff88; margin: 0 0 12px 0; font-size: 1.3rem; }
+    .upgrade-card p { color: rgba(255,255,255,0.7); margin: 0 0 20px 0; }
+    .upgrade-btn {
+      display: inline-block;
+      padding: 14px 32px;
+      background: linear-gradient(135deg, #ffd700, #e6c200);
+      color: #0a0e27;
+      text-decoration: none;
+      border-radius: 12px;
+      font-weight: 800;
+      transition: all 0.3s;
+    }
+    .upgrade-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(255,215,0,0.4); }
     
-    @keyframes sparkleBurst {
-      0% { transform: translate(0, 0) scale(0); opacity: 1; }
-      100% { transform: translate(var(--tx), var(--ty)) scale(1); opacity: 0; }
+    .error-box { text-align: center; padding: 40px 20px; }
+    .loading-box { text-align: center; padding: 40px; color: rgba(255,255,255,0.5); }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
     }
     @keyframes boxShake {
       0%, 100% { transform: translateX(0); }
@@ -67,26 +148,9 @@
       0% { transform: translateY(0) rotate(0); opacity: 1; }
       100% { transform: translateY(-50px) rotate(-30deg); opacity: 0; }
     }
-    @keyframes rewardReveal {
-      0% { transform: scale(0) rotate(-180deg); opacity: 0; }
-      50% { transform: scale(1.3) rotate(10deg); opacity: 1; }
-      100% { transform: scale(1) rotate(0); opacity: 1; }
-    }
-    .reward-amount { animation: rewardReveal 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards; text-shadow: 0 0 20px var(--rms-yellow); }
-    
-    .tier-badge { display: inline-block; background: rgba(255,26,26,0.1); color: var(--rms-vivid-red); padding: 6px 16px; border-radius: 20px; font-size: 0.85rem; font-weight: 700; margin-bottom: 10px; }
-    .error-box { text-align: center; padding: 40px 20px; grid-column: 1 / -1; }
-    .loading-box { text-align: center; padding: 40px; color: var(--rms-text-muted); }
-    
-    .m0-notice {
-      background: rgba(255,215,0,0.1);
-      border: 1px solid rgba(255,215,0,0.3);
-      border-radius: 12px;
-      padding: 12px;
-      margin-bottom: 16px;
-      text-align: center;
-      font-size: 0.85rem;
-      color: var(--rms-yellow);
+    @keyframes sparkleBurst {
+      0% { transform: translate(0, 0) scale(0); opacity: 1; }
+      100% { transform: translate(var(--tx), var(--ty)) scale(1); opacity: 0; }
     }
   </style>
 </head>
@@ -94,22 +158,26 @@
   <div id="header-container"></div>
 
   <div class="task-container">
-    <h2 style="margin-bottom: 5px;">Daily Mystery Boxes</h2>
-    <p class="text-muted" style="margin-bottom: 20px;">Tap a box to reveal your reward.</p>
+    <div class="page-header">
+      <h2>Daily Mystery Boxes</h2>
+      <p>Tap a box to reveal your reward.</p>
+    </div>
 
     <div id="m0-notice" class="m0-notice" style="display: none;">
-      <i class="fa-solid fa-info-circle"></i> M0: 1 task per day for 3 days only
+      <i class="fa-solid fa-gift"></i> M0: 1 task per day for 3 days
     </div>
 
-    <div class="tier-badge" id="current-tier">Loading Tier...</div>
+    <div class="progress-card">
+      <div class="progress-header">
+        <div class="progress-title">Today's Progress</div>
+        <div class="progress-count"><span id="completed-count">0</span> / <span id="total-count">1</span></div>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+      </div>
+    </div>
 
-    <div class="progress-header">
-      <span class="text-muted" style="font-size: 0.85rem;">Daily Progress</span>
-      <span class="text-yellow" style="font-weight: 700; font-size: 0.85rem;" id="progress-text">0 / 0</span>
-    </div>
-    <div class="progress-bar-bg">
-      <div class="progress-bar-fill" id="progress-fill" style="width: 0%;"></div>
-    </div>
+    <div id="day-info" class="day-info" style="display: none;"></div>
 
     <div class="box-grid" id="box-grid">
       <div class="loading-box"><i class="fa-solid fa-circle-notch fa-spin"></i><p>Loading...</p></div>
@@ -124,16 +192,14 @@
     const supabase = createClient('https://ofysznsajwxnjqaumwch.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9meXN6bnNhand4bmpxYXVtd2NoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgyMzM4NDgsImV4cCI6MjEwMzgwOTg0OH0.XaHkP5WZ2nJVJXVdbG-D13rrD63g_09HxmJoZn7ZoWA');
     window.supabase = supabase;
 
-    let taskStatus = null;
-
     async function loadTasks() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return window.location.href = '/login.html';
 
       const grid = document.getElementById('box-grid');
+      const dayInfo = document.getElementById('day-info');
       
       try {
-        // Get user profile
         const { data: profile } = await supabase
           .from('profiles')
           .select('vip_level, m0_task_days_completed, m0_start_date, last_task_date, tasks_completed_today')
@@ -144,73 +210,71 @@
         const isM0 = vipLevel === 'newbie' || vipLevel === 'M0';
         const today = new Date().toISOString().split('T')[0];
         
-        // Show M0 notice
         if (isM0) {
           document.getElementById('m0-notice').style.display = 'block';
         }
 
-        // Handle M0 logic: 1 task per day for 3 days
+        // M0 LOGIC: 1 task per day for 3 days
         if (isM0) {
           const m0Completed = profile?.m0_task_days_completed || 0;
-          const m0StartDate = profile?.m0_start_date;
           const lastTaskDate = profile?.last_task_date ? new Date(profile.last_task_date).toISOString().split('T')[0] : null;
+          const currentDay = m0Completed + 1;
           
-          document.getElementById('current-tier').textContent = 'M0 - Starter';
+          // Update progress (1/1 for today)
+          document.getElementById('completed-count').textContent = lastTaskDate === today ? '1' : '0';
+          document.getElementById('total-count').textContent = '1';
+          document.getElementById('progress-fill').style.width = lastTaskDate === today ? '100%' : '0%';
           
+          // Show day info
+          if (m0Completed < 3) {
+            dayInfo.style.display = 'block';
+            dayInfo.innerHTML = `<i class="fa-solid fa-calendar-day"></i> Day ${currentDay} of 3 - Complete today's task to earn ₦50`;
+          }
+
           if (m0Completed >= 3) {
-            // All 3 days completed
-            document.getElementById('progress-text').textContent = '3 / 3';
-            document.getElementById('progress-fill').style.width = '100%';
+            // All 3 days completed - show upgrade
             grid.innerHTML = `
-              <div class="error-box">
-                <i class="fa-solid fa-trophy" style="font-size: 3rem; color: var(--rms-yellow); margin-bottom: 12px;"></i>
-                <p>All M0 tasks completed!</p>
-                <p style="font-size: 0.85rem; color: var(--rms-text-muted); margin: 8px 0;">You earned ₦150 total</p>
-                <a href="/vip.html" class="rms-btn rms-btn-primary" style="text-decoration:none; display:inline-block; margin-top:10px;">Upgrade to M1</a>
+              <div class="upgrade-card">
+                <h3><i class="fa-solid fa-trophy"></i> All M0 Tasks Completed!</h3>
+                <p>You've earned ₦150 from your 3 starter tasks.</p>
+                <a href="/vip.html" class="upgrade-btn"><i class="fa-solid fa-crown"></i> Upgrade to M1 for Unlimited Tasks</a>
               </div>
             `;
             return;
           }
           
-          // Check if already did today's task
           const completedToday = lastTaskDate === today;
-          const currentDay = m0Completed + 1;
-          
-          document.getElementById('progress-text').textContent = `${m0Completed} / 3`;
-          document.getElementById('progress-fill').style.width = `${(m0Completed / 3) * 100}%`;
           
           if (completedToday) {
             // Already completed today
             grid.innerHTML = `
-              <div class="mystery-box opened" style="grid-column: 1 / -1;">
-                <i class="fa-solid fa-check box-icon" style="color: var(--rms-green);"></i>
-                <div class="box-label">Completed</div>
-                <div class="box-reward"><div class="reward-amount">+₦50</div></div>
+              <div class="mystery-box completed">
+                <i class="fa-solid fa-check-circle box-icon" style="color: #00ff88;"></i>
+                <div class="box-reward-popup">+₦50</div>
               </div>
-              <div class="error-box" style="grid-column: 1 / -1; padding: 20px;">
-                <i class="fa-solid fa-clock" style="margin-bottom: 8px;"></i>
-                <p>Come back tomorrow for Day ${Math.min(currentDay + 1, 3)}!</p>
+              <div class="upgrade-card" style="margin-top: 16px; padding: 20px;">
+                <p style="margin: 0; color: #00ff88;"><i class="fa-solid fa-check-circle"></i> Come back tomorrow for Day ${Math.min(currentDay + 1, 3)}!</p>
               </div>
             `;
           } else {
             // Show today's box
             grid.innerHTML = `
-              <div class="mystery-box" id="today-box" style="grid-column: 1 / -1;">
+              <div class="mystery-box" id="today-box" onclick="openBox(50, true)">
                 <i class="fa-solid fa-gift box-icon"></i>
-                <div class="box-label">Day ${currentDay} of 3</div>
-                <div class="box-reward"><div class="reward-amount">+₦50</div></div>
+                <div class="box-title">Day ${currentDay} Task</div>
+                <div class="box-reward">₦50 Reward</div>
+                <div class="box-status">Tap to complete</div>
+                <div class="box-reward-popup">+₦50</div>
               </div>
             `;
-            document.getElementById('today-box').onclick = () => openBox(50, true);
           }
           return;
         }
 
-        // M1+ logic
+        // M1+ LOGIC
         const tierTasks = { 'M1': 5, 'M2': 10, 'M3': 15, 'M4': 20, 'M5': 999, 'M6': 999, 'M7': 999 };
         const maxBoxes = tierTasks[vipLevel] || 5;
         
-        // Reset if new day
         let boxesOpened = 0;
         const lastDate = profile?.last_task_date ? new Date(profile.last_task_date).toISOString().split('T')[0] : null;
         if (lastDate !== today) {
@@ -222,24 +286,30 @@
           boxesOpened = profile?.tasks_completed_today || 0;
         }
 
-        document.getElementById('current-tier').textContent = `${vipLevel.toUpperCase()} - ${maxBoxes === 999 ? 'Unlimited' : maxBoxes + ' Boxes'}`;
-        document.getElementById('progress-text').textContent = `${boxesOpened} / ${maxBoxes === 999 ? '∞' : maxBoxes}`;
+        document.getElementById('completed-count').textContent = boxesOpened;
+        document.getElementById('total-count').textContent = maxBoxes === 999 ? '∞' : maxBoxes;
         document.getElementById('progress-fill').style.width = `${(boxesOpened / (maxBoxes === 999 ? boxesOpened + 5 : maxBoxes)) * 100}%`;
+        
+        dayInfo.style.display = 'none';
 
-        // Render boxes
+        // Render VIP boxes
+        grid.className = 'box-grid';
+        grid.style.gridTemplateColumns = 'repeat(2, 1fr)';
         grid.innerHTML = '';
+        
         const totalBoxes = maxBoxes === 999 ? Math.min(10, boxesOpened + 5) : maxBoxes;
         
         for (let i = 0; i < totalBoxes; i++) {
           const isOpened = i < boxesOpened;
-          const box = document.createElement('div');
-          box.className = `mystery-box ${isOpened ? 'opened' : ''}`;
-          const reward = 100 + (Math.floor(Math.random() * 5) * 50); // 100-300
+          const reward = 100 + (Math.floor(Math.random() * 5) * 50);
           
+          const box = document.createElement('div');
+          box.className = `mystery-box ${isOpened ? 'completed' : ''}`;
           box.innerHTML = `
-            <i class="fa-solid fa-gift box-icon"></i>
-            <div class="box-label">${isOpened ? 'Opened' : `Box ${i + 1}`}</div>
-            <div class="box-reward"><div class="reward-amount">+₦${reward.toLocaleString()}</div></div>
+            <i class="fa-solid ${isOpened ? 'fa-check-circle' : 'fa-gift'} box-icon" style="color: ${isOpened ? '#00ff88' : '#ffd700'};"></i>
+            <div class="box-title">Box ${i + 1}</div>
+            <div class="box-reward">${isOpened ? 'Completed' : 'Tap to Open'}</div>
+            <div class="box-reward-popup">+₦${reward}</div>
           `;
           
           if (!isOpened) {
@@ -250,55 +320,42 @@
         }
 
       } catch (err) {
-        console.error('Task loading error:', err);
-        document.getElementById('current-tier').textContent = 'Error';
-        grid.innerHTML = `<div class="error-box"><i class="fa-solid fa-triangle-exclamation" style="color:red;"></i><p style="color:red;">${err.message}</p><button onclick="loadTasks()" class="rms-btn rms-btn-outline" style="margin-top:10px;">Retry</button></div>`;
+        console.error('Load error:', err);
+        grid.innerHTML = `<div class="error-box"><i class="fa-solid fa-triangle-exclamation" style="color: #ff4444; font-size: 3rem; margin-bottom: 12px;"></i><p style="color: #ff4444;">${err.message}</p><button onclick="loadTasks()" style="padding: 12px 32px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; border-radius: 12px; cursor: pointer; margin-top: 12px;">Retry</button></div>`;
       }
     }
 
-    function createSparkles(boxElement) {
-      const rect = boxElement.getBoundingClientRect();
+    function createSparkles(element) {
+      const rect = element.getBoundingClientRect();
       const centerX = rect.left + (rect.width / 2);
       const centerY = rect.top + (rect.height / 2);
       
-      for (let i = 0; i < 100; i++) {
+      for (let i = 0; i < 80; i++) {
         const sparkle = document.createElement('div');
-        const angle = (Math.PI * 2 * i) / 100;
-        const distance = 100 + Math.random() * 150;
-        const tx = Math.cos(angle) * distance;
-        const ty = Math.sin(angle) * distance;
-        const size = 4 + Math.random() * 8;
-        const colors = ['#ffd700', '#ffffff', '#ff1a1a', '#2ecc71', '#3498db'];
-        const color = colors[Math.floor(Math.random() * colors.length)];
-        
-        sparkle.className = 'sparkle';
+        const angle = (Math.PI * 2 * i) / 80;
+        const distance = 80 + Math.random() * 120;
         sparkle.style.cssText = `
           position: fixed !important;
           left: ${centerX}px !important;
           top: ${centerY}px !important;
-          width: ${size}px !important;
-          height: ${size}px !important;
-          background: ${color} !important;
-          color: ${color} !important;
+          width: ${4 + Math.random() * 6}px !important;
+          height: ${4 + Math.random() * 6}px !important;
+          background: ${['#ffd700', '#00ff88', '#00d4ff', '#ffffff'][Math.floor(Math.random() * 4)]} !important;
           border-radius: 50% !important;
           pointer-events: none !important;
           z-index: 999999 !important;
-          margin: 0 !important;
-          padding: 0 !important;
-          --tx: ${tx}px;
-          --ty: ${ty}px;
-          animation: sparkleBurst 4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards !important;
-          animation-delay: ${Math.random()}s !important;
+          --tx: ${Math.cos(angle) * distance}px;
+          --ty: ${Math.sin(angle) * distance}px;
+          animation: sparkleBurst 3s ease forwards !important;
         `;
-        
         document.body.appendChild(sparkle);
-        setTimeout(() => sparkle.remove(), 5000);
+        setTimeout(() => sparkle.remove(), 3000);
       }
     }
 
-    async function openBox(amount, isM0) {
-      const box = document.getElementById('today-box') || document.querySelector('.mystery-box:not(.opened):not(.opening)');
-      if (!box || box.classList.contains('opened') || box.classList.contains('opening')) return;
+    window.openBox = async (amount, isM0) => {
+      const box = document.getElementById('today-box');
+      if (!box || box.classList.contains('completed') || box.classList.contains('opening')) return;
       
       box.classList.add('opening');
       createSparkles(box);
@@ -309,11 +366,9 @@
         
         // Credit wallet
         const { data: wallet } = await supabase.from('wallets').select('balance').eq('user_id', user.id).single();
-        const newBalance = (wallet?.balance || 0) + amount;
-        
         await supabase.from('wallets').upsert({
           user_id: user.id,
-          balance: newBalance,
+          balance: (wallet?.balance || 0) + amount,
           updated_at: new Date()
         });
 
@@ -329,19 +384,17 @@
         // Update profile
         if (isM0) {
           const { data: profile } = await supabase.from('profiles').select('m0_task_days_completed, m0_start_date').eq('id', user.id).single();
-          const newDaysCompleted = (profile?.m0_task_days_completed || 0) + 1;
-          const updateData = {
-            m0_task_days_completed: newDaysCompleted,
-            last_task_date: today
-          };
-          if (!profile?.m0_start_date) {
-            updateData.m0_start_date = new Date();
-          }
-          await supabase.from('profiles').update(updateData).eq('id', user.id);
+          const newDays = (profile?.m0_task_days_completed || 0) + 1;
+          await supabase.from('profiles').update({
+            m0_task_days_completed: newDays,
+            last_task_date: today,
+            m0_start_date: profile?.m0_start_date || new Date()
+          }).eq('id', user.id);
         } else {
           const { data: profile } = await supabase.from('profiles').select('tasks_completed_today').eq('id', user.id).single();
           await supabase.from('profiles').update({
-            tasks_completed_today: (profile?.tasks_completed_today || 0) + 1
+            tasks_completed_today: (profile?.tasks_completed_today || 0) + 1,
+            last_task_date: today
           }).eq('id', user.id);
         }
 
@@ -357,17 +410,17 @@
 
         setTimeout(() => {
           box.classList.remove('opening');
-          box.classList.add('opened');
-          showToast(` You earned ₦${amount.toLocaleString()}!`, 'success');
+          box.classList.add('completed');
+          showToast(`₦${amount} added to wallet!`, 'success');
           setTimeout(() => location.reload(), 1500);
         }, 600);
         
       } catch (err) {
-        console.error('Open box error:', err);
+        console.error('Error:', err);
         box.classList.remove('opening');
         showToast(err.message, 'error');
       }
-    }
+    };
 
     loadTasks();
   </script>
