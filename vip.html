@@ -22,14 +22,8 @@
       overflow: hidden;
     }
     .current-tier-card::before {
-      content: '';
-      position: absolute;
-      top: -50%;
-      right: -50%;
-      width: 200%;
-      height: 200%;
-      background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%);
-      pointer-events: none;
+      content: ''; position: absolute; top: -50%; right: -50%; width: 200%; height: 200%;
+      background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%); pointer-events: none;
     }
     .current-tier-label { font-size: 0.85rem; color: rgba(255,255,255,0.8); font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; position: relative; z-index: 1; }
     .current-tier-name { font-size: 2rem; font-weight: 900; color: white; margin-bottom: 12px; position: relative; z-index: 1; }
@@ -49,15 +43,7 @@
       transition: all 0.3s;
     }
     .tier-card:hover { border-color: #ffd700; transform: translateY(-2px); }
-    .tier-card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 3px;
-      background: linear-gradient(90deg, #0066ff, #00d4ff, #0066ff);
-    }
+    .tier-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, #0066ff, #00d4ff, #0066ff); }
     .tier-card.current { border-color: #00ff88; background: linear-gradient(135deg, rgba(0,210,106,0.1), rgba(0,255,136,0.05)); }
     .tier-card.current::before { background: linear-gradient(90deg, #00d26a, #00ff88, #00d26a); }
     .tier-card.passed { opacity: 0.7; border-color: rgba(255,255,255,0.1); }
@@ -67,40 +53,28 @@
     .tier-name { font-size: 1.4rem; font-weight: 900; color: white; }
     .tier-price { font-size: 1.3rem; font-weight: 900; color: #ffd700; }
     
+    .tier-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+    .tier-stat { background: rgba(0,0,0,0.2); padding: 10px; border-radius: 10px; text-align: center; }
+    .tier-stat-val { font-size: 1rem; font-weight: 800; color: #00d4ff; margin-bottom: 4px; }
+    .tier-stat-lbl { font-size: 0.65rem; color: rgba(255,255,255,0.6); text-transform: uppercase; font-weight: 600; }
+    
     .tier-benefits { margin-bottom: 18px; }
     .tier-benefit { display: flex; align-items: center; gap: 10px; padding: 8px 0; font-size: 0.9rem; color: rgba(255,255,255,0.9); }
     .tier-benefit i { color: #00ff88; font-size: 0.9rem; }
-    .tier-benefit.locked { opacity: 0.5; }
-    .tier-benefit.locked i { color: #ff4444; }
     
     .upgrade-btn {
-      width: 100%;
-      padding: 14px;
-      font-size: 1rem;
-      font-weight: 800;
-      border: none;
-      border-radius: 12px;
-      background: linear-gradient(135deg, #ffd700, #e6c200);
-      color: #0a0e27;
-      cursor: pointer;
-      transition: all 0.3s;
-      box-shadow: 0 8px 24px rgba(255,215,0,0.3);
+      width: 100%; padding: 14px; font-size: 1rem; font-weight: 800; border: none; border-radius: 12px;
+      background: linear-gradient(135deg, #ffd700, #e6c200); color: #0a0e27; cursor: pointer;
+      transition: all 0.3s; box-shadow: 0 8px 24px rgba(255,215,0,0.3);
     }
     .upgrade-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(255,215,0,0.4); }
     .upgrade-btn:disabled { opacity: 0.5; cursor: not-allowed; background: #555; color: #aaa; box-shadow: none; }
     .upgrade-btn.current-tier { background: linear-gradient(135deg, #00d26a, #00ff88); color: white; }
     .upgrade-btn.passed-tier { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.6); box-shadow: none; }
     
-    .m0-notice {
-      background: linear-gradient(135deg, rgba(255,26,26,0.1), rgba(255,68,68,0.05));
-      border: 1px solid rgba(255,26,26,0.3);
-      border-radius: 16px;
-      padding: 20px;
-      margin-bottom: 24px;
-    }
+    .m0-notice { background: linear-gradient(135deg, rgba(255,26,26,0.1), rgba(255,68,68,0.05)); border: 1px solid rgba(255,26,26,0.3); border-radius: 16px; padding: 20px; margin-bottom: 24px; }
     .m0-notice h3 { color: #ff4444; margin: 0 0 12px 0; font-size: 1.1rem; display: flex; align-items: center; gap: 8px; }
     .m0-notice ul { margin: 0; padding-left: 20px; color: rgba(255,255,255,0.8); font-size: 0.9rem; line-height: 1.8; }
-    .m0-notice li { margin-bottom: 4px; }
   </style>
 </head>
 <body class="rv-shell">
@@ -108,27 +82,23 @@
 
   <div class="vip-container">
     <h2 style="margin-bottom: 5px; font-size: 1.8rem; font-weight: 900; color: white;">VIP Membership</h2>
-    <p style="color: rgba(255,255,255,0.6); margin-bottom: 24px; font-size: 0.95rem;">Upgrade your tier to unlock exclusive benefits.</p>
+    <p style="color: rgba(255,255,255,0.6); margin-bottom: 24px; font-size: 0.95rem;">Upgrade your tier to unlock daily earnings.</p>
 
-    <!-- Current Tier -->
     <div class="current-tier-card">
       <div class="current-tier-label">Your Current Tier</div>
       <div class="current-tier-name" id="current-tier">M0</div>
       <div class="current-tier-benefits" id="current-benefits">Loading...</div>
     </div>
 
-    <!-- M0 Notice -->
     <div class="m0-notice" id="m0-notice" style="display: none;">
       <h3><i class="fa-solid fa-exclamation-triangle"></i> M0 Limitations</h3>
       <ul>
         <li>Only 3 starter tasks (₦50 each)</li>
         <li><strong>No withdrawals allowed</strong></li>
         <li>Wealth Center locked</li>
-        <li>Limited earning potential</li>
       </ul>
     </div>
 
-    <!-- Tier List -->
     <div class="section-title"><i class="fa-solid fa-crown"></i> Available Tiers</div>
     <div id="tier-list">
       <div style="text-align: center; padding: 40px; color: rgba(255,255,255,0.5);">
@@ -148,59 +118,55 @@
 
     const tierOrder = ['M0', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7'];
 
+    // Updated benefits matching the new database prices
     const tierBenefits = {
-      'M0': [
-        { text: '3 Starter Tasks (₦50 each)', unlocked: true },
-        { text: 'No withdrawals', unlocked: false },
-        { text: 'Wealth Center locked', unlocked: false }
-      ],
       'M1': [
-        { text: 'Daily tasks (5 per day)', unlocked: true },
-        { text: 'Withdrawal unlocked', unlocked: true },
-        { text: 'Wealth Center access', unlocked: true },
-        { text: '10% referral commission', unlocked: true },
-        { text: 'Lucky Wheel spins', unlocked: true } // FIXED: Unlocked for M1
+        { text: '5 Daily Mystery Boxes', unlocked: true },
+        { text: 'Earn ₦612 Daily', unlocked: true },
+        { text: 'Total Return: ₦223,380', unlocked: true },
+        { text: 'Withdrawal Day: Monday', unlocked: true },
+        { text: 'Wealth Center access', unlocked: true }
       ],
       'M2': [
-        { text: 'Daily tasks (10 per day)', unlocked: true },
-        { text: 'Higher task rewards', unlocked: true },
-        { text: 'Wealth Center (all plans)', unlocked: true },
-        { text: '5% gift code rewards', unlocked: true },
+        { text: '10 Daily Mystery Boxes', unlocked: true },
+        { text: 'Earn ₦1,326 Daily', unlocked: true },
+        { text: 'Total Return: ₦483,990', unlocked: true },
+        { text: 'Withdrawal Day: Monday', unlocked: true },
         { text: 'Priority support', unlocked: true }
       ],
       'M3': [
-        { text: 'Daily tasks (15 per day)', unlocked: true },
-        { text: 'Premium task rewards', unlocked: true },
-        { text: '8% gift code rewards', unlocked: true },
-        { text: 'Exclusive wealth plans', unlocked: true },
+        { text: '15 Daily Mystery Boxes', unlocked: true },
+        { text: 'Earn ₦3,264 Daily', unlocked: true },
+        { text: 'Total Return: ₦1,191,360', unlocked: true },
+        { text: 'Withdrawal Day: Tuesday', unlocked: true },
         { text: 'VIP support channel', unlocked: true }
       ],
       'M4': [
-        { text: 'Daily tasks (20 per day)', unlocked: true },
-        { text: 'Maximum task rewards', unlocked: true },
-        { text: '12% gift code rewards', unlocked: true },
-        { text: 'All wealth plans unlocked', unlocked: true },
+        { text: '20 Daily Mystery Boxes', unlocked: true },
+        { text: 'Earn ₦7,140 Daily', unlocked: true },
+        { text: 'Total Return: ₦2,606,100', unlocked: true },
+        { text: 'Withdrawal Day: Tuesday', unlocked: true },
         { text: 'Personal account manager', unlocked: true }
       ],
       'M5': [
-        { text: 'Unlimited daily tasks', unlocked: true },
-        { text: 'Highest task rewards', unlocked: true },
-        { text: '15% gift code rewards', unlocked: true },
-        { text: 'Exclusive VIP events', unlocked: true },
+        { text: '25 Daily Mystery Boxes', unlocked: true },
+        { text: 'Earn ₦13,260 Daily', unlocked: true },
+        { text: 'Total Return: ₦4,839,900', unlocked: true },
+        { text: 'Withdrawal Day: Wednesday', unlocked: true },
         { text: 'Dedicated VIP support', unlocked: true }
       ],
       'M6': [
-        { text: 'All M5 benefits', unlocked: true },
-        { text: '18% gift code rewards', unlocked: true },
-        { text: 'Private investment opportunities', unlocked: true },
-        { text: 'Early access to new features', unlocked: true },
+        { text: '30 Daily Mystery Boxes', unlocked: true },
+        { text: 'Earn ₦26,112 Daily', unlocked: true },
+        { text: 'Total Return: ₦9,530,880', unlocked: true },
+        { text: 'Withdrawal Day: Thursday', unlocked: true },
         { text: 'VIP-only bonuses', unlocked: true }
       ],
       'M7': [
-        { text: 'All M6 benefits', unlocked: true },
-        { text: '20% gift code rewards', unlocked: true },
-        { text: 'Maximum earning potential', unlocked: true },
-        { text: 'Elite VIP status', unlocked: true },
+        { text: '35 Daily Mystery Boxes', unlocked: true },
+        { text: 'Earn ₦51,204 Daily', unlocked: true },
+        { text: 'Total Return: 18,689,460', unlocked: true },
+        { text: 'Withdrawal Day: Friday', unlocked: true },
         { text: 'Lifetime premium access', unlocked: true }
       ]
     };
@@ -225,16 +191,14 @@
           document.getElementById('current-benefits').textContent = `${tierBenefits[displayTier]?.length || 0} premium benefits unlocked`;
         }
 
-        // Load tiers from database
         const { data: tiers } = await supabase.from('rms_tiers').select('*').order('upgrade_cost', { ascending: true });
-        
         const tierListEl = document.getElementById('tier-list');
         
         if (tiers && tiers.length > 0) {
           tierListEl.innerHTML = tiers.map(tier => {
             const tierIndex = tierOrder.indexOf(tier.tier);
             const isCurrent = tier.tier === displayTier;
-            const isPassed = tierIndex < currentTierIndex; // FIXED: Mark lower tiers as passed
+            const isPassed = tierIndex < currentTierIndex;
             const benefits = tierBenefits[tier.tier] || [];
             
             let btnHtml = '';
@@ -243,7 +207,7 @@
             } else if (isPassed) {
               btnHtml = `<button class="upgrade-btn passed-tier" disabled><i class="fa-solid fa-check-circle"></i> Passed</button>`;
             } else {
-              btnHtml = `<button class="upgrade-btn" onclick="upgradeToTier('${tier.tier}', ${tier.upgrade_cost})"><i class="fa-solid fa-crown"></i> Upgrade Now</button>`;
+              btnHtml = `<button class="upgrade-btn" onclick="upgradeToTier('${tier.tier}', ${tier.upgrade_cost})"><i class="fa-solid fa-crown"></i> Upgrade Now (₦${Number(tier.upgrade_cost).toLocaleString()})</button>`;
             }
             
             return `
@@ -252,10 +216,20 @@
                   <div class="tier-name">${tier.tier}</div>
                   <div class="tier-price">₦${Number(tier.upgrade_cost).toLocaleString()}</div>
                 </div>
+                <div class="tier-stats">
+                  <div class="tier-stat">
+                    <div class="tier-stat-val">${tier.daily_boxes}</div>
+                    <div class="tier-stat-lbl">Daily Boxes</div>
+                  </div>
+                  <div class="tier-stat">
+                    <div class="tier-stat-val">${Number(tier.daily_earning).toLocaleString()}</div>
+                    <div class="tier-stat-lbl">Daily Earning</div>
+                  </div>
+                </div>
                 <div class="tier-benefits">
                   ${benefits.map(b => `
-                    <div class="tier-benefit ${b.unlocked ? '' : 'locked'}">
-                      <i class="fa-solid ${b.unlocked ? 'fa-check-circle' : 'fa-lock'}"></i>
+                    <div class="tier-benefit">
+                      <i class="fa-solid fa-check-circle"></i>
                       ${b.text}
                     </div>
                   `).join('')}
@@ -275,7 +249,7 @@
     }
 
     window.upgradeToTier = async (targetTier, cost) => {
-      showConfirm(`Upgrade to ${targetTier} for ₦${Number(cost).toLocaleString()}?`, async () => {
+      showConfirm(`Upgrade to ${targetTier} for ₦${Number(cost).toLocaleString()}? This will be deducted from your wallet.`, async () => {
         try {
           const token = (await supabase.auth.getSession()).data.session.access_token;
           const res = await fetch('/api/admin?action=upgradeTier', {
