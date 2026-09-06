@@ -1,24 +1,34 @@
+/**
+ * RMS Finance API
+ * Handles: Wallet, Transactions, Deposits, Withdrawals, Gift Codes, Target Growth
+ */
+
 import supabaseAdmin from '../lib/supabase.js';
 import { verifyUser } from '../lib/auth.js';
 import { initiatePayment, initiateTransfer } from '../lib/targetgrowths.js';
 
 export default async function handler(req, res) {
   const action = req.query.action || req.body?.action;
+  
   try {
     switch (action) {
+      // --- WALLET & TRANSACTIONS ---
       case 'getWallet': return await getWallet(req, res);
       case 'getTransactions': return await getTransactions(req, res);
       case 'getDeposits': return await getDeposits(req, res);
       case 'getWithdrawals': return await getWithdrawals(req, res);
       case 'getWithdrawalEligibility': return await getWithdrawalEligibility(req, res);
+      case 'getDepositStatus': return await getDepositStatus(req, res);
+      
+      // --- MANUAL DEPOSIT/WITHDRAWAL ---
       case 'createDeposit': return await createDeposit(req, res);
       case 'createWithdrawal': return await createWithdrawal(req, res);
       
-      // --- TARGET GROWTH ACTIONS ---
+      // --- TARGET GROWTH ---
       case 'initiateTargetGrowthDeposit': return await initiateTargetGrowthDeposit(req, res);
       case 'initiateTargetGrowthWithdrawal': return await initiateTargetGrowthWithdrawal(req, res);
       
-      // --- GIFT CODE ACTIONS ---
+      // --- GIFT CODES ---
       case 'generateGiftCodes': return await generateGiftCodes(req, res);
       case 'getMyGiftCodes': return await getMyGiftCodes(req, res);
       case 'redeemGiftCode': return await redeemGiftCode(req, res);
@@ -32,8 +42,9 @@ export default async function handler(req, res) {
 }
 
 // ==========================================
-// HELPER: Target Growth Bank Code Mapping
+// HELPERS
 // ==========================================
+
 const TG_BANK_CODES = {
   'access bank': 'NGR044', 'access': 'NGR044',
   'guaranty trust bank': 'NGR058', 'gtbank': 'NGR058', 'gtb': 'NGR058',
@@ -56,9 +67,7 @@ const TG_BANK_CODES = {
 function getTargetGrowthBankCode(bankName) {
   if (!bankName) return null;
   const cleanName = bankName.trim().toLowerCase();
-  // Direct match
   if (TG_BANK_CODES[cleanName]) return TG_BANK_CODES[cleanName];
-  // Partial match (e.g., user types "GTBank Plc")
   for (const [key, code] of Object.entries(TG_BANK_CODES)) {
     if (cleanName.includes(key)) return code;
   }
@@ -73,13 +82,30 @@ function getAppUrl(req) {
   return `${proto}://${host}`.replace(/\/$/, "");
 }
 
+function generateGiftCode() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let code = 'GIFT-';
+  for (let i = 0; i < 8; i++) {
+    code += chars.charAt(Math.floor(Math.random() * chars.length));
+    if (i === 3) code += '-';
+  }
+  return code;
+}
+
 // ==========================================
-// EXISTING ACTIONS (Unchanged)
+// WALLET & TRANSACTIONS
 // ==========================================
+
 async function getWallet(req, res) {
   const user = await verifyUser(req);
   if (!user) return res.status(401).json({ error: 'Unauthorized' });
-  const { data: wallet } = await supabaseAdmin.from('wallets').select('*').eq('user_id', user.id).single();
+
+  const { data: wallet } = await supabaseAdmin
+    .from('wallets')
+    .select('*')
+    .eq('user_id', user.id)
+    .single();
+    
   if (!wallet) return res.status(200).json({ balance: 0, total_earned: 0, total_deposited: 0, total_withdrawn: 0 });
   return res.status(200).json(wallet);
 }
@@ -87,32 +113,56 @@ async function getWallet(req, res) {
 async function getTransactions(req, res) {
   const user = await verifyUser(req);
   if (!user) return res.status(401).json({ error: 'Unauthorized' });
-  const { data: transactions } = await supabaseAdmin.from('transactions').select('*').eq('user_id', user.id).order('created_at', { ascending: false }).limit(50);
+
+  const { data: transactions } = await supabaseAdmin
+    .from('transactions')
+    .select('*')
+    .eq('user_id', user.id)
+    .order('created_at', { ascending: false })
+    .limit(50);
+    
   return res.status(200).json({ transactions: transactions || [] });
 }
 
 async function getDeposits(req, res) {
   const user = await verifyUser(req);
   if (!user) return res.status(401).json({ error: 'Unauthorized' });
-  const { data: deposits } = await supabaseAdmin.from('deposits').select('*').eq('user_id', user.id).order('created_at', { ascending: false });
+
+  const { data: deposits } = await supabaseAdmin
+    .from('deposits')
+    .select('*')
+    .eq('user_id', user.id)
+    .order('created_at', { ascending: false });
+    
   return res.status(200).json({ deposits: deposits || [] });
 }
 
 async function getWithdrawals(req, res) {
   const user = await verifyUser(req);
   if (!user) return res.status(401).json({ error: 'Unauthorized' });
-  const { data: withdrawals } = await supabaseAdmin.from('withdrawals').select('*').eq('user_id', user.id).order('created_at', { ascending: false });
+
+  const { data: withdrawals } = await supabaseAdmin
+    .from('withdrawals')
+    .select('*')
+    .eq('user_id', user.id)
+    .order('created_at', { ascending: false });
+    
   return res.status(200).json({ withdrawals: withdrawals || [] });
 }
 
 async function getWithdrawalEligibility(req, res) {
   const user = await verifyUser(req);
   if (!user) return res.status(401).json({ error: 'Unauthorized' });
-  const { data: profile } = await supabaseAdmin.from('profiles').select('vip_level').eq('id', user.id).single();
+
+  const { data: profile } = await supabaseAdmin
+    .from('profiles')
+    .select('vip_level')
+    .eq('id', user.id)
+    .single();
+    
   const tier = profile?.vip_level || 'newbie';
-  
-  // Simple eligibility check (expand with your RPC or time logic as needed)
   const isNewbie = tier === 'newbie' || tier === 'M0';
+  
   return res.status(200).json({
     tier: tier,
     can_withdraw_now: !isNewbie,
@@ -120,17 +170,52 @@ async function getWithdrawalEligibility(req, res) {
   });
 }
 
+async function getDepositStatus(req, res) {
+  const user = await verifyUser(req);
+  if (!user) return res.status(401).json({ error: 'Unauthorized' });
+  
+  const ref = req.query.ref;
+  if (!ref) return res.status(400).json({ error: 'Reference required' });
+
+  const { data: deposit } = await supabaseAdmin
+    .from('deposits')
+    .select('status, amount, provider_status')
+    .eq('reference', ref)
+    .eq('user_id', user.id)
+    .single();
+
+  if (!deposit) return res.status(404).json({ error: 'Deposit not found' });
+  return res.status(200).json(deposit);
+}
+
+// ==========================================
+// MANUAL DEPOSIT & WITHDRAWAL
+// ==========================================
+
 async function createDeposit(req, res) {
   const user = await verifyUser(req);
   if (!user) return res.status(401).json({ error: 'Unauthorized' });
+
   const { amount, payment_method, proof_image_url, sender_name } = req.body;
   if (!amount || Number(amount) <= 0) return res.status(400).json({ error: 'Invalid amount' });
 
   const reference = `MAN_${user.id.slice(0, 8)}_${Date.now()}`;
-  const { data: deposit, error } = await supabaseAdmin.from('deposits').insert({
-    user_id: user.id, amount: Number(amount), reference, sender_name,
-    payment_method, proof_image_url, status: 'pending', method: 'manual', provider: 'manual'
-  }).select().single();
+  
+  const { data: deposit, error } = await supabaseAdmin
+    .from('deposits')
+    .insert({
+      user_id: user.id, 
+      amount: Number(amount), 
+      reference, 
+      sender_name,
+      payment_method, 
+      proof_image_url, 
+      status: 'pending', 
+      method: 'manual', 
+      provider: 'manual'
+    })
+    .select()
+    .single();
 
   if (error) return res.status(500).json({ error: error.message });
   return res.status(201).json({ message: 'Deposit submitted for approval.', deposit });
@@ -139,36 +224,65 @@ async function createDeposit(req, res) {
 async function createWithdrawal(req, res) {
   const user = await verifyUser(req);
   if (!user) return res.status(401).json({ error: 'Unauthorized' });
+
   const { amount, bank_name, account_number, account_name } = req.body;
 
-  const { data: profile } = await supabaseAdmin.from('profiles').select('vip_level').eq('id', user.id).single();
+  const { data: profile } = await supabaseAdmin
+    .from('profiles')
+    .select('vip_level')
+    .eq('id', user.id)
+    .single();
+    
   const tier = profile?.vip_level || 'newbie';
   if (tier === 'newbie' || tier === 'M0') {
     return res.status(400).json({ error: 'Upgrade to M1 or higher to withdraw.' });
   }
 
-  const { data: wallet } = await supabaseAdmin.from('wallets').select('balance').eq('user_id', user.id).single();
+  const { data: wallet } = await supabaseAdmin
+    .from('wallets')
+    .select('balance')
+    .eq('user_id', user.id)
+    .single();
+    
   if (!wallet) return res.status(400).json({ error: 'Wallet not found.' });
   if (Number(amount) > wallet.balance) return res.status(400).json({ error: 'Insufficient available balance.' });
 
   const reference = `WD_${user.id.slice(0, 8)}_${Date.now()}`;
-  const { data: wd, error: wdErr } = await supabaseAdmin.from('withdrawals').insert({
-    user_id: user.id, amount: Number(amount), net_amount: Number(amount),
-    bank_name, account_number, account_name, status: 'pending', method: 'manual', provider: 'manual'
-  }).select().single();
+  
+  const { data: wd, error: wdErr } = await supabaseAdmin
+    .from('withdrawals')
+    .insert({
+      user_id: user.id, 
+      amount: Number(amount), 
+      net_amount: Number(amount),
+      bank_name, 
+      account_number, 
+      account_name, 
+      status: 'pending', 
+      method: 'manual', 
+      provider: 'manual'
+    })
+    .select()
+    .single();
   
   if (wdErr) return res.status(500).json({ error: wdErr.message });
 
-  await supabaseAdmin.from('transactions').insert({
-    user_id: user.id, type: 'withdrawal', amount: Number(amount), status: 'pending',
-    reference: `wd_${wd.id}`, description: `Withdrawal to ${account_name}`
-  });
+  await supabaseAdmin
+    .from('transactions')
+    .insert({
+      user_id: user.id, 
+      type: 'withdrawal', 
+      amount: Number(amount), 
+      status: 'pending',
+      reference: `wd_${wd.id}`, 
+      description: `Withdrawal to ${account_name}`
+    });
 
   return res.status(201).json({ message: 'Withdrawal request submitted.', withdrawal: wd });
 }
 
 // ==========================================
-// NEW: TARGET GROWTH ACTIONS
+// TARGET GROWTH DEPOSIT
 // ==========================================
 
 async function initiateTargetGrowthDeposit(req, res) {
@@ -184,17 +298,20 @@ async function initiateTargetGrowthDeposit(req, res) {
   const reference = `TG_DEP_${identifier}`;
 
   // 1. Create pending deposit record
-  const { error: insertError } = await supabaseAdmin.from('deposits').insert({
-    user_id: user.id,
-    amount: numAmount,
-    reference: reference,
-    status: 'pending',
-    method: 'targetgrowths',
-    provider: 'targetgrowths',
-    provider_identifier: identifier,
-    provider_status: 'initiated',
-    created_at: new Date().toISOString()
-  });
+  const { error: insertError } = await supabaseAdmin
+    .from('deposits')
+    .insert({
+      user_id: user.id,
+      amount: numAmount,
+      reference: reference,
+      status: 'pending',
+      method: 'targetgrowths',
+      provider: 'targetgrowths',
+      provider_identifier: identifier,
+      provider_status: 'initiated',
+      created_at: new Date().toISOString()
+    });
+    
   if (insertError) return res.status(500).json({ error: insertError.message });
 
   // 2. Initiate Payment with Target Growth
@@ -209,7 +326,7 @@ async function initiateTargetGrowthDeposit(req, res) {
       ipnUrl: ipnUrl,
       successUrl: `${origin}/deposit-success.html?ref=${encodeURIComponent(reference)}`,
       cancelUrl: `${origin}/deposit.html?cancelled=true`,
-      siteLogo: `${origin}/logo.png`, // Ensure you have a logo.png in your public folder
+      siteLogo: `${origin}/logo.png`,
       customerName: full_name || 'RMS User',
       customerEmail: email || 'user@example.com'
     });
@@ -220,12 +337,15 @@ async function initiateTargetGrowthDeposit(req, res) {
     if (!checkoutUrl) throw new Error('Target Growth did not return a checkout URL');
 
     // 3. Update record with checkout info
-    await supabaseAdmin.from('deposits').update({
-      provider_reference: providerRef,
-      provider_status: 'checkout_created',
-      provider_response: providerResponse,
-      updated_at: new Date().toISOString()
-    }).eq('reference', reference);
+    await supabaseAdmin
+      .from('deposits')
+      .update({
+        provider_reference: providerRef,
+        provider_status: 'checkout_created',
+        provider_response: providerResponse,
+        updated_at: new Date().toISOString()
+      })
+      .eq('reference', reference);
 
     return res.status(200).json({ 
       ok: true, 
@@ -236,16 +356,23 @@ async function initiateTargetGrowthDeposit(req, res) {
 
   } catch (e) {
     console.error('[TG Deposit Initiate Error]', e);
-    await supabaseAdmin.from('deposits').update({
-      status: 'rejected',
-      provider_status: 'initiation_failed',
-      provider_error: e.message,
-      updated_at: new Date().toISOString()
-    }).eq('reference', reference);
+    await supabaseAdmin
+      .from('deposits')
+      .update({
+        status: 'rejected',
+        provider_status: 'initiation_failed',
+        provider_error: e.message,
+        updated_at: new Date().toISOString()
+      })
+      .eq('reference', reference);
     
     return res.status(502).json({ error: e.message || 'Could not start payment' });
   }
 }
+
+// ==========================================
+// TARGET GROWTH WITHDRAWAL
+// ==========================================
 
 async function initiateTargetGrowthWithdrawal(req, res) {
   const user = await verifyUser(req);
@@ -263,35 +390,41 @@ async function initiateTargetGrowthWithdrawal(req, res) {
   }
 
   // 2. Check Balance
-  const { data: wallet } = await supabaseAdmin.from('wallets').select('balance').eq('user_id', user.id).single();
+  const { data: wallet } = await supabaseAdmin
+    .from('wallets')
+    .select('balance')
+    .eq('user_id', user.id)
+    .single();
+    
   if (!wallet) return res.status(400).json({ error: 'Wallet not found.' });
   if (numAmount > wallet.balance) return res.status(400).json({ error: 'Insufficient available balance.' });
 
-  // 3. Create Withdrawal Record (Debit happens on admin approval, or you can debit here if preferred)
-  // For safety, we create it as 'pending' and let the Admin API trigger the actual transfer.
-  // BUT if you want instant automated payouts, we initiate transfer HERE.
-  // Let's do instant automated payout for sandbox testing:
-  
+  // 3. Create Withdrawal Record
   const reference = `TG_WD_${user.id.replace(/-/g, '').slice(0, 8)}_${Date.now()}`;
   const identifier = `TGW${user.id.replace(/-/g, '').slice(0, 12)}${Date.now().toString(36).slice(-4)}`.toUpperCase();
 
-  const { data: wd, error: wdErr } = await supabaseAdmin.from('withdrawals').insert({
-    user_id: user.id,
-    amount: numAmount,
-    net_amount: numAmount, // Adjust if you have fee logic
-    bank_name,
-    account_number,
-    account_name,
-    status: 'pending',
-    method: 'targetgrowths',
-    provider: 'targetgrowths',
-    provider_identifier: identifier,
-    provider_status: 'initiating',
-    created_at: new Date().toISOString()
-  }).select().single();
+  const { data: wd, error: wdErr } = await supabaseAdmin
+    .from('withdrawals')
+    .insert({
+      user_id: user.id,
+      amount: numAmount,
+      net_amount: numAmount,
+      bank_name,
+      account_number,
+      account_name,
+      status: 'pending',
+      method: 'targetgrowths',
+      provider: 'targetgrowths',
+      provider_identifier: identifier,
+      provider_status: 'initiating',
+      created_at: new Date().toISOString()
+    })
+    .select()
+    .single();
 
   if (wdErr) return res.status(500).json({ error: wdErr.message });
 
+  // 4. Initiate Transfer
   try {
     const origin = getAppUrl(req);
     const ipnUrl = `${origin}/api/webhooks/targetgrowths`;
@@ -309,27 +442,35 @@ async function initiateTargetGrowthWithdrawal(req, res) {
     const providerRef = providerResponse?.transaction_ref || providerResponse?.trx_id;
 
     // Update withdrawal with provider info
-    await supabaseAdmin.from('withdrawals').update({
-      provider_reference: providerRef,
-      provider_status: 'provider_pending',
-      provider_response: providerResponse,
-      updated_at: new Date().toISOString()
-    }).eq('id', wd.id);
+    await supabaseAdmin
+      .from('withdrawals')
+      .update({
+        provider_reference: providerRef,
+        provider_status: 'provider_pending',
+        provider_response: providerResponse,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', wd.id);
 
-    // Deduct balance immediately (or wait for webhook, but deducting now prevents double-spend)
-    await supabaseAdmin.from('wallets').update({
-      balance: wallet.balance - numAmount,
-      updated_at: new Date().toISOString()
-    }).eq('user_id', user.id);
+    // Deduct balance immediately (prevents double-spend)
+    await supabaseAdmin
+      .from('wallets')
+      .update({
+        balance: wallet.balance - numAmount,
+        updated_at: new Date().toISOString()
+      })
+      .eq('user_id', user.id);
 
-    await supabaseAdmin.from('transactions').insert({
-      user_id: user.id,
-      type: 'withdrawal',
-      amount: numAmount,
-      status: 'pending',
-      reference: `wd_${wd.id}`,
-      description: `Target Growth Withdrawal to ${account_name}`
-    });
+    await supabaseAdmin
+      .from('transactions')
+      .insert({
+        user_id: user.id,
+        type: 'withdrawal',
+        amount: numAmount,
+        status: 'pending',
+        reference: `wd_${wd.id}`,
+        description: `Target Growth Withdrawal to ${account_name}`
+      });
 
     return res.status(201).json({ 
       ok: true, 
@@ -340,41 +481,181 @@ async function initiateTargetGrowthWithdrawal(req, res) {
   } catch (e) {
     console.error('[TG Withdrawal Initiate Error]', e);
     // Revert status if transfer fails
-    await supabaseAdmin.from('withdrawals').update({
-      status: 'rejected',
-      provider_status: 'transfer_failed',
-      provider_error: e.message,
-      updated_at: new Date().toISOString()
-    }).eq('id', wd.id);
+    await supabaseAdmin
+      .from('withdrawals')
+      .update({
+        status: 'rejected',
+        provider_status: 'transfer_failed',
+        provider_error: e.message,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', wd.id);
     
     return res.status(502).json({ error: e.message || 'Could not initiate transfer' });
   }
 }
 
 // ==========================================
-// GIFT CODE ACTIONS (Unchanged from previous)
+// GIFT CODES
 // ==========================================
-function generateCode() {
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-  let code = 'GIFT-';
-  for (let i = 0; i < 8; i++) {
-    code += chars.charAt(Math.floor(Math.random() * chars.length));
-    if (i === 3) code += '-';
-  }
-  return code;
-}
 
 async function generateGiftCodes(req, res) {
-  // ... (Keep the gift code logic from the previous response here) ...
-  return res.status(501).json({ error: 'Gift code logic preserved from previous step' });
+  const user = await verifyUser(req);
+  if (!user) return res.status(401).json({ error: 'Unauthorized' });
+
+  // Check generations available
+  const { data: profile } = await supabaseAdmin
+    .from('profiles')
+    .select('gift_code_generations_available')
+    .eq('id', user.id)
+    .single();
+
+  const availableGenerations = profile?.gift_code_generations_available || 0;
+  if (availableGenerations <= 0) {
+    return res.status(400).json({ 
+      error: 'No generations available. Wait for your referrals to upgrade to M2+ to unlock more!' 
+    });
+  }
+
+  // Get M2+ referrals
+  const { data: referrals } = await supabaseAdmin
+    .from('profiles')
+    .select('id, vip_level, email, full_name')
+    .eq('referred_by', user.id)
+    .in('vip_level', ['M2', 'M3', 'M4', 'M5', 'M6', 'M7']);
+
+  if (!referrals || referrals.length === 0) {
+    return res.status(400).json({ error: 'No eligible M2+ referrals found' });
+  }
+
+  const generatedCodes = [];
+  for (const ref of referrals) {
+    const randomAmount = Math.floor(Math.random() * 451) + 50; // 50 to 500
+    const code = generateGiftCode();
+
+    const { error } = await supabaseAdmin
+      .from('gift_codes')
+      .insert({
+        code: code,
+        amount: randomAmount,
+        max_uses: 1,
+        used_count: 0,
+        is_active: true,
+        created_by: user.id,
+        expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+      });
+
+    if (error) throw error;
+
+    generatedCodes.push({
+      code: code,
+      referral: ref.full_name || ref.email,
+      tier: ref.vip_level,
+      amount: randomAmount
+    });
+  }
+
+  // Decrease counter
+  await supabaseAdmin
+    .from('profiles')
+    .update({ 
+      gift_code_generations_available: availableGenerations - 1 
+    })
+    .eq('id', user.id);
+
+  return res.status(200).json({
+    success: true,
+    codes: generatedCodes,
+    remaining_generations: availableGenerations - 1
+  });
 }
 
 async function getMyGiftCodes(req, res) {
-  // ... (Keep the gift code logic from the previous response here) ...
-  return res.status(501).json({ error: 'Gift code logic preserved from previous step' });
+  const user = await verifyUser(req);
+  if (!user) return res.status(401).json({ error: 'Unauthorized' });
+
+  const { data: codes } = await supabaseAdmin
+    .from('gift_codes')
+    .select('*')
+    .eq('created_by', user.id)
+    .order('created_at', { ascending: false })
+    .limit(20);
+
+  return res.status(200).json({ codes: codes || [] });
 }
 
 async function redeemGiftCode(req, res) {
-  // ... (Keep the gift code logic from previous response here) ...
-  return res.status(501).json({ error: 'Gift code logic preserved from previous step' });
+  const user = await verifyUser(req);
+  if (!user) return res.status(401).json({ error: 'Unauthorized' });
+
+  const { code } = req.body;
+  if (!code) return res.status(400).json({ error: 'Code required' });
+
+  const { data: giftCode, error: findError } = await supabaseAdmin
+    .from('gift_codes')
+    .select('*')
+    .eq('code', code.toUpperCase().trim())
+    .single();
+
+  if (findError || !giftCode) {
+    return res.status(404).json({ error: 'Invalid gift code' });
+  }
+
+  if (!giftCode.is_active) {
+    return res.status(400).json({ error: 'This gift code has already been used' });
+  }
+
+  if (giftCode.expires_at && new Date(giftCode.expires_at) < new Date()) {
+    return res.status(400).json({ error: 'This gift code has expired' });
+  }
+
+  if (giftCode.created_by === user.id) {
+    return res.status(400).json({ error: 'You cannot redeem your own generated gift code' });
+  }
+
+  // Credit wallet
+  const { data: wallet } = await supabaseAdmin
+    .from('wallets')
+    .select('balance')
+    .eq('user_id', user.id)
+    .single();
+
+  const newBalance = (wallet?.balance || 0) + Number(giftCode.amount);
+
+  await supabaseAdmin
+    .from('wallets')
+    .update({
+      balance: newBalance,
+      updated_at: new Date()
+    })
+    .eq('user_id', user.id);
+
+  // Mark as used
+  await supabaseAdmin
+    .from('gift_codes')
+    .update({ 
+      is_active: false, 
+      used_count: 1,
+      used_by: user.id
+    })
+    .eq('id', giftCode.id);
+
+  // Record transaction
+  await supabaseAdmin
+    .from('transactions')
+    .insert({
+      user_id: user.id,
+      type: 'gift_code',
+      amount: giftCode.amount,
+      status: 'approved',
+      reference: `gift_redeem_${Date.now()}`,
+      description: `Redeemed Gift Code: ${code}`
+    });
+
+  return res.status(200).json({
+    success: true,
+    amount: giftCode.amount,
+    new_balance: newBalance,
+    message: `Success! ₦${giftCode.amount.toLocaleString()} added to your wallet.`
+  });
 }
