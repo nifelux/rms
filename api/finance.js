@@ -207,6 +207,26 @@ async function generateGiftCodes(req, res) {
     const user = await verifyUser(req);
     if (!user) return res.status(401).json({ error: 'Unauthorized' });
 
+    // Check if user already generated codes recently (30-day cooldown)
+    const { data: profile } = await supabaseAdmin
+      .from('profiles')
+      .select('last_gift_code_generation')
+      .eq('id', user.id)
+      .single();
+
+    if (profile?.last_gift_code_generation) {
+      const lastGen = new Date(profile.last_gift_code_generation);
+      const now = new Date();
+      const daysSinceLastGen = (now - lastGen) / (1000 * 60 * 60 * 24);
+      
+      if (daysSinceLastGen < 30) {
+        const daysRemaining = Math.ceil(30 - daysSinceLastGen);
+        return res.status(400).json({ 
+          error: `You can only generate gift codes once every 30 days. Try again in ${daysRemaining} day(s).` 
+        });
+      }
+    }
+
     // Get user's M2+ referrals
     const { data: referrals } = await supabaseAdmin
       .from('profiles')
@@ -248,6 +268,14 @@ async function generateGiftCodes(req, res) {
         amount: randomAmount
       });
     }
+
+    // Update the last generation timestamp
+    await supabaseAdmin
+      .from('profiles')
+      .update({ 
+        last_gift_code_generation: new Date().toISOString() 
+      })
+      .eq('id', user.id);
 
     return res.status(200).json({
       success: true,
