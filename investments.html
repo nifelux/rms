@@ -3,101 +3,156 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>RMS — Daily Tasks</title>
+  <title>RMS — Daily Mystery Boxes</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/style.css">
   <meta name="theme-color" content="#0a0e27">
   <style>
-    .task-container { padding: 20px 16px 100px 16px; max-width: 600px; margin: 0 auto; }
-    .progress-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-    .progress-bar-bg { width: 100%; height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden; margin-bottom: 30px; }
-    .progress-bar-fill { height: 100%; background: linear-gradient(90deg, var(--rms-yellow), var(--rms-vivid-red)); transition: width 0.5s ease; }
+    .tasks-container { padding: 20px 16px 100px 16px; max-width: 600px; margin: 0 auto; font-family: 'Inter', sans-serif; }
     
-    .box-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
-    
-    .mystery-box {
-      aspect-ratio: 1;
-      background: var(--rms-bg-card);
-      border: 2px solid var(--rms-border);
+    .page-header { margin-bottom: 24px; }
+    .page-header h2 { font-size: 1.8rem; font-weight: 900; color: white; margin: 0 0 8px 0; }
+    .page-header p { color: rgba(255,255,255,0.6); font-size: 0.95rem; margin: 0; }
+
+    .vip-notice {
+      background: linear-gradient(135deg, rgba(255,26,26,0.15), rgba(255,68,68,0.05));
+      border: 1px solid rgba(255,26,26,0.3);
       border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 24px;
+      text-align: center;
+    }
+    .vip-notice h3 { color: #ff4444; margin: 0 0 8px 0; font-size: 1.1rem; }
+    .vip-notice p { color: rgba(255,255,255,0.8); font-size: 0.9rem; margin: 0 0 16px 0; }
+    .vip-notice a { display: inline-block; padding: 12px 24px; background: linear-gradient(135deg, #ffd700, #e6c200); color: #0a0e27; text-decoration: none; border-radius: 12px; font-weight: 800; }
+
+    .progress-card {
+      background: linear-gradient(135deg, rgba(0,102,255,0.1), rgba(0,212,255,0.05));
+      border: 1px solid rgba(0,212,255,0.2);
+      border-radius: 20px;
+      padding: 20px;
+      margin-bottom: 24px;
+    }
+    .progress-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    .progress-title { font-size: 0.9rem; color: rgba(255,255,255,0.7); font-weight: 600; }
+    .progress-count { font-size: 1.1rem; font-weight: 900; color: #ffd700; }
+    .progress-bar { height: 10px; background: rgba(255,255,255,0.1); border-radius: 5px; overflow: hidden; }
+    .progress-fill { height: 100%; background: linear-gradient(90deg, #00d4ff, #0066ff); border-radius: 5px; transition: width 0.5s ease; }
+
+    .boxes-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 24px; }
+    .mystery-box {
+      background: linear-gradient(135deg, rgba(255,215,0,0.1), rgba(255,193,7,0.05));
+      border: 2px solid rgba(255,215,0,0.3);
+      border-radius: 20px;
+      padding: 24px 16px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s;
+      position: relative;
+      overflow: hidden;
+    }
+    .mystery-box:hover:not(.completed):not(.locked) { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(255,215,0,0.3); }
+    .mystery-box.completed { opacity: 0.6; border-color: rgba(0,255,136,0.3); background: rgba(0,255,136,0.1); }
+    .mystery-box.locked { opacity: 0.4; cursor: not-allowed; }
+    
+    .box-icon { font-size: 3rem; margin-bottom: 12px; }
+    .mystery-box:not(.completed):not(.locked) .box-icon { animation: bounce 2s infinite; }
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+    
+    .box-title { font-size: 1rem; font-weight: 800; color: white; margin-bottom: 6px; }
+    .box-reward { font-size: 0.85rem; color: #ffd700; font-weight: 700; margin-bottom: 8px; }
+    .box-status { font-size: 0.75rem; color: rgba(255,255,255,0.6); font-weight: 600; }
+    .mystery-box.completed .box-status { color: #00ff88; }
+
+    .reward-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.8);
       display: flex;
-      flex-direction: column;
       align-items: center;
       justify-content: center;
+      z-index: 1000;
+      padding: 20px;
+    }
+    .reward-content {
+      background: linear-gradient(135deg, #1a1f4e, #0a0e27);
+      border: 2px solid #ffd700;
+      border-radius: 24px;
+      padding: 32px 24px;
+      text-align: center;
+      max-width: 320px;
+      animation: popIn 0.3s ease;
+    }
+    @keyframes popIn {
+      from { transform: scale(0.8); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+    .reward-icon { font-size: 4rem; margin-bottom: 16px; }
+    .reward-title { font-size: 1.3rem; font-weight: 900; color: white; margin-bottom: 8px; }
+    .reward-amount { font-size: 2rem; font-weight: 900; color: #ffd700; margin-bottom: 24px; }
+    .reward-btn {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, #ffd700, #e6c200);
+      border: none;
+      border-radius: 12px;
+      font-weight: 800;
+      font-size: 1rem;
+      color: #0a0e27;
       cursor: pointer;
-      transition: all 0.3s ease;
-      position: relative;
-      overflow: visible;
     }
-    
-    .mystery-box:hover { transform: scale(1.05); border-color: var(--rms-yellow); box-shadow: 0 0 20px rgba(255,215,0,0.3); }
-    .mystery-box.opened { border-color: var(--rms-text-muted); opacity: 0.5; cursor: default; pointer-events: none; }
-    .mystery-box.opening { animation: boxShake 0.5s ease; }
-    
-    .box-icon { font-size: 2.5rem; color: var(--rms-yellow); margin-bottom: 8px; transition: all 0.3s ease; position: relative; z-index: 2; }
-    .mystery-box:hover .box-icon { transform: rotate(-10deg) scale(1.1); }
-    .mystery-box.opening .box-icon { animation: boxLidFly 0.6s ease forwards; }
-    
-    .box-label { font-size: 0.8rem; font-weight: 600; position: relative; z-index: 2; }
-    
-    .box-reward {
-      position: absolute; inset: 0; background: rgba(10,14,39,0.95);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 1.2rem; font-weight: 800; color: var(--rms-yellow);
-      opacity: 0; transition: opacity 0.3s; z-index: 3;
-    }
-    .mystery-box.opened .box-reward { opacity: 1; }
-    .mystery-box.opened .box-icon, .mystery-box.opened .box-label { display: none; }
-    
-    .sparkle {
-      position: fixed; border-radius: 50%; pointer-events: none; z-index: 999999;
-      box-shadow: 0 0 10px currentColor, 0 0 20px currentColor;
-    }
-    
-    @keyframes sparkleBurst {
-      0% { transform: translate(0, 0) scale(0); opacity: 1; }
-      100% { transform: translate(var(--tx), var(--ty)) scale(1); opacity: 0; }
-    }
-    @keyframes boxShake {
-      0%, 100% { transform: translateX(0); }
-      10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
-      20%, 40%, 60%, 80% { transform: translateX(5px); }
-    }
-    @keyframes boxLidFly {
-      0% { transform: translateY(0) rotate(0); opacity: 1; }
-      100% { transform: translateY(-50px) rotate(-30deg); opacity: 0; }
-    }
-    @keyframes rewardReveal {
-      0% { transform: scale(0) rotate(-180deg); opacity: 0; }
-      50% { transform: scale(1.3) rotate(10deg); opacity: 1; }
-      100% { transform: scale(1) rotate(0); opacity: 1; }
-    }
-    .reward-amount { animation: rewardReveal 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards; text-shadow: 0 0 20px var(--rms-yellow); }
-    
-    .tier-badge { display: inline-block; background: rgba(255,26,26,0.1); color: var(--rms-vivid-red); padding: 6px 16px; border-radius: 20px; font-size: 0.85rem; font-weight: 700; margin-bottom: 10px; }
-    .error-box { text-align: center; padding: 40px 20px; grid-column: 1 / -1; }
-    .loading-box { text-align: center; padding: 40px; color: var(--rms-text-muted); }
+
+    .empty-state { text-align: center; padding: 60px 20px; color: rgba(255,255,255,0.5); }
+    .empty-state i { font-size: 4rem; margin-bottom: 16px; opacity: 0.3; }
   </style>
 </head>
 <body class="rv-shell">
   <div id="header-container"></div>
 
-  <div class="task-container">
-    <h2 style="margin-bottom: 5px;">Daily Mystery Boxes</h2>
-    <p class="text-muted" style="margin-bottom: 20px;">Tap a box to reveal your reward.</p>
-
-    <div class="tier-badge" id="current-tier">Loading Tier...</div>
-
-    <div class="progress-header">
-      <span class="text-muted" style="font-size: 0.85rem;">Daily Progress</span>
-      <span class="text-yellow" style="font-weight: 700; font-size: 0.85rem;" id="progress-text">0 / 0</span>
-    </div>
-    <div class="progress-bar-bg">
-      <div class="progress-bar-fill" id="progress-fill" style="width: 0%;"></div>
+  <div class="tasks-container">
+    <div class="page-header">
+      <h2>Daily Mystery Boxes</h2>
+      <p>Tap a box to reveal your reward.</p>
     </div>
 
-    <div class="box-grid" id="box-grid">
-      <div class="loading-box"><i class="fa-solid fa-circle-notch fa-spin"></i><p>Loading...</p></div>
+    <div id="vip-notice" style="display: none;">
+      <div class="vip-notice">
+        <h3><i class="fa-solid fa-lock"></i> VIP Required</h3>
+        <p>Mystery boxes are only available for M1 and above. Upgrade now to start earning!</p>
+        <a href="/vip.html">Upgrade to M1</a>
+      </div>
+    </div>
+
+    <div id="tasks-content" style="display: none;">
+      <div class="progress-card">
+        <div class="progress-header">
+          <div class="progress-title">Daily Progress</div>
+          <div class="progress-count"><span id="completed-count">0</span> / <span id="total-count">0</span></div>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+        </div>
+      </div>
+
+      <div class="boxes-grid" id="boxes-grid">
+        <!-- Boxes will be generated here -->
+      </div>
+    </div>
+
+    <div id="error-state" class="empty-state" style="display: none;">
+      <i class="fa-solid fa-triangle-exclamation" style="color: #ff4444;"></i>
+      <p style="color: #ff4444; font-weight: 700; margin-bottom: 16px;">Failed to load tasks</p>
+      <button onclick="location.reload()" style="padding: 12px 32px; background: linear-gradient(135deg, #ffd700, #e6c200); border: none; border-radius: 12px; font-weight: 800; color: #0a0e27; cursor: pointer;">
+        <i class="fa-solid fa-rotate-right"></i> Retry
+      </button>
     </div>
   </div>
 
@@ -106,162 +161,165 @@
   <script src="/assets/js/notifications.js"></script>
   <script type="module">
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
-    // ⚠️ REPLACE WITH YOUR ACTUAL KEYS ️
     const supabase = createClient('https://ofysznsajwxnjqaumwch.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9meXN6bnNhand4bmpxYXVtd2NoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgyMzM4NDgsImV4cCI6MjEwMzgwOTg0OH0.XaHkP5WZ2nJVJXVdbG-D13rrD63g_09HxmJoZn7ZoWA');
     window.supabase = supabase;
 
-    let taskStatus = null;
+    const tierTasks = {
+      'M1': 5,
+      'M2': 10,
+      'M3': 15,
+      'M4': 20,
+      'M5': 999, // Unlimited
+      'M6': 999,
+      'M7': 999
+    };
+
+    const rewards = [50, 100, 150, 200, 250, 300, 500, 1000];
 
     async function loadTasks() {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return window.location.href = '/login.html';
-
-      const grid = document.getElementById('box-grid');
-      
       try {
-        const token = (await supabase.auth.getSession()).data.session.access_token;
-        const res = await fetch('/api/task?action=getTaskStatus', { 
-          headers: { 'Authorization': `Bearer ${token}` } 
-        });
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return window.location.href = '/login.html';
+
+        // Get user profile
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('vip_level, last_task_date, tasks_completed_today')
+          .eq('id', user.id)
+          .single();
+
+        const vipLevel = profile?.vip_level || 'newbie';
         
-        // Handle non-JSON responses (like 500 errors)
-        const contentType = res.headers.get('content-type');
-        if (!contentType || !contentType.includes('application/json')) {
-          throw new Error('Server error. Please check Vercel logs.');
+        // Check if M0 or newbie
+        if (vipLevel === 'newbie' || vipLevel === 'M0') {
+          document.getElementById('vip-notice').style.display = 'block';
+          return;
         }
 
-        if (!res.ok) {
-          const errorData = await res.json();
-          throw new Error(errorData.error || 'Failed to load tasks');
-        }
+        document.getElementById('tasks-content').style.display = 'block';
+
+        // Get today's date
+        const today = new Date().toISOString().split('T')[0];
+        const lastTaskDate = profile?.last_task_date ? new Date(profile.last_task_date).toISOString().split('T')[0] : null;
         
-        taskStatus = await res.json();
-
-        if (taskStatus.weekend_closed) {
-          document.getElementById('current-tier').textContent = 'Weekend Break';
-          grid.innerHTML = `<div class="error-box"><i class="fa-solid fa-calendar-xmark"></i><p>${taskStatus.message}</p></div>`;
-          return;
+        // Reset if new day
+        let tasksCompleted = 0;
+        if (lastTaskDate !== today) {
+          await supabase.from('profiles').update({
+            tasks_completed_today: 0,
+            last_task_date: today
+          }).eq('id', user.id);
+        } else {
+          tasksCompleted = profile?.tasks_completed_today || 0;
         }
 
-        if (!taskStatus.tier || taskStatus.tier === 'newbie') {
-          document.getElementById('current-tier').textContent = 'Upgrade Required';
-          grid.innerHTML = `<div class="error-box"><i class="fa-solid fa-lock"></i><p>Upgrade to M0+ to unlock boxes.</p><a href="/vip.html" class="rms-btn rms-btn-primary" style="text-decoration:none; display:inline-block; margin-top:10px;">View VIP</a></div>`;
-          return;
+        // Get max tasks for tier
+        const maxTasks = tierTasks[vipLevel] || 5;
+
+        // Update progress
+        document.getElementById('completed-count').textContent = tasksCompleted;
+        document.getElementById('total-count').textContent = maxTasks === 999 ? '∞' : maxTasks;
+        document.getElementById('progress-fill').style.width = `${(tasksCompleted / (maxTasks === 999 ? tasksCompleted + 5 : maxTasks)) * 100}%`;
+
+        // Generate boxes
+        const grid = document.getElementById('boxes-grid');
+        grid.innerHTML = '';
+
+        for (let i = 1; i <= (maxTasks === 999 ? Math.min(10, tasksCompleted + 5) : maxTasks); i++) {
+          const isCompleted = i <= tasksCompleted;
+          const reward = rewards[Math.floor(Math.random() * rewards.length)];
+          
+          const box = document.createElement('div');
+          box.className = `mystery-box ${isCompleted ? 'completed' : ''}`;
+          box.innerHTML = `
+            <div class="box-icon">${isCompleted ? '🎁' : '📦'}</div>
+            <div class="box-title">Box #${i}</div>
+            <div class="box-reward">${isCompleted ? `₦${reward}` : 'Tap to Open'}</div>
+            <div class="box-status">${isCompleted ? 'Completed' : 'Available'}</div>
+          `;
+          
+          if (!isCompleted) {
+            box.onclick = () => openBox(i, reward);
+          }
+          
+          grid.appendChild(box);
         }
 
-        if (taskStatus.m0_expired) {
-          document.getElementById('current-tier').textContent = 'M0 Expired';
-          grid.innerHTML = `<div class="error-box"><i class="fa-solid fa-clock"></i><p>${taskStatus.message}</p><a href="/vip.html" class="rms-btn rms-btn-primary" style="text-decoration:none; display:inline-block; margin-top:10px;">Upgrade</a></div>`;
-          return;
-        }
-
-        document.getElementById('current-tier').textContent = `Tier: ${taskStatus.tier.toUpperCase()}`;
-        document.getElementById('progress-text').textContent = `${taskStatus.boxes_opened} / ${taskStatus.max_boxes}`;
-        document.getElementById('progress-fill').style.width = `${taskStatus.max_boxes > 0 ? (taskStatus.boxes_opened / taskStatus.max_boxes) * 100 : 0}%`;
-
-        renderBoxes();
       } catch (err) {
-        console.error('Task loading error:', err);
-        document.getElementById('current-tier').textContent = 'Error';
-        grid.innerHTML = `<div class="error-box"><i class="fa-solid fa-triangle-exclamation" style="color:red;"></i><p style="color:red;">${err.message}</p><button onclick="loadTasks()" class="rms-btn rms-btn-outline" style="margin-top:10px;">Retry</button></div>`;
+        console.error('Load tasks error:', err);
+        document.getElementById('error-state').style.display = 'block';
       }
     }
 
-    function renderBoxes() {
-      const grid = document.getElementById('box-grid');
-      grid.innerHTML = '';
-      const max = taskStatus.max_boxes || 0;
-      
-      if (max === 0) {
-        grid.innerHTML = '<div class="error-box"><p>No boxes available.</p></div>';
-        return;
-      }
-
-      for (let i = 0; i < max; i++) {
-        const isOpened = i < taskStatus.boxes_opened;
-        const box = document.createElement('div');
-        box.className = `mystery-box ${isOpened ? 'opened' : ''}`;
-        box.innerHTML = `
-          <i class="fa-solid fa-gift box-icon"></i>
-          <div class="box-label">${isOpened ? 'Opened' : 'Tap'}</div>
-          <div class="box-reward"><div class="reward-amount">+₦${taskStatus.earning_per_box.toLocaleString()}</div></div>
-        `;
-        if (!isOpened && taskStatus.can_open) box.onclick = () => openBox(box);
-        grid.appendChild(box);
-      }
-    }
-
-    function createSparkles(boxElement) {
-      // Get the exact center of the box relative to the screen
-      const rect = boxElement.getBoundingClientRect();
-      const centerX = rect.left + (rect.width / 2);
-      const centerY = rect.top + (rect.height / 2);
-      
-      for (let i = 0; i < 100; i++) {
-        const sparkle = document.createElement('div');
-        const angle = (Math.PI * 2 * i) / 100;
-        const distance = 100 + Math.random() * 150;
-        const tx = Math.cos(angle) * distance;
-        const ty = Math.sin(angle) * distance;
-        const size = 4 + Math.random() * 8;
-        const colors = ['#ffd700', '#ffffff', '#ff1a1a', '#2ecc71', '#3498db'];
-        const color = colors[Math.floor(Math.random() * colors.length)];
-        
-        sparkle.className = 'sparkle';
-        
-        // We add !important to EVERYTHING to force it to the center
-        sparkle.style.cssText = `
-          position: fixed !important;
-          left: ${centerX}px !important;
-          top: ${centerY}px !important;
-          width: ${size}px !important;
-          height: ${size}px !important;
-          background: ${color} !important;
-          color: ${color} !important;
-          border-radius: 50% !important;
-          pointer-events: none !important;
-          z-index: 999999 !important;
-          margin: 0 !important;
-          padding: 0 !important;
-          --tx: ${tx}px;
-          --ty: ${ty}px;
-          animation: sparkleBurst 4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards !important;
-          animation-delay: ${Math.random()}s !important;
-        `;
-        
-        document.body.appendChild(sparkle);
-        setTimeout(() => sparkle.remove(), 5000);
-      }
-    }
-
-    async function openBox(boxElement) {
-      if (boxElement.classList.contains('opened') || boxElement.classList.contains('opening')) return;
-      boxElement.classList.add('opening');
-      createSparkles(boxElement);
-      
+    window.openBox = async (boxNumber, reward) => {
       try {
-        const token = (await supabase.auth.getSession()).data.session.access_token;
-        const res = await fetch('/api/task?action=openMysteryBox', {
-          method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-          body: JSON.stringify({})
-        });
+        const { data: { user } } = await supabase.auth.getUser();
         
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || 'Failed');
-
-        setTimeout(() => {
-          boxElement.classList.remove('opening');
-          boxElement.classList.add('opened');
-          taskStatus.boxes_opened++;
-          document.getElementById('progress-text').textContent = `${taskStatus.boxes_opened} / ${taskStatus.max_boxes}`;
-          document.getElementById('progress-fill').style.width = `${(taskStatus.boxes_opened / taskStatus.max_boxes) * 100}%`;
-          showToast(` You earned ₦${data.amount.toLocaleString()}!`, 'success');
-        }, 600);
+        // Show reward modal
+        document.body.innerHTML += `
+          <div class="reward-modal" id="reward-modal">
+            <div class="reward-content">
+              <div class="reward-icon">🎉</div>
+              <div class="reward-title">Congratulations!</div>
+              <div class="reward-amount">${reward}</div>
+              <button class="reward-btn" onclick="claimReward(${boxNumber}, ${reward})">Claim Reward</button>
+            </div>
+          </div>
+        `;
       } catch (err) {
-        boxElement.classList.remove('opening');
-        showToast(err.message, 'error');
+        showToast('Error opening box', 'error');
       }
-    }
+    };
+
+    window.claimReward = async (boxNumber, reward) => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        
+        // Credit wallet
+        const { data: wallet } = await supabase.from('wallets').select('balance').eq('user_id', user.id).single();
+        const newBalance = (wallet?.balance || 0) + reward;
+        
+        await supabase.from('wallets').upsert({
+          user_id: user.id,
+          balance: newBalance,
+          updated_at: new Date()
+        });
+
+        // Record task
+        await supabase.from('tasks').insert({
+          user_id: user.id,
+          amount: reward,
+          status: 'completed',
+          task_date: new Date().toISOString().split('T')[0],
+          completed_at: new Date()
+        });
+
+        // Update profile
+        const { data: profile } = await supabase.from('profiles').select('tasks_completed_today').eq('id', user.id).single();
+        await supabase.from('profiles').update({
+          tasks_completed_today: (profile?.tasks_completed_today || 0) + 1
+        }).eq('id', user.id);
+
+        // Record transaction
+        await supabase.from('transactions').insert({
+          user_id: user.id,
+          type: 'task_earning',
+          amount: reward,
+          status: 'approved',
+          reference: `task_${Date.now()}`,
+          description: `Mystery Box #${boxNumber}`
+        });
+
+        // Close modal and reload
+        document.getElementById('reward-modal').remove();
+        showToast(`₦${reward} added to your wallet!`, 'success');
+        setTimeout(() => location.reload(), 1500);
+
+      } catch (err) {
+        console.error('Claim error:', err);
+        showToast('Failed to claim reward', 'error');
+      }
+    };
 
     loadTasks();
   </script>
