@@ -29,7 +29,6 @@
     .balance-btn.primary:hover { transform: translateY(-2px); }
     .balance-btn.secondary { background: rgba(255,255,255,0.15); color: white; border: 1px solid rgba(255,255,255,0.3); backdrop-filter: blur(10px); }
     .balance-btn.secondary:hover { background: rgba(255,255,255,0.25); }
-    .balance-btn.disabled { opacity: 0.5; cursor: not-allowed; background: rgba(255,255,255,0.1); }
     
     .quick-actions { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 24px 0; }
     .action-item { display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 16px 8px; text-decoration: none; color: white; transition: all 0.3s ease; cursor: pointer; backdrop-filter: blur(10px); }
@@ -69,39 +68,6 @@
 
     .empty-state { text-align: center; padding: 32px 20px; color: rgba(255,255,255,0.5); font-size: 0.9rem; }
     .empty-state i { font-size: 2.5rem; margin-bottom: 12px; opacity: 0.3; display: block; }
-
-    /* M0 Task Banner */
-    .m0-task-banner {
-      background: linear-gradient(135deg, #ff1a1a 0%, #ff4444 100%);
-      border-radius: 20px;
-      padding: 24px;
-      margin-bottom: 24px;
-      color: white;
-      position: relative;
-      overflow: hidden;
-      box-shadow: 0 12px 40px rgba(255,26,26,0.3);
-    }
-    .m0-task-banner::before {
-      content: '';
-      position: absolute;
-      top: -50%;
-      right: -50%;
-      width: 200%;
-      height: 200%;
-      background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%);
-      pointer-events: none;
-    }
-    .m0-task-banner h3 { margin: 0 0 8px 0; font-size: 1.2rem; font-weight: 800; position: relative; z-index: 1; }
-    .m0-task-banner p { margin: 0 0 16px 0; font-size: 0.9rem; opacity: 0.9; position: relative; z-index: 1; }
-    .m0-progress { background: rgba(255,255,255,0.2); border-radius: 10px; padding: 14px; margin-bottom: 16px; position: relative; z-index: 1; }
-    .m0-progress-text { font-size: 0.85rem; margin-bottom: 10px; font-weight: 600; }
-    .m0-progress-bar { height: 10px; background: rgba(255,255,255,0.3); border-radius: 5px; overflow: hidden; }
-    .m0-progress-fill { height: 100%; background: linear-gradient(90deg, #ffd700, #e6c200); border-radius: 5px; transition: width 0.5s ease; }
-    .m0-task-btn { display: block; width: 100%; padding: 14px; background: white; color: #ff1a1a; text-align: center; text-decoration: none; border-radius: 12px; font-weight: 800; font-size: 1rem; position: relative; z-index: 1; transition: all 0.3s; border: none; cursor: pointer; }
-    .m0-task-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.2); }
-    .m0-task-btn:disabled { opacity: 0.7; cursor: not-allowed; }
-    .m0-upgrade-notice { background: rgba(255,215,0,0.2); border: 1px solid rgba(255,215,0,0.4); border-radius: 12px; padding: 14px; margin-top: 16px; text-align: center; position: relative; z-index: 1; }
-    .m0-upgrade-notice strong { color: #ffd700; }
   </style>
 </head>
 <body class="rv-shell">
@@ -120,15 +86,12 @@
       </button>
     </div>
 
-    <!-- M0 Task Banner (shown only for M0 users) -->
-    
-
     <div class="balance-card">
       <div class="balance-label">Available Balance</div>
       <div class="balance-amount">₦<span id="wallet-balance">0.00</span></div>
       <div class="balance-actions">
         <a href="/deposit.html" class="balance-btn primary"><i class="fa-solid fa-arrow-down"></i> Deposit</a>
-        <a href="/withdraw.html" class="balance-btn secondary" id="withdraw-btn"><i class="fa-solid fa-arrow-up"></i> Withdraw</a>
+        <a href="/withdraw.html" class="balance-btn secondary"><i class="fa-solid fa-arrow-up"></i> Withdraw</a>
       </div>
     </div>
 
@@ -151,8 +114,7 @@
         <div class="action-label">My Team</div>
       </a>
 
-      <!-- Row 2 (New Shortcuts) -->
-      <!-- ⚠️ UPDATE THESE LINKS WITH YOUR ACTUAL TELEGRAM & WHATSAPP -->
+      <!-- Row 2 -->
       <a href="https://t.me/rms888" target="_blank" class="action-item">
         <div class="action-icon blue"><i class="fa-brands fa-telegram"></i></div>
         <div class="action-label">Telegram</div>
@@ -242,7 +204,7 @@
       if (!user) return window.location.href = '/login.html';
 
       try {
-        const { data: profile } = await supabase.from('profiles').select('full_name, username, vip_level, m0_task_days_completed, m0_start_date, last_task_date').eq('id', user.id).single();
+        const { data: profile } = await supabase.from('profiles').select('full_name, username, vip_level').eq('id', user.id).single();
         document.getElementById('user-name').textContent = profile?.full_name || profile?.username || 'User';
         if (window.updateVipBadge) window.updateVipBadge();
 
@@ -250,68 +212,22 @@
         const balance = wallet?.balance || 0;
         document.getElementById('wallet-balance').textContent = Number(balance).toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-        // M0 Logic: Show task banner and disable withdrawal
-        const vipLevel = profile?.vip_level || 'newbie';
-        const isM0 = vipLevel === 'newbie' || vipLevel === 'M0';
-        
-        if (isM0) {
-          // Disable withdrawal button
-          const withdrawBtn = document.getElementById('withdraw-btn');
-          withdrawBtn.classList.add('disabled');
-          withdrawBtn.href = '#';
-          withdrawBtn.onclick = (e) => {
-            e.preventDefault();
-            showToast('⚠️ Withdrawal is locked for M0 users. Upgrade to M1 to unlock!', 'error', 5000);
-          };
+        // 1. Load Transactions with Error Handling
+        const { data: transactions, error: txnError } = await supabase
+          .from('transactions')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false })
+          .limit(10);
 
-          // Show M0 task banner
-          const daysCompleted = profile?.m0_task_days_completed || 0;
-          const daysRemaining = 3 - daysCompleted;
-          const progressPercent = (daysCompleted / 3) * 100;
-          
-          const taskBanner = document.getElementById('m0-task-banner');
-          taskBanner.style.display = 'block';
-          
-          if (daysCompleted < 3) {
-            taskBanner.innerHTML = `
-              <h3>📦 M0 Starter Tasks</h3>
-              <p>Complete your daily task to earn ₦50. Only 3 days available!</p>
-              <div class="m0-progress">
-                <div class="m0-progress-text">Day ${daysCompleted} of 3 completed</div>
-                <div class="m0-progress-bar">
-                  <div class="m0-progress-fill" style="width: ${progressPercent}%;"></div>
-                </div>
-              </div>
-              <button class="m0-task-btn" onclick="doM0Task()">
-                <i class="fa-solid fa-play"></i> Do Today's Task (₦50)
-              </button>
-              <div class="m0-upgrade-notice">
-                <strong>️ No withdrawal until M1</strong><br>
-                <span style="font-size: 0.85rem; opacity: 0.9;">Complete all 3 days, then upgrade to unlock withdrawals!</span>
-              </div>
-            `;
-          } else {
-            taskBanner.innerHTML = `
-              <h3>✅ All M0 Tasks Completed!</h3>
-              <p>You've earned ₦150 from your starter tasks.</p>
-              <div class="m0-upgrade-notice" style="background: rgba(0,255,136,0.2); border-color: rgba(0,255,136,0.4);">
-                <strong style="color: #00ff88;"> Ready for M1!</strong><br>
-                <span style="font-size: 0.85rem; opacity: 0.9;">Upgrade now to unlock withdrawals, wealth center, and more tasks!</span>
-              </div>
-              <a href="/vip.html" class="m0-task-btn" style="margin-top: 16px; background: linear-gradient(135deg, #ffd700, #e6c200); color: #0a0e27;">
-                <i class="fa-solid fa-crown"></i> Upgrade to M1 Now
-              </a>
-            `;
-          }
-        }
-
-        const { data: transactions } = await supabase.from('transactions').select('*').eq('user_id', user.id).order('created_at', { ascending: false }).limit(10);
         const txnList = document.getElementById('transactions-list');
-        
         let totalEarnings = 0;
         let referralIncome = 0;
 
-        if (transactions && transactions.length > 0) {
+        if (txnError) {
+          console.error('Transaction load error:', txnError);
+          txnList.innerHTML = '<div class="empty-state"><i class="fa-solid fa-triangle-exclamation" style="color: #ff4444;"></i><p>Error loading transactions.</p></div>';
+        } else if (transactions && transactions.length > 0) {
           transactions.forEach(txn => {
             const type = getTransactionType(txn);
             const amount = Number(txn.amount);
@@ -346,10 +262,21 @@
         document.getElementById('total-earnings').textContent = `₦${totalEarnings.toLocaleString()}`;
         document.getElementById('referral-income').textContent = `₦${referralIncome.toLocaleString()}`;
 
-        const { data: recentTasks } = await supabase.from('transactions').select('*').eq('user_id', user.id).in('type', ['task_earning', 'wealth_claim', 'wheel_win']).order('created_at', { ascending: false }).limit(5);
+        // 2. Load Recent Activity with Error Handling
+        const { data: recentTasks, error: activityError } = await supabase
+          .from('transactions')
+          .select('*')
+          .eq('user_id', user.id)
+          .in('type', ['task_earning', 'wealth_claim', 'wheel_win'])
+          .order('created_at', { ascending: false })
+          .limit(5);
+
         const activityList = document.getElementById('activity-list');
 
-        if (recentTasks && recentTasks.length > 0) {
+        if (activityError) {
+          console.error('Activity load error:', activityError);
+          activityList.innerHTML = '<div class="empty-state"><i class="fa-solid fa-triangle-exclamation" style="color: #ff4444;"></i><p>Error loading activity.</p></div>';
+        } else if (recentTasks && recentTasks.length > 0) {
           activityList.innerHTML = recentTasks.map(t => {
             let icon = 'fa-box-open';
             if (t.type === 'wealth_claim') icon = 'fa-gem';
@@ -362,33 +289,19 @@
                   <div class="txn-icon income"><i class="fa-solid ${icon}"></i></div>
                   <div class="txn-body"><div class="txn-title">${title}</div><div class="txn-date">${date}</div></div>
                 </div>
-                <div class="txn-amount income">+${Number(t.amount).toLocaleString()}</div>
+                <div class="txn-amount income">+₦${Number(t.amount).toLocaleString()}</div>
               </div>
             `;
           }).join('');
         } else {
           activityList.innerHTML = '<div class="empty-state"><i class="fa-solid fa-box-open"></i><p>No recent activity.</p></div>';
         }
+
       } catch (err) {
         console.error('Dashboard load error:', err);
+        showToast('Failed to load dashboard data', 'error');
       }
     }
-
-    window.doM0Task = async () => {
-      try {
-        const token = (await supabase.auth.getSession()).data.session.access_token;
-        const res = await fetch('/api/tasks?action=completeTask', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || 'Task failed');
-        showToast(`✅ Task completed! ₦50 added to your wallet.`, 'success');
-        setTimeout(() => loadDashboard(), 1500);
-      } catch (err) {
-        showToast(err.message, 'error');
-      }
-    };
 
     loadDashboard();
   </script>
