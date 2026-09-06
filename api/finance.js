@@ -218,24 +218,18 @@ async function generateGiftCodes(req, res) {
       return res.status(400).json({ error: 'No eligible M2+ referrals found' });
     }
 
-    const tierPercentages = {
-      'M2': 0.05, 'M3': 0.08, 'M4': 0.12,
-      'M5': 0.15, 'M6': 0.18, 'M7': 0.20
-    };
-
-    const baseAmount = 10000;
     const generatedCodes = [];
 
     for (const ref of referrals) {
-      const percentage = tierPercentages[ref.vip_level];
-      const couponAmount = baseAmount * percentage;
+      // Generate random amount between 50 and 500
+      const randomAmount = Math.floor(Math.random() * 451) + 50; // 50 to 500
       const code = generateCode();
 
       const { data, error } = await supabaseAdmin
         .from('gift_codes')
         .insert({
           code: code,
-          amount: couponAmount,
+          amount: randomAmount,
           max_uses: 1,
           used_count: 0,
           is_active: true,
@@ -251,8 +245,7 @@ async function generateGiftCodes(req, res) {
         code: code,
         referral: ref.full_name || ref.email,
         tier: ref.vip_level,
-        percentage: percentage * 100,
-        amount: couponAmount
+        amount: randomAmount
       });
     }
 
