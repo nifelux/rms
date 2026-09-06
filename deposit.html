@@ -55,7 +55,7 @@
   <script src="/assets/js/notifications.js"></script>
   <script type="module">
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
-    const supabase = createClient('https://ofysznsajwxnjqaumwch.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9meXN6bnNhand4bmpxYXVtd2NoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgyMzM4NDgsImV4cCI6MjEwMzgwOTg0OH0.XaHkP5WZ2nJVJXVdbG-D13rrD63g_09HxmJoZn7ZoWA);
+    const supabase = createClient('https://ofysznsajwxnjqaumwch.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9meXN6bnNhand4bmpxYXVtd2NoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgyMzM4NDgsImV4cCI6MjEwMzgwOTg0OH0.XaHkP5WZ2nJVJXVdbG-D13rrD63g_09HxmJoZn7ZoWA');
 
     document.getElementById('deposit-form').addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -74,6 +74,8 @@
 
         const token = (await supabase.auth.getSession()).data.session.access_token;
         
+        console.log('🚀 Sending request to API...');
+
         const res = await fetch('/api/finance?action=initiateTargetGrowthDeposit', {
           method: 'POST',
           headers: { 
@@ -82,18 +84,28 @@
           },
           body: JSON.stringify({
             amount: amount,
-            email: profile.email,
-            full_name: profile.full_name
+            email: profile?.email || 'test@test.com',
+            full_name: profile?.full_name || 'Test User'
           })
         });
 
         const data = await res.json();
-        if (!res.ok) throw new Error(data.error);
+        console.log('📦 API Response:', data); // <--- THIS IS CRITICAL
 
+        if (!res.ok) {
+          throw new Error(data.error || 'API request failed');
+        }
+
+        if (!data.checkout_url) {
+          throw new Error('API did not return a checkout URL. Check Vercel logs.');
+        }
+
+        console.log('✅ Redirecting to:', data.checkout_url);
         // Redirect to Target Growth Checkout
         window.location.href = data.checkout_url;
 
       } catch (err) {
+        console.error('❌ Frontend Error:', err);
         showToast(err.message, 'error');
         btn.disabled = false;
         btn.innerHTML = '<i class="fa-solid fa-bolt"></i> Pay Now';
