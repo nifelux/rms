@@ -327,17 +327,33 @@
     .empty-team p { font-size: 0.95rem; margin-bottom: 8px; }
     .empty-team small { font-size: 0.8rem; }
 
-    /* Gift Code Modal */
-    .gift-modal {
+    /* Modal Styles */
+    .modal-overlay {
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
       background: rgba(0,0,0,0.95);
-      backdrop-filter: blur(10px);
-      display: flex;
+      backdrop-filter: blur(5px);
+      display: none;
       align-items: center;
       justify-content: center;
-      z-index: 100000;
+      z-index: 99999;
       padding: 20px;
+    }
+    .modal-content {
+      background: linear-gradient(135deg, #1a1f4e, #0a0e27);
+      border: 3px solid #ffd700;
+      border-radius: 24px;
+      padding: 32px;
+      max-width: 500px;
+      width: 100%;
+      max-height: 85vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+      animation: popIn 0.3s ease;
+    }
+    @keyframes popIn {
+      from { transform: scale(0.9); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
     }
   </style>
 </head>
@@ -422,6 +438,13 @@
     </div>
   </div>
 
+  <!-- Hardcoded Modal Container -->
+  <div id="gift-code-modal" class="modal-overlay">
+    <div id="gift-code-modal-content" class="modal-content">
+      <!-- Content will be injected here by JavaScript -->
+    </div>
+  </div>
+
   <div id="footer-container"></div>
   <script src="/assets/js/components.js"></script>
   <script src="/assets/js/notifications.js"></script>
@@ -441,7 +464,7 @@
         // 1. Load Profile
         const { data: profile } = await supabase
           .from('profiles')
-          .select('referral_code')
+          .select('referral_code, gift_code_generations_available')
           .eq('id', user.id)
           .single();
         
@@ -542,46 +565,64 @@
         }
 
         // 6. Check Gift Code Generation Status
-    const giftSection = document.getElementById('gift-reward-section');
-    const noM2Notice = document.getElementById('no-m2-notice');
-    const claimBtn = document.getElementById('claim-gift-btn');
-    
-    if (m2Count >= 1) {
-      giftSection.style.display = 'block';
-      noM2Notice.style.display = 'none';
-      document.getElementById('high-tier-count').textContent = m2Count;
-      
-      // Check if user can generate codes
-      if (profile?.last_gift_code_generation) {
-        const lastGen = new Date(profile.last_gift_code_generation);
-        const now = new Date();
-        const daysSinceLastGen = Math.floor((now - lastGen) / (1000 * 60 * 60 * 24));
+        const giftSection = document.getElementById('gift-reward-section');
+        const noM2Notice = document.getElementById('no-m2-notice');
+        const claimBtn = document.getElementById('claim-gift-btn');
         
-        if (daysSinceLastGen < 30) {
-          const daysRemaining = 30 - daysSinceLastGen;
-          claimBtn.disabled = true;
-          claimBtn.innerHTML = `<i class="fa-solid fa-clock"></i> Available in ${daysRemaining} day(s)`;
-          claimBtn.style.background = '#555';
-          claimBtn.style.color = '#aaa';
+        if (m2Count >= 1) {
+          giftSection.style.display = 'block';
+          noM2Notice.style.display = 'none';
+          document.getElementById('high-tier-count').textContent = m2Count;
+          
+          const generationsLeft = profile?.gift_code_generations_available || 0;
+          
+          if (generationsLeft > 0) {
+            claimBtn.disabled = false;
+            claimBtn.innerHTML = `<i class="fa-solid fa-ticket"></i> Generate Gift Codes (${generationsLeft} left)`;
+            claimBtn.style.background = '';
+            claimBtn.style.color = '';
+          } else {
+            claimBtn.disabled = true;
+            claimBtn.innerHTML = `<i class="fa-solid fa-lock"></i> 0 Generations Left`;
+            claimBtn.style.background = '#555';
+            claimBtn.style.color = '#aaa';
+          }
         } else {
-          claimBtn.disabled = false;
-          claimBtn.innerHTML = '<i class="fa-solid fa-ticket"></i> Generate Gift Codes';
-          claimBtn.style.background = '';
-          claimBtn.style.color = '';
+          giftSection.style.display = 'none';
+          noM2Notice.style.display = 'block';
         }
+
+      } catch (err) {
+        console.error('Team loading error:', err);
+        showToast('Error loading team data', 'error');
       }
-    } else {
-      giftSection.style.display = 'none';
-      noM2Notice.style.display = 'block';
     }
+
+    window.claimGiftCodes = async () => {
+      const btn = document.getElementById('claim-gift-btn');
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Generating...';
+
+      try {
+        const token = (await supabase.auth.getSession()).data.session.access_token;
+        const res = await fetch('/api/finance?action=generateGiftCodes', {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}` 
+          }
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error);
+
         // Show generated codes in modal
         showGeneratedCodesModal(data.codes);
         
-        btn.innerHTML = '<i class="fa-solid fa-check"></i> Codes Generated!';
+        // Reload to update the button state
         setTimeout(() => {
-          btn.innerHTML = '<i class="fa-solid fa-ticket"></i> Generate Gift Codes';
-          btn.disabled = false;
-        }, 3000);
+          loadTeam();
+        }, 1000);
         
       } catch (err) {
         showToast(err.message, 'error');
@@ -626,7 +667,6 @@
       modal.style.display = 'flex';
     }
 
-    // Add this helper function to close the modal
     window.closeGiftModal = () => {
       document.getElementById('gift-code-modal').style.display = 'none';
     };
@@ -645,11 +685,5 @@
 
     loadTeam();
   </script>
-  <!-- Hardcoded Modal Container -->
-  <div id="gift-code-modal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 99999; background: rgba(0,0,0,0.95); backdrop-filter: blur(5px); align-items: center; justify-content: center; padding: 20px;">
-    <div id="gift-code-modal-content" style="background: linear-gradient(135deg, #1a1f4e, #0a0e27); border: 3px solid #ffd700; border-radius: 24px; padding: 32px; max-width: 500px; width: 100%; max-height: 85vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.5);">
-      <!-- Content will be injected here by JavaScript -->
-    </div>
-  </div>
 </body>
 </html>
