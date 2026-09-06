@@ -1,14 +1,14 @@
 import supabaseAdmin from '../lib/supabase.js';
-import { verifyUser } from '../lib/auth.js';
 
 export default async function handler(req, res) {
   const action = req.query.action || req.body?.action;
   
   try {
     switch (action) {
-      case 'getTaskStatus': return await getTaskStatus(req, res);
-      case 'openMysteryBox': return await openMysteryBox(req, res);
-      default: return res.status(400).json({ error: 'Invalid action' });
+      case 'getAvailableTasks': return await getAvailableTasks(req, res);
+      case 'completeTask': return await completeTask(req, res);
+      default:
+        return res.status(400).json({ error: 'Invalid action' });
     }
   } catch (err) {
     console.error('Task API Error:', err);
@@ -16,142 +16,200 @@ export default async function handler(req, res) {
   }
 }
 
-// WAT (UTC+1) Weekend Check
-function isTaskDayOpen() {
-  const now = new Date();
-  const watDate = new Date(now.getTime() + 60 * 60 * 1000);
-  const day = watDate.getUTCDay(); // 0 = Sunday, 6 = Saturday
-  return day !== 0 && day !== 6; 
-}
-
-function startOfTodayWAT() {
-  const now = new Date();
-  const wat = new Date(now.getTime() + 60 * 60 * 1000);
-  wat.setUTCHours(0, 0, 0, 0);
-  return new Date(wat.getTime() - 60 * 60 * 1000);
-}
-
-async function getTaskStatus(req, res) {
+async function getAvailableTasks(req, res) {
   try {
-    const user = await verifyUser(req);
-    if (!user) return res.status(401).json({ error: 'Unauthorized' });
+    const authHeader = req.headers.authorization;
+    if (!authHeader) return res.status(401).json({ error: 'No authorization' });
 
-    const { data: profile, error: profileError } = await supabaseAdmin
+    const token = authHeader.replace('Bearer ', '');
+    const { data: { user }, error: userError } = await supabaseAdmin.auth.getUser(token);
+    if (userError || !user) return res.status(401).json({ error: 'Invalid token' });
+
+    // Get user profile
+    const { data: profile } = await supabaseAdmin
       .from('profiles')
-      .select('vip_level, boxes_opened_today, last_task_reset_date, m0_start_date')
+      .select('vip_level, m0_task_days_completed, m0_start_date, last_task_date')
       .eq('id', user.id)
       .single();
 
-    if (profileError || !profile) {
-      return res.status(500).json({ error: 'Failed to load profile' });
-    }
+    const today = new Date().toISOString().split('T')[0];
+    const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+    
+    // Check if user already did task today
+    const { data: todayTask } = await supabaseAdmin
+      .from('tasks')
+      .select('id')
+      .eq('user_id', user.id)
+      .eq('task_date', today)
+      .single();
 
-    // 1. Check Weekend
-    if (!isTaskDayOpen()) {
-      return res.status(200).json({
-        tier: profile.vip_level || 'newbie',
-        boxes_opened: 0,
-        max_boxes: 0,
-        earning_per_box: 0,
-        can_open: false,
-        weekend_closed: true,
-        message: 'Tasks are closed on Saturdays and Sundays. Come back Monday!'
+    if (todayTask) {
+      return res.status(200).json({ 
+        available: false, 
+        message: 'You have already completed your task for today. Come back tomorrow!' 
       });
     }
 
-    const now = new Date();
-    const todayStart = startOfTodayWAT();
-    const lastReset = profile.last_task_reset_date ? new Date(profile.last_task_reset_date) : new Date(0);
-    
-    let boxesOpened = profile.boxes_opened_today || 0;
-    if (lastReset < todayStart) {
-      boxesOpened = 0;
-      await supabaseAdmin.from('profiles').update({ 
-        boxes_opened_today: 0, 
-        last_task_reset_date: now.toISOString() 
-      }).eq('id', user.id);
-    }
+    // M0 Logic: 1 task per day for 3 days only
+    if (profile.vip_level === 'newbie' || profile.vip_level === 'M0') {
+      let daysCompleted = profile.m0_task_days_completed || 0;
+      const startDate = profile.m0_start_date;
+      const lastTaskDate = profile.last_task_date;
 
-    const tier = profile.vip_level || 'newbie';
-    
-    if (tier === 'newbie') {
-      return res.status(200).json({ tier: 'newbie', boxes_opened: 0, max_boxes: 0, earning_per_box: 0, can_open: false });
-    }
-
-    if (tier === 'M0') {
-      const m0StartDate = profile.m0_start_date ? new Date(profile.m0_start_date) : todayStart;
-      const hoursSinceM0 = (now - m0StartDate) / (1000 * 60 * 60);
-      if (hoursSinceM0 >= 24) {
-        return res.status(200).json({ tier: 'M0', boxes_opened: 0, max_boxes: 0, earning_per_box: 0, can_open: false, m0_expired: true, message: 'Your free M0 trial has expired. Upgrade to continue.' });
+      // If this is the first task ever
+      if (!startDate) {
+        return res.status(200).json({ 
+          available: true, 
+          amount: 50,
+          message: 'M0 Task (Day 1 of 3)',
+          daysRemaining: 3
+        });
       }
+
+      // Check if last task was yesterday or earlier
+      const lastDate = lastTaskDate ? new Date(lastTaskDate) : null;
+      const todayDate = new Date(today);
+      
+      if (lastDate) {
+        const daysDiff = Math.floor((todayDate - lastDate) / (1000 * 60 * 60 * 24));
+        if (daysDiff < 1) {
+          return res.status(200).json({ 
+            available: false, 
+            message: 'You already did your task today. Come back tomorrow!' 
+          });
+        }
+      }
+
+      // Check if 3 days limit reached
+      if (daysCompleted >= 3) {
+        return res.status(200).json({ 
+          available: false, 
+          message: 'You have completed all 3 M0 tasks. Please upgrade to M1 to continue earning!' 
+        });
+      }
+
+      const daysRemaining = 3 - daysCompleted;
+      return res.status(200).json({ 
+        available: true, 
+        amount: 50,
+        message: `M0 Task (Day ${daysCompleted + 1} of 3)`,
+        daysRemaining: daysRemaining
+      });
     }
 
-    const { data: tierInfo, error: tierError } = await supabaseAdmin.from('rms_tiers').select('daily_boxes, box_earning').eq('tier', tier).single();
-    if (tierError || !tierInfo) return res.status(500).json({ error: 'Tier configuration not found' });
-
-    return res.status(200).json({
-      tier: tier,
-      boxes_opened: boxesOpened,
-      max_boxes: tierInfo.daily_boxes,
-      earning_per_box: tierInfo.box_earning,
-      can_open: boxesOpened < tierInfo.daily_boxes
+    // M1+ users get more tasks (you can customize this)
+    return res.status(200).json({ 
+      available: true, 
+      amount: 100,
+      message: 'VIP Task Available',
+      isVip: true
     });
-    
+
   } catch (err) {
-    console.error('getTaskStatus error:', err);
+    console.error('Get tasks error:', err);
     return res.status(500).json({ error: err.message });
   }
 }
 
-async function openMysteryBox(req, res) {
+async function completeTask(req, res) {
   try {
-    const user = await verifyUser(req);
-    if (!user) return res.status(401).json({ error: 'Unauthorized' });
+    const authHeader = req.headers.authorization;
+    if (!authHeader) return res.status(401).json({ error: 'No authorization' });
 
-    if (!isTaskDayOpen()) {
-      return res.status(400).json({ error: 'Tasks are closed on weekends. Please try again on Monday.' });
+    const token = authHeader.replace('Bearer ', '');
+    const { data: { user }, error: userError } = await supabaseAdmin.auth.getUser(token);
+    if (userError || !user) return res.status(401).json({ error: 'Invalid token' });
+
+    const today = new Date().toISOString().split('T')[0];
+
+    // Check if already completed today
+    const { data: existingTask } = await supabaseAdmin
+      .from('tasks')
+      .select('id')
+      .eq('user_id', user.id)
+      .eq('task_date', today)
+      .single();
+
+    if (existingTask) {
+      return res.status(400).json({ error: 'Task already completed today' });
     }
 
-    const { data: profile, error: profileError } = await supabaseAdmin.from('profiles').select('vip_level, boxes_opened_today, last_task_reset_date, m0_start_date').eq('id', user.id).single();
-    if (profileError || !profile) return res.status(500).json({ error: 'Profile not found' });
+    // Get user profile
+    const { data: profile } = await supabaseAdmin
+      .from('profiles')
+      .select('vip_level, m0_task_days_completed, m0_start_date')
+      .eq('id', user.id)
+      .single();
 
-    const tier = profile.vip_level;
-    if (!tier || tier === 'newbie') return res.status(400).json({ error: 'You must have an active tier to open boxes' });
+    // M0 Logic
+    if (profile.vip_level === 'newbie' || profile.vip_level === 'M0') {
+      const daysCompleted = profile.m0_task_days_completed || 0;
+      
+      if (daysCompleted >= 3) {
+        return res.status(400).json({ error: 'M0 task limit reached. Upgrade to M1 to continue.' });
+      }
 
-    const now = new Date();
-    const todayStart = startOfTodayWAT();
-    const lastReset = profile.last_task_reset_date ? new Date(profile.last_task_reset_date) : new Date(0);
-    let boxesOpened = profile.boxes_opened_today || 0;
-    
-    if (lastReset < todayStart) boxesOpened = 0;
+      const taskAmount = 50;
 
-    if (tier === 'M0') {
-      const m0StartDate = profile.m0_start_date ? new Date(profile.m0_start_date) : todayStart;
-      const hoursSinceM0 = (now - m0StartDate) / (1000 * 60 * 60);
-      if (hoursSinceM0 >= 24) return res.status(400).json({ error: 'Your M0 trial has expired. Please upgrade.' });
+      // Create task record
+      await supabaseAdmin.from('tasks').insert({
+        user_id: user.id,
+        amount: taskAmount,
+        status: 'completed',
+        task_date: today,
+        completed_at: new Date()
+      });
+
+      // Update profile
+      const newDaysCompleted = daysCompleted + 1;
+      const updateData = {
+        m0_task_days_completed: newDaysCompleted,
+        last_task_date: today
+      };
+      
+      if (!profile.m0_start_date) {
+        updateData.m0_start_date = new Date();
+      }
+
+      await supabaseAdmin.from('profiles').update(updateData).eq('id', user.id);
+
+      // Credit wallet
+      const { data: wallet } = await supabaseAdmin
+        .from('wallets')
+        .select('balance')
+        .eq('user_id', user.id)
+        .single();
+
+      const newBalance = (wallet?.balance || 0) + taskAmount;
+      await supabaseAdmin.from('wallets').upsert({
+        user_id: user.id,
+        balance: newBalance,
+        updated_at: new Date()
+      });
+
+      // Record transaction
+      await supabaseAdmin.from('transactions').insert({
+        user_id: user.id,
+        type: 'task_earning',
+        amount: taskAmount,
+        status: 'approved',
+        reference: `task_${Date.now()}`,
+        description: `M0 Task Day ${newDaysCompleted}/3`
+      });
+
+      return res.status(200).json({ 
+        success: true, 
+        message: `Task completed! ₦${taskAmount} added to your wallet.`,
+        daysCompleted: newDaysCompleted,
+        daysRemaining: 3 - newDaysCompleted
+      });
     }
 
-    const { data: tierInfo, error: tierError } = await supabaseAdmin.from('rms_tiers').select('daily_boxes, box_earning').eq('tier', tier).single();
-    if (tierError || !tierInfo) return res.status(500).json({ error: 'Tier configuration not found' });
+    // M1+ users (you can add different logic here)
+    return res.status(400).json({ error: 'Task system for VIP users coming soon' });
 
-    if (boxesOpened >= tierInfo.daily_boxes) return res.status(400).json({ error: `Daily limit reached (${tierInfo.daily_boxes} boxes)` });
-
-    const reference = `box_${user.id}_${Date.now()}`;
-    const { error: txnErr } = await supabaseAdmin.from('transactions').insert({
-      user_id: user.id, type: 'task_earning', amount: tierInfo.box_earning, status: 'approved', reference: reference, description: `Mystery Box Reward (${tier})`
-    });
-
-    if (txnErr) {
-      if (txnErr.message.includes('duplicate')) return res.status(400).json({ error: 'Task already claimed' });
-      return res.status(500).json({ error: txnErr.message });
-    }
-
-    await supabaseAdmin.from('profiles').update({ boxes_opened_today: boxesOpened + 1, last_task_reset_date: now.toISOString() }).eq('id', user.id);
-
-    return res.status(200).json({ success: true, amount: tierInfo.box_earning, boxes_opened: boxesOpened + 1, max_boxes: tierInfo.daily_boxes });
-    
   } catch (err) {
-    console.error('openMysteryBox error:', err);
+    console.error('Complete task error:', err);
     return res.status(500).json({ error: err.message });
   }
 }
