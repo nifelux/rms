@@ -10,14 +10,12 @@
   <link rel="stylesheet" href="assets/css/style.css">
   <meta name="theme-color" content="#0a0e27">
   <style>
-    /* Scoped styles to prevent breaking header/footer */
     .deposit-container { padding: 20px 16px 100px 16px; max-width: 600px; margin: 0 auto; font-family: 'Inter', sans-serif; }
     
     .page-header { margin-bottom: 24px; }
     .page-header h2 { font-size: 1.8rem; font-weight: 900; color: white; margin: 0 0 8px 0; }
     .page-header p { color: rgba(255,255,255,0.6); font-size: 0.95rem; margin: 0; }
 
-    /* Balance Card */
     .balance-card {
       background: linear-gradient(135deg, rgba(0,102,255,0.15), rgba(0,212,255,0.05));
       border: 1px solid rgba(0,212,255,0.2);
@@ -32,7 +30,6 @@
     .balance-value { font-size: 1.8rem; font-weight: 900; color: white; }
     .balance-icon { width: 48px; height: 48px; background: linear-gradient(135deg, #0066ff, #00d4ff); border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; color: white; }
 
-    /* Steps Indicator */
     .steps-container { display: flex; justify-content: space-between; margin-bottom: 24px; position: relative; }
     .steps-container::before { content: ''; position: absolute; top: 15px; left: 10%; right: 10%; height: 2px; background: rgba(255,255,255,0.1); z-index: 0; }
     .step { display: flex; flex-direction: column; align-items: center; position: relative; z-index: 1; flex: 1; }
@@ -42,12 +39,10 @@
     .step-label { font-size: 0.7rem; color: rgba(255,255,255,0.5); font-weight: 600; text-transform: uppercase; }
     .step.active .step-label { color: #ffd700; }
 
-    /* Sections */
     .section-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; padding: 20px; margin-bottom: 16px; backdrop-filter: blur(10px); }
     .section-title { font-size: 1rem; font-weight: 700; color: white; margin: 0 0 16px 0; display: flex; align-items: center; gap: 8px; }
     .section-title i { color: #00d4ff; }
 
-    /* Amount Input */
     .amount-input-wrapper { position: relative; margin-bottom: 16px; }
     .currency-symbol { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); font-size: 1.5rem; font-weight: 800; color: rgba(255,255,255,0.4); }
     .amount-input { width: 100%; padding: 18px 16px 18px 40px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 14px; color: white; font-size: 1.5rem; font-weight: 800; box-sizing: border-box; transition: all 0.3s; }
@@ -58,16 +53,20 @@
     .quick-btn { padding: 12px 8px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: white; font-weight: 700; font-size: 0.85rem; cursor: pointer; transition: all 0.2s; text-align: center; }
     .quick-btn:hover, .quick-btn.active { background: rgba(255,215,0,0.1); border-color: #ffd700; color: #ffd700; }
 
-    /* Payment Methods */
-    .method-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    .method-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 14px; padding: 16px; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; gap: 12px; }
-    .method-card:hover { border-color: rgba(255,215,0,0.3); }
-    .method-card.selected { background: rgba(0,212,255,0.1); border-color: #00d4ff; box-shadow: 0 0 15px rgba(0,212,255,0.1); }
-    .method-icon { width: 40px; height: 40px; border-radius: 10px; background: rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; color: #00d4ff; }
-    .method-card.selected .method-icon { background: rgba(0,212,255,0.2); }
-    .method-name { font-weight: 700; font-size: 0.9rem; color: white; }
+    .payment-method {
+      background: linear-gradient(135deg, rgba(0,212,255,0.1), rgba(0,102,255,0.05));
+      border: 2px solid rgba(0,212,255,0.3);
+      border-radius: 14px;
+      padding: 16px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .payment-icon { width: 40px; height: 40px; border-radius: 10px; background: rgba(0,212,255,0.2); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; color: #00d4ff; }
+    .payment-name { font-weight: 700; font-size: 0.95rem; color: white; }
+    .payment-desc { font-size: 0.8rem; color: rgba(255,255,255,0.6); }
 
-    /* Bank Details */
     .bank-details { background: rgba(0,0,0,0.2); border-radius: 14px; padding: 16px; margin-top: 12px; }
     .bank-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
     .bank-row:last-child { border-bottom: none; }
@@ -76,13 +75,11 @@
     .copy-btn { background: rgba(255,215,0,0.1); border: none; color: #ffd700; width: 28px; height: 28px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
     .copy-btn:hover { background: rgba(255,215,0,0.2); }
 
-    /* Form Inputs */
     .form-group { margin-bottom: 16px; }
     .form-label { display: block; font-size: 0.85rem; color: rgba(255,255,255,0.7); font-weight: 600; margin-bottom: 8px; }
     .form-input { width: 100%; padding: 14px 16px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; color: white; font-size: 0.95rem; box-sizing: border-box; transition: all 0.3s; }
     .form-input:focus { outline: none; border-color: #00d4ff; }
 
-    /* Submit Button */
     .submit-btn { width: 100%; padding: 16px; font-size: 1.05rem; font-weight: 800; border: none; border-radius: 14px; background: linear-gradient(135deg, #ffd700, #e6c200); color: #0a0e27; cursor: pointer; transition: all 0.3s; box-shadow: 0 8px 24px rgba(255,215,0,0.3); margin-top: 8px; display: flex; align-items: center; justify-content: center; gap: 8px; }
     .submit-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(255,215,0,0.4); }
     .submit-btn:disabled { opacity: 0.6; cursor: not-allowed; background: #555; color: #aaa; box-shadow: none; }
@@ -99,16 +96,14 @@
       <p>Add funds to your RMS wallet securely.</p>
     </div>
 
-    <!-- Balance Card -->
     <div class="balance-card">
       <div>
         <div class="balance-label">Available Balance</div>
-        <div class="balance-value">₦<span id="current-balance">0.00</span></div>
+        <div class="balance-value"><span id="current-balance">0.00</span></div>
       </div>
       <div class="balance-icon"><i class="fa-solid fa-wallet"></i></div>
     </div>
 
-    <!-- Steps -->
     <div class="steps-container">
       <div class="step active" id="step-1-indicator">
         <div class="step-circle">1</div>
@@ -124,7 +119,6 @@
       </div>
     </div>
 
-    <!-- STEP 1: Amount -->
     <div id="step-1">
       <div class="section-card">
         <div class="section-title"><i class="fa-solid fa-coins"></i> Enter Deposit Amount</div>
@@ -142,23 +136,19 @@
       <button class="submit-btn" onclick="goToStep(2)">Continue <i class="fa-solid fa-arrow-right"></i></button>
     </div>
 
-    <!-- STEP 2: Payment Method -->
     <div id="step-2" class="hidden">
       <div class="section-card">
-        <div class="section-title"><i class="fa-solid fa-credit-card"></i> Select Payment Method</div>
-        <div class="method-grid">
-          <div class="method-card selected" onclick="selectMethod(this, 'bank_transfer')">
-            <div class="method-icon"><i class="fa-solid fa-building-columns"></i></div>
-            <div class="method-name">Bank Transfer</div>
-          </div>
-          <div class="method-card" onclick="selectMethod(this, 'usdt')">
-            <div class="method-icon"><i class="fa-brands fa-bitcoin"></i></div>
-            <div class="method-name">USDT (TRC20)</div>
+        <div class="section-title"><i class="fa-solid fa-credit-card"></i> Payment Method</div>
+        
+        <div class="payment-method">
+          <div class="payment-icon"><i class="fa-solid fa-building-columns"></i></div>
+          <div>
+            <div class="payment-name">Bank Transfer</div>
+            <div class="payment-desc">Transfer to our bank account</div>
           </div>
         </div>
 
-        <!-- Bank Details (Shown if Bank Transfer) -->
-        <div id="bank-details" class="bank-details">
+        <div class="bank-details">
           <div class="bank-row">
             <span class="bank-label">Bank Name</span>
             <span class="bank-value">Opay <button class="copy-btn" onclick="copyText('Opay')"><i class="fa-regular fa-copy"></i></button></span>
@@ -172,18 +162,6 @@
             <span class="bank-value">RMS GLOBAL LTD <button class="copy-btn" onclick="copyText('RMS GLOBAL LTD')"><i class="fa-regular fa-copy"></i></button></span>
           </div>
         </div>
-
-        <!-- USDT Details (Hidden by default) -->
-        <div id="usdt-details" class="bank-details hidden">
-          <div class="bank-row">
-            <span class="bank-label">Network</span>
-            <span class="bank-value">TRC20 (Tron)</span>
-          </div>
-          <div class="bank-row">
-            <span class="bank-label">Wallet Address</span>
-            <span class="bank-value" style="font-size: 0.8rem; word-break: break-all;">TXYZ...abc123 <button class="copy-btn" onclick="copyText('TXYZ...abc123')"><i class="fa-regular fa-copy"></i></button></span>
-          </div>
-        </div>
       </div>
 
       <div style="display: flex; gap: 12px;">
@@ -192,7 +170,6 @@
       </div>
     </div>
 
-    <!-- STEP 3: Confirm -->
     <div id="step-3" class="hidden">
       <div class="section-card">
         <div class="section-title"><i class="fa-solid fa-circle-check"></i> Confirm Details</div>
@@ -203,15 +180,15 @@
             <span class="bank-value" style="color: #ffd700; font-size: 1.1rem;" id="confirm-amount">0</span>
           </div>
           <div class="bank-row">
-            <span class="bank-label">Method</span>
-            <span class="bank-value" id="confirm-method">Bank Transfer</span>
+            <span class="bank-label">Payment Method</span>
+            <span class="bank-value">Bank Transfer</span>
           </div>
         </div>
 
         <div class="form-group" style="margin-top: 20px;">
-          <label class="form-label">Transaction Reference / ID (Required)</label>
-          <input type="text" id="transaction-ref" class="form-input" placeholder="e.g., TRX123456789">
-          <small style="color: rgba(255,255,255,0.4); font-size: 0.75rem; margin-top: 4px; display: block;">Enter the reference number from your bank or crypto app.</small>
+          <label class="form-label">Sender's Full Name (Required)</label>
+          <input type="text" id="sender-name" class="form-input" placeholder="Enter the name used for the transfer">
+          <small style="color: rgba(255,255,255,0.4); font-size: 0.75rem; margin-top: 4px; display: block;">Enter the exact name on the bank account you sent from.</small>
         </div>
       </div>
 
@@ -232,10 +209,8 @@
     window.supabase = supabase;
 
     let currentStep = 1;
-    let selectedMethod = 'bank_transfer';
     let depositAmount = 0;
 
-    // Load Balance
     async function loadBalance() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
@@ -243,7 +218,6 @@
       document.getElementById('current-balance').textContent = Number(wallet?.balance || 0).toLocaleString('en-NG', { minimumFractionDigits: 2 });
     }
 
-    // Step Navigation
     window.goToStep = (step) => {
       if (step === 2 && currentStep === 1) {
         depositAmount = Number(document.getElementById('deposit-amount').value);
@@ -256,7 +230,6 @@
       document.getElementById(`step-${currentStep}`).classList.add('hidden');
       document.getElementById(`step-${step}`).classList.remove('hidden');
       
-      // Update indicators
       for (let i = 1; i <= 3; i++) {
         const ind = document.getElementById(`step-${i}-indicator`);
         ind.classList.remove('active', 'completed');
@@ -265,32 +238,16 @@
       }
 
       if (step === 3) {
-        document.getElementById('confirm-amount').textContent = `₦${depositAmount.toLocaleString()}`;
-        document.getElementById('confirm-method').textContent = selectedMethod === 'bank_transfer' ? 'Bank Transfer' : 'USDT (TRC20)';
+        document.getElementById('confirm-amount').textContent = `${depositAmount.toLocaleString()}`;
       }
 
       currentStep = step;
     };
 
-    // Helpers
     window.setAmount = (amt) => {
       document.getElementById('deposit-amount').value = amt;
       document.querySelectorAll('.quick-btn').forEach(b => b.classList.remove('active'));
       event.target.classList.add('active');
-    };
-
-    window.selectMethod = (el, method) => {
-      document.querySelectorAll('.method-card').forEach(c => c.classList.remove('selected'));
-      el.classList.add('selected');
-      selectedMethod = method;
-      
-      if (method === 'bank_transfer') {
-        document.getElementById('bank-details').classList.remove('hidden');
-        document.getElementById('usdt-details').classList.add('hidden');
-      } else {
-        document.getElementById('bank-details').classList.add('hidden');
-        document.getElementById('usdt-details').classList.remove('hidden');
-      }
     };
 
     window.copyText = (text) => {
@@ -298,11 +255,10 @@
       showToast('Copied to clipboard!', 'success');
     };
 
-    // Submit Deposit
     window.submitDeposit = async () => {
-      const ref = document.getElementById('transaction-ref').value.trim();
-      if (!ref) {
-        showToast('Please enter a transaction reference', 'error');
+      const senderName = document.getElementById('sender-name').value.trim();
+      if (!senderName) {
+        showToast('Please enter the sender\'s name', 'error');
         return;
       }
 
@@ -317,10 +273,8 @@
         const { error } = await supabase.from('deposits').insert({
           user_id: user.id,
           amount: depositAmount,
-          method: selectedMethod,
-          reference: ref,
-          status: 'pending',
-          created_at: new Date()
+          sender_name: senderName,
+          status: 'pending'
         });
 
         if (error) throw error;
