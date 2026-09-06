@@ -92,7 +92,42 @@
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
     const supabase = createClient('https://ofysznsajwxnjqaumwch.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9meXN6bnNhand4bmpxYXVtd2NoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgyMzM4NDgsImV4cCI6MjEwMzgwOTg0OH0.XaHkP5WZ2nJVJXVdbG-D13rrD63g_09HxmJoZn7ZoWA');
     window.supabase = supabase;
+// Add this at the start of loadWealthPage()
+async function loadWealthPage() {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return window.location.href = '/login.html';
 
+  // Check VIP level
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('vip_level')
+    .eq('id', user.id)
+    .single();
+
+  if (!profile || profile.vip_level === 'newbie' || profile.vip_level === 'M0') {
+    // Block access
+    document.body.innerHTML = `
+      <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:#0a0e27;color:white;padding:20px;">
+        <div style="max-width:400px;text-align:center;">
+          <div style="font-size:4rem;margin-bottom:20px;">🔒</div>
+          <h2 style="margin-bottom:16px;">VIP Access Required</h2>
+          <p style="color:rgba(255,255,255,0.7);margin-bottom:24px;">
+            Wealth Center is only available for M1 and above. 
+            Upgrade now to access exclusive investment plans!
+          </p>
+          <a href="/vip.html" style="display:inline-block;padding:14px 32px;background:linear-gradient(135deg,#ffd700,#e6c200);color:#0a0e27;text-decoration:none;border-radius:12px;font-weight:700;">
+            Upgrade to M1
+          </a>
+          <br><br>
+          <a href="/dashboard.html" style="color:rgba(255,255,255,0.6);text-decoration:none;">← Back to Dashboard</a>
+        </div>
+      </div>
+    `;
+    return;
+  }
+
+  // ... rest of existing wealth page code
+    }
     // Helper to format duration text (e.g., "3 Mins" or "5 Days")
     function formatDuration(days) {
       const mins = Math.round(days * 1440);
