@@ -597,87 +597,45 @@
     };
 
     function showGeneratedCodesModal(codes) {
-      const modal = document.createElement('div');
-      modal.className = 'gift-modal';
-      modal.innerHTML = `
-        <div style="
-          background: linear-gradient(135deg, #1a1f4e, #0a0e27);
-          border: 3px solid #ffd700;
-          border-radius: 24px;
-          padding: 32px;
-          max-width: 500px;
-          width: 100%;
-          max-height: 80vh;
-          overflow-y: auto;
-          animation: popIn 0.3s ease;
-        ">
-          <div style="text-align: center; margin-bottom: 24px;">
-            <div style="font-size: 3rem; margin-bottom: 12px;">🎁</div>
-            <h3 style="color: #ffd700; margin: 0 0 8px 0;">Gift Codes Generated!</h3>
-            <p style="color: rgba(255,255,255,0.7); font-size: 0.9rem;">Share these codes with your referrals</p>
-          </div>
-          
-          <div style="display: flex; flex-direction: column; gap: 12px;">
-            ${codes.map(c => `
-              <div style="
-                background: rgba(255,215,0,0.1);
-                border: 2px solid #ffd700;
-                border-radius: 12px;
-                padding: 16px;
-                position: relative;
-              ">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                  <span style="color: rgba(255,255,255,0.8); font-size: 0.85rem;">${c.referral}</span>
-                  <span style="color: #00ff88; font-weight: 700;">${c.tier} (${c.percentage}%)</span>
-                </div>
-                <div style="
-                  background: rgba(0,0,0,0.4);
-                  padding: 12px;
-                  border-radius: 8px;
-                  text-align: center;
-                  font-family: monospace;
-                  font-size: 1.3rem;
-                  font-weight: 800;
-                  color: #ffd700;
-                  letter-spacing: 2px;
-                  margin-bottom: 8px;
-                ">${c.code}</div>
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                  <span style="color: rgba(255,255,255,0.6); font-size: 0.8rem;">Value: ₦${c.amount.toLocaleString()}</span>
-                  <button onclick="window.copyCode('${c.code}')" style="
-                    background: rgba(255,215,0,0.2);
-                    border: 1px solid #ffd700;
-                    color: #ffd700;
-                    padding: 6px 12px;
-                    border-radius: 6px;
-                    cursor: pointer;
-                    font-size: 0.8rem;
-                    font-weight: 600;
-                  ">
-                    <i class="fa-regular fa-copy"></i> Copy
-                  </button>
-                </div>
-              </div>
-            `).join('')}
-          </div>
-          
-          <button onclick="this.closest('.gift-modal').remove()" style="
-            width: 100%;
-            margin-top: 24px;
-            padding: 14px;
-            background: linear-gradient(135deg, #ffd700, #e6c200);
-            border: none;
-            border-radius: 12px;
-            font-weight: 800;
-            font-size: 1rem;
-            color: #0a0e27;
-            cursor: pointer;
-          ">Close</button>
+      const modal = document.getElementById('gift-code-modal');
+      const content = document.getElementById('gift-code-modal-content');
+      
+      content.innerHTML = `
+        <div style="text-align: center; margin-bottom: 24px;">
+          <div style="font-size: 3rem; margin-bottom: 12px;">🎁</div>
+          <h3 style="color: #ffd700; margin: 0 0 8px 0; font-size: 1.5rem; font-weight: 800;">Gift Codes Generated!</h3>
+          <p style="color: rgba(255,255,255,0.7); font-size: 0.9rem;">Share these codes with your referrals</p>
         </div>
+        
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+          ${codes.map(c => `
+            <div style="background: rgba(255,215,0,0.05); border: 1px solid rgba(255,215,0,0.3); border-radius: 12px; padding: 16px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <span style="color: white; font-weight: 600;">${c.referral}</span>
+                <span style="color: #00ff88; font-weight: 700;">${c.tier} (${c.percentage}%)</span>
+              </div>
+              <div style="background: rgba(0,0,0,0.4); padding: 12px; border-radius: 8px; text-align: center; font-family: monospace; font-size: 1.2rem; font-weight: 800; color: #ffd700; letter-spacing: 2px; margin-bottom: 8px;">${c.code}</div>
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="color: rgba(255,255,255,0.6); font-size: 0.85rem;">Value: ₦${c.amount.toLocaleString()}</span>
+                <button onclick="window.copyCode('${c.code}')" style="background: rgba(255,215,0,0.2); border: 1px solid #ffd700; color: #ffd700; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 0.8rem; font-weight: 600;">
+                  <i class="fa-regular fa-copy"></i> Copy
+                </button>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+        
+        <button onclick="window.closeGiftModal()" style="width: 100%; margin-top: 24px; padding: 14px; background: linear-gradient(135deg, #ffd700, #e6c200); border: none; border-radius: 12px; font-weight: 800; font-size: 1rem; color: #0a0e27; cursor: pointer;">Close</button>
       `;
       
-      document.body.appendChild(modal);
+      // Show the modal
+      modal.style.display = 'flex';
     }
+
+    // Add this helper function to close the modal
+    window.closeGiftModal = () => {
+      document.getElementById('gift-code-modal').style.display = 'none';
+    };
 
     window.copyCode = (code) => {
       navigator.clipboard.writeText(code);
@@ -693,5 +651,11 @@
 
     loadTeam();
   </script>
+  <!-- Hardcoded Modal Container -->
+  <div id="gift-code-modal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 99999; background: rgba(0,0,0,0.95); backdrop-filter: blur(5px); align-items: center; justify-content: center; padding: 20px;">
+    <div id="gift-code-modal-content" style="background: linear-gradient(135deg, #1a1f4e, #0a0e27); border: 3px solid #ffd700; border-radius: 24px; padding: 32px; max-width: 500px; width: 100%; max-height: 85vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.5);">
+      <!-- Content will be injected here by JavaScript -->
+    </div>
+  </div>
 </body>
 </html>
