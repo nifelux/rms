@@ -5,63 +5,119 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>RMS — Wealth Center</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/style.css">
   <meta name="theme-color" content="#0a0e27">
   <style>
-    .wealth-container { padding: 20px 16px 100px 16px; max-width: 600px; margin: 0 auto; }
-    .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; }
-    .stat-card { background: var(--rms-bg-card); border: 1px solid var(--rms-border); border-radius: 12px; padding: 16px; text-align: center; }
-    .stat-label { font-size: 0.75rem; color: var(--rms-text-muted); margin-bottom: 6px; text-transform: uppercase; }
-    .stat-value { font-size: 1.4rem; font-weight: 800; color: var(--rms-white); }
-    .stat-value.yellow { color: var(--rms-yellow); }
-
-    .section-title { font-size: 1.1rem; font-weight: 700; margin: 24px 0 12px 0; display: flex; align-items: center; gap: 8px; }
-    .section-title i { color: var(--rms-yellow); }
-
-    .plan-card { background: var(--rms-bg-card); border: 1px solid var(--rms-border); border-radius: 16px; padding: 20px; margin-bottom: 16px; }
-    .plan-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
-    .plan-name { font-size: 1.2rem; font-weight: 800; color: var(--rms-white); }
-    .plan-price { font-size: 1.1rem; font-weight: 700; color: var(--rms-yellow); }
-    .plan-details { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
-    .plan-detail { background: rgba(255,255,255,0.03); padding: 10px; border-radius: 8px; text-align: center; }
-    .plan-detail-val { font-size: 1rem; font-weight: 700; color: var(--rms-white); margin-bottom: 4px; }
-    .plan-detail-lbl { font-size: 0.7rem; color: var(--rms-text-muted); text-transform: uppercase; }
-
-    .invest-btn { width: 100%; padding: 12px; font-size: 1rem; font-weight: 700; border: none; border-radius: 10px; background: linear-gradient(135deg, var(--rms-yellow), #e6c200); color: #0a0e27; cursor: pointer; }
-    .invest-btn:disabled { opacity: 0.5; cursor: not-allowed; background: #555; color: #aaa; }
-
-    .investment-item { background: var(--rms-bg-card); border: 1px solid var(--rms-border); border-radius: 12px; padding: 16px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
-    .inv-info h4 { margin: 0 0 6px 0; font-size: 1rem; color: var(--rms-white); }
-    .inv-info p { margin: 0 0 8px 0; font-size: 0.75rem; color: var(--rms-text-muted); }
-    .inv-amount { font-weight: 800; color: var(--rms-yellow); font-size: 1rem; }
-    .inv-return { font-size: 0.75rem; color: #2ecc71; margin-top: 4px; }
+    .wealth-container { padding: 20px 16px 100px 16px; max-width: 600px; margin: 0 auto; font-family: 'Inter', sans-serif; }
     
-    .inv-status { font-size: 0.7rem; padding: 4px 10px; border-radius: 10px; font-weight: 700; margin-top: 6px; display: inline-block; }
-    .status-active { background: rgba(52,152,219,0.15); color: #3498db; }
-    .status-completed { background: rgba(46,204,113,0.15); color: #2ecc71; }
+    .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; }
+    .stat-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 18px; text-align: center; backdrop-filter: blur(10px); }
+    .stat-label { font-size: 0.75rem; color: rgba(255,255,255,0.6); margin-bottom: 6px; text-transform: uppercase; font-weight: 600; }
+    .stat-value { font-size: 1.6rem; font-weight: 900; color: white; }
+    .stat-value.yellow { color: #ffd700; }
+
+    .section-title { font-size: 1.2rem; font-weight: 800; margin: 28px 0 16px 0; display: flex; align-items: center; gap: 10px; color: white; }
+    .section-title i { color: #00d4ff; }
+
+    .plan-card { 
+      background: linear-gradient(135deg, rgba(0,102,255,0.1), rgba(0,212,255,0.05));
+      border: 1px solid rgba(0,212,255,0.3);
+      border-radius: 20px; 
+      padding: 24px; 
+      margin-bottom: 16px; 
+      position: relative; 
+      overflow: hidden;
+      transition: all 0.3s;
+    }
+    .plan-card:hover { border-color: #ffd700; transform: translateY(-2px); }
+    .plan-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, #0066ff, #00d4ff, #0066ff);
+    }
+    .plan-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+    .plan-name { font-size: 1.3rem; font-weight: 800; color: white; }
+    .plan-price { font-size: 1.2rem; font-weight: 900; color: #ffd700; }
+    
+    .plan-details { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 18px; }
+    .plan-detail { background: rgba(0,0,0,0.3); padding: 12px; border-radius: 12px; text-align: center; }
+    .plan-detail-val { font-size: 1.1rem; font-weight: 800; color: white; margin-bottom: 4px; }
+    .plan-detail-lbl { font-size: 0.7rem; color: rgba(255,255,255,0.6); text-transform: uppercase; font-weight: 600; }
+
+    .invest-btn { 
+      width: 100%; 
+      padding: 14px; 
+      font-size: 1rem; 
+      font-weight: 800; 
+      border: none; 
+      border-radius: 12px; 
+      background: linear-gradient(135deg, #ffd700, #e6c200); 
+      color: #0a0e27; 
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 8px 24px rgba(255,215,0,0.3);
+    }
+    .invest-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(255,215,0,0.4); }
+    .invest-btn:disabled { opacity: 0.5; cursor: not-allowed; background: #555; color: #aaa; box-shadow: none; }
+
+    .investment-item { 
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px; 
+      padding: 18px; 
+      margin-bottom: 12px; 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center;
+      backdrop-filter: blur(10px);
+      transition: all 0.3s;
+    }
+    .investment-item:hover { border-color: rgba(255,215,0,0.3); }
+    .inv-info h4 { margin: 0 0 8px 0; font-size: 1.05rem; color: white; font-weight: 700; }
+    .inv-info p { margin: 0 0 10px 0; font-size: 0.75rem; color: rgba(255,255,255,0.5); }
+    .inv-amount { font-weight: 900; color: #ffd700; font-size: 1.1rem; }
+    .inv-return { font-size: 0.8rem; color: #00ff88; margin-top: 6px; font-weight: 600; }
+    
+    .inv-status { font-size: 0.7rem; padding: 5px 12px; border-radius: 10px; font-weight: 700; margin-top: 8px; display: inline-block; }
+    .status-active { background: rgba(0,212,255,0.15); color: #00d4ff; border: 1px solid rgba(0,212,255,0.3); }
+    .status-completed { background: rgba(0,255,136,0.15); color: #00ff88; border: 1px solid rgba(0,255,136,0.3); }
 
     .claim-btn {
-      background: linear-gradient(135deg, #2ecc71, #27ae60);
-      color: white; border: none; padding: 8px 16px; border-radius: 8px;
-      font-size: 0.8rem; font-weight: 700; cursor: pointer; margin-top: 6px;
-      width: 100%; animation: pulse 2s infinite;
+      background: linear-gradient(135deg, #00d26a, #00ff88);
+      color: white;
+      border: none;
+      padding: 10px 18px;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      font-weight: 800;
+      cursor: pointer;
+      margin-top: 8px;
+      width: 100%;
+      animation: pulse 2s infinite;
+      box-shadow: 0 6px 20px rgba(0,255,136,0.3);
     }
     @keyframes pulse {
-      0% { box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.7); }
-      70% { box-shadow: 0 0 0 6px rgba(46, 204, 113, 0); }
-      100% { box-shadow: 0 0 0 0 rgba(46, 204, 113, 0); }
+      0% { box-shadow: 0 0 0 0 rgba(0,255,136,0.7); }
+      70% { box-shadow: 0 0 0 8px rgba(0,255,136,0); }
+      100% { box-shadow: 0 0 0 0 rgba(0,255,136,0); }
     }
 
-    .empty-state { text-align: center; padding: 30px 20px; color: var(--rms-text-muted); font-size: 0.9rem; }
-    .loading-box { text-align: center; padding: 30px; color: var(--rms-text-muted); }
+    .empty-state { text-align: center; padding: 40px 20px; color: rgba(255,255,255,0.5); font-size: 0.95rem; }
+    .loading-box { text-align: center; padding: 40px; color: rgba(255,255,255,0.5); }
   </style>
 </head>
 <body class="rv-shell">
   <div id="header-container"></div>
 
   <div class="wealth-container">
-    <h2 style="margin-bottom: 5px;">Wealth Center</h2>
-    <p class="text-muted" style="margin-bottom: 24px;">Lock funds, earn guaranteed returns.</p>
+    <h2 style="margin-bottom: 5px; font-size: 1.8rem; font-weight: 900; color: white;">Wealth Center</h2>
+    <p style="color: rgba(255,255,255,0.6); margin-bottom: 24px; font-size: 0.95rem;">Lock funds, earn guaranteed returns.</p>
 
     <div class="stats-grid">
       <div class="stat-card">
@@ -92,54 +148,41 @@
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
     const supabase = createClient('https://ofysznsajwxnjqaumwch.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9meXN6bnNhand4bmpxYXVtd2NoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgyMzM4NDgsImV4cCI6MjEwMzgwOTg0OH0.XaHkP5WZ2nJVJXVdbG-D13rrD63g_09HxmJoZn7ZoWA');
     window.supabase = supabase;
-// Add this at the start of loadWealthPage()
-async function loadWealthPage() {
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return window.location.href = '/login.html';
-
-  // Check VIP level
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('vip_level')
-    .eq('id', user.id)
-    .single();
-
-  if (!profile || profile.vip_level === 'newbie' || profile.vip_level === 'M0') {
-    // Block access
-    document.body.innerHTML = `
-      <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:#0a0e27;color:white;padding:20px;">
-        <div style="max-width:400px;text-align:center;">
-          <div style="font-size:4rem;margin-bottom:20px;">🔒</div>
-          <h2 style="margin-bottom:16px;">VIP Access Required</h2>
-          <p style="color:rgba(255,255,255,0.7);margin-bottom:24px;">
-            Wealth Center is only available for M1 and above. 
-            Upgrade now to access exclusive investment plans!
-          </p>
-          <a href="/vip.html" style="display:inline-block;padding:14px 32px;background:linear-gradient(135deg,#ffd700,#e6c200);color:#0a0e27;text-decoration:none;border-radius:12px;font-weight:700;">
-            Upgrade to M1
-          </a>
-          <br><br>
-          <a href="/dashboard.html" style="color:rgba(255,255,255,0.6);text-decoration:none;">← Back to Dashboard</a>
-        </div>
-      </div>
-    `;
-    return;
-  }
-
-  // ... rest of existing wealth page code
-    }
-    // Helper to format duration text (e.g., "3 Mins" or "5 Days")
-    function formatDuration(days) {
-      const mins = Math.round(days * 1440);
-      return mins >= 1440 ? `${mins / 1440} Days` : `${mins} Mins`;
-    }
 
     async function loadWealthPage() {
       try {
         const { data: { session } } = await supabase.auth.getSession();
         if (!session) return window.location.href = '/login.html';
 
-        // 1. Load Investments from 'wealth_investments'
+        // Check VIP level - Block M0
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('vip_level')
+          .eq('id', session.user.id)
+          .single();
+
+        if (!profile || profile.vip_level === 'newbie' || profile.vip_level === 'M0') {
+          document.body.innerHTML = `
+            <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#0a0e27,#1a1f4e);color:white;padding:20px;">
+              <div style="max-width:400px;text-align:center;">
+                <div style="font-size:5rem;margin-bottom:20px;"></div>
+                <h2 style="margin-bottom:16px;font-size:1.8rem;font-weight:900;">VIP Access Required</h2>
+                <p style="color:rgba(255,255,255,0.7);margin-bottom:24px;font-size:1rem;line-height:1.6;">
+                  Wealth Center is only available for <strong style="color:#ffd700;">M1 and above</strong>. 
+                  Upgrade now to access exclusive investment plans and earn passive income!
+                </p>
+                <a href="/vip.html" style="display:inline-block;padding:16px 36px;background:linear-gradient(135deg,#ffd700,#e6c200);color:#0a0e27;text-decoration:none;border-radius:14px;font-weight:800;font-size:1.05rem;box-shadow:0 8px 24px rgba(255,215,0,0.4);">
+                  <i class="fa-solid fa-crown"></i> Upgrade to M1
+                </a>
+                <br><br>
+                <a href="/dashboard.html" style="color:rgba(255,255,255,0.6);text-decoration:none;font-size:0.9rem;">← Back to Dashboard</a>
+              </div>
+            </div>
+          `;
+          return;
+        }
+
+        // 1. Load Investments
         const { data: investments } = await supabase
           .from('wealth_investments')
           .select('*')
@@ -165,13 +208,14 @@ async function loadWealthPage() {
             const now = new Date();
             const isMatured = now >= maturityDate && inv.status === 'active';
             const isCompleted = inv.status === 'completed';
-            const durationText = formatDuration(inv.duration_days);
+            const durationMins = Math.round(inv.duration_days * 1440);
+            const durationText = durationMins >= 1440 ? `${durationMins/1440} Days` : `${durationMins} Mins`;
 
             let actionHtml = '';
             if (isCompleted) {
               actionHtml = `<span class="inv-status status-completed"><i class="fa-solid fa-check"></i> COMPLETED</span>`;
             } else if (isMatured) {
-              actionHtml = `<button class="claim-btn" onclick="claimInvestment('${inv.id}')"><i class="fa-solid fa-gift"></i> Claim ${Number(inv.return_amount).toLocaleString()}</button>`;
+              actionHtml = `<button class="claim-btn" onclick="claimInvestment('${inv.id}')"><i class="fa-solid fa-gift"></i> Claim ₦${Number(inv.return_amount).toLocaleString()}</button>`;
             } else {
               actionHtml = `<span class="inv-status status-active"><i class="fa-solid fa-clock"></i> Active (${durationText})</span>`;
             }
@@ -184,14 +228,14 @@ async function loadWealthPage() {
                   ${actionHtml}
                 </div>
                 <div style="text-align: right; margin-left: 12px;">
-                  <div class="inv-amount">₦${Number(inv.amount).toLocaleString()}</div>
+                  <div class="inv-amount">${Number(inv.amount).toLocaleString()}</div>
                   <div class="inv-return">Return: ${Number(inv.return_amount).toLocaleString()}</div>
                 </div>
               </div>
             `;
           }).join('');
         } else {
-          invList.innerHTML = '<div class="empty-state"><i class="fa-solid fa-folder-open" style="font-size: 2rem; margin-bottom: 10px; opacity: 0.5;"></i><p>No active investments yet.</p></div>';
+          invList.innerHTML = '<div class="empty-state"><i class="fa-solid fa-folder-open" style="font-size: 2.5rem; margin-bottom: 12px; opacity: 0.3;"></i><p>No active investments yet.</p></div>';
         }
 
         document.getElementById('total-invested').textContent = totalInvested.toLocaleString();
@@ -206,7 +250,8 @@ async function loadWealthPage() {
         if (plans && plans.length > 0) {
           plansList.innerHTML = plans.map(plan => {
             const canAfford = Number(balance) >= Number(plan.invest_amount);
-            const planDurationText = formatDuration(plan.duration_days);
+            const planMins = Math.round(plan.duration_days * 1440);
+            const planDurationText = planMins >= 1440 ? `${planMins/1440} Days` : `${planMins} Mins`;
             
             return `
               <div class="plan-card">
@@ -216,7 +261,7 @@ async function loadWealthPage() {
                 </div>
                 <div class="plan-details">
                   <div class="plan-detail">
-                    <div class="plan-detail-val yellow">₦${Number(plan.return_amount).toLocaleString()}</div>
+                    <div class="plan-detail-val" style="color:#ffd700;">₦${Number(plan.return_amount).toLocaleString()}</div>
                     <div class="plan-detail-lbl">Total Return</div>
                   </div>
                   <div class="plan-detail">
@@ -236,7 +281,7 @@ async function loadWealthPage() {
 
       } catch (err) {
         console.error('Wealth page error:', err);
-        showToast('Failed to load data: ' + err.message, 'error');
+        showToast('Failed to load wealth data', 'error');
       }
     }
 
