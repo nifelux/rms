@@ -5,54 +5,212 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>RMS — Profile</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/style.css">
   <meta name="theme-color" content="#0a0e27">
   <style>
-    .profile-container { padding: 20px 16px 100px 16px; max-width: 600px; margin: 0 auto; }
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
     
-    /* Header Section */
-    .profile-header { text-align: center; margin-bottom: 24px; padding-bottom: 20px; border-bottom: 1px solid var(--rms-border); }
+    body {
+      background: linear-gradient(135deg, #0a0e27 0%, #1a1f4e 50%, #0a0e27 100%);
+      min-height: 100vh;
+      color: white;
+      padding-bottom: 100px;
+    }
+
+    .profile-container { padding: 20px 16px; max-width: 600px; margin: 0 auto; }
+    
+    /* Profile Header */
+    .profile-header { 
+      text-align: center; 
+      margin-bottom: 28px; 
+      padding: 32px 20px;
+      background: linear-gradient(135deg, rgba(0,102,255,0.1), rgba(0,212,255,0.05));
+      border: 1px solid rgba(0,212,255,0.2);
+      border-radius: 24px;
+      position: relative;
+      overflow: hidden;
+    }
+    .profile-header::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255,215,0,0.1) 0%, transparent 60%);
+      pointer-events: none;
+    }
+    
     .avatar-large { 
-      width: 90px; height: 90px; background: linear-gradient(135deg, var(--rms-bg-card), #1a2050); 
-      border: 2px solid var(--rms-yellow); border-radius: 50%; 
-      display: flex; align-items: center; justify-content: center; 
-      margin: 0 auto 16px; font-size: 2.5rem; color: var(--rms-yellow);
-      box-shadow: 0 0 20px rgba(255,215,0,0.15);
-    }
-    .vip-badge { 
-      display: inline-flex; align-items: center; gap: 6px;
-      background: linear-gradient(135deg, var(--rms-vivid-red), var(--rms-red)); 
-      color: white; padding: 6px 16px; border-radius: 20px; 
-      font-size: 0.85rem; font-weight: 700; margin-top: 12px; letter-spacing: 0.5px;
+      width: 90px; 
+      height: 90px; 
+      background: linear-gradient(135deg, #ffd700, #e6c200); 
+      border-radius: 50%; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      margin: 0 auto 16px; 
+      font-size: 2.5rem; 
+      color: #0a0e27;
+      box-shadow: 0 8px 24px rgba(255,215,0,0.3);
+      position: relative;
+      z-index: 1;
     }
     
+    .user-name { 
+      font-size: 1.5rem; 
+      font-weight: 900; 
+      margin-bottom: 4px; 
+      position: relative;
+      z-index: 1;
+    }
+    
+    .user-email { 
+      color: rgba(255,255,255,0.6); 
+      font-size: 0.9rem; 
+      margin-bottom: 16px; 
+      position: relative;
+      z-index: 1;
+    }
+    
+    .vip-badge { 
+      display: inline-flex; 
+      align-items: center; 
+      gap: 6px;
+      background: rgba(255,255,255,0.1); 
+      border: 1px solid rgba(255,255,255,0.2);
+      color: white; 
+      padding: 8px 20px; 
+      border-radius: 20px; 
+      font-size: 0.85rem; 
+      font-weight: 700; 
+      letter-spacing: 0.5px;
+      position: relative;
+      z-index: 1;
+      transition: all 0.3s;
+    }
+    .vip-badge.premium {
+      background: linear-gradient(135deg, rgba(255,215,0,0.2), rgba(255,215,0,0.1));
+      border-color: rgba(255,215,0,0.4);
+      color: #ffd700;
+      box-shadow: 0 0 20px rgba(255,215,0,0.2);
+    }
+
     /* Stats Grid */
-    .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; }
-    .stat-box { background: var(--rms-bg-card); border: 1px solid var(--rms-border); border-radius: 12px; padding: 16px; text-align: center; }
-    .stat-num { font-size: 1.4rem; font-weight: 800; color: var(--rms-white); margin-bottom: 4px; }
-    .stat-lbl { font-size: 0.75rem; color: var(--rms-text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .stats-grid { 
+      display: grid; 
+      grid-template-columns: 1fr 1fr; 
+      gap: 12px; 
+      margin-bottom: 28px; 
+    }
+    .stat-box { 
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px; 
+      padding: 18px 16px; 
+      text-align: center;
+      backdrop-filter: blur(10px);
+      transition: all 0.3s;
+    }
+    .stat-box:hover { 
+      border-color: rgba(255,215,0,0.3); 
+      background: rgba(255,215,0,0.05); 
+      transform: translateY(-2px);
+    }
+    .stat-num { 
+      font-size: 1.5rem; 
+      font-weight: 900; 
+      margin-bottom: 4px; 
+    }
+    .stat-num.gold { color: #ffd700; }
+    .stat-num.green { color: #00ff88; }
+    .stat-lbl { 
+      font-size: 0.7rem; 
+      color: rgba(255,255,255,0.6); 
+      text-transform: uppercase; 
+      letter-spacing: 0.5px; 
+      font-weight: 600;
+    }
 
     /* Menu Groups */
     .menu-group { margin-bottom: 24px; }
-    .menu-group-title { font-size: 0.75rem; color: var(--rms-text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; padding-left: 4px; font-weight: 600; }
-    .menu-list { background: var(--rms-bg-card); border: 1px solid var(--rms-border); border-radius: 16px; overflow: hidden; }
+    .menu-group-title { 
+      font-size: 0.8rem; 
+      color: rgba(255,255,255,0.5); 
+      text-transform: uppercase; 
+      letter-spacing: 1px; 
+      margin-bottom: 12px; 
+      padding-left: 4px; 
+      font-weight: 700;
+    }
+    .menu-list { 
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px; 
+      overflow: hidden;
+      backdrop-filter: blur(10px);
+    }
     
     .menu-item { 
-      display: flex; justify-content: space-between; align-items: center; 
-      padding: 16px 20px; border-bottom: 1px solid rgba(255,255,255,0.05); 
-      text-decoration: none; color: white; transition: background 0.2s;
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      padding: 16px 20px; 
+      border-bottom: 1px solid rgba(255,255,255,0.05); 
+      text-decoration: none; 
+      color: white; 
+      transition: all 0.2s;
     }
-    .menu-item:hover { background: rgba(255,255,255,0.02); }
+    .menu-item:hover { 
+      background: rgba(255,215,0,0.05); 
+      padding-left: 24px;
+    }
     .menu-item:last-child { border-bottom: none; }
-    .menu-item-left { display: flex; align-items: center; gap: 14px; font-size: 0.95rem; }
-    .menu-item-left i { width: 20px; text-align: center; color: var(--rms-yellow); font-size: 1.1rem; }
-    .menu-item-right i { color: var(--rms-text-muted); font-size: 0.8rem; }
+    
+    .menu-item-left { 
+      display: flex; 
+      align-items: center; 
+      gap: 14px; 
+      font-size: 0.95rem;
+      font-weight: 600;
+    }
+    .menu-item-left i { 
+      width: 24px; 
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center; 
+      font-size: 1rem; 
+    }
+    .menu-item-right i { 
+      color: rgba(255,255,255,0.3); 
+      font-size: 0.8rem; 
+      transition: transform 0.2s;
+    }
+    .menu-item:hover .menu-item-right i {
+      color: #ffd700;
+      transform: translateX(4px);
+    }
     
     /* Specific Icon Colors */
-    .menu-item.security i { color: #2ecc71; }
-    .menu-item.bank i { color: #3498db; }
-    .menu-item.logout { color: var(--rms-vivid-red); }
-    .menu-item.logout .menu-item-left i { color: var(--rms-vivid-red); }
+    .menu-item.security i { color: #00ff88; }
+    .menu-item.bank i { color: #00d4ff; }
+    .menu-item.logout { 
+      color: #ff4444; 
+      margin-top: 8px;
+      background: rgba(255,68,68,0.05);
+      border: 1px solid rgba(255,68,68,0.1);
+      border-radius: 16px;
+    }
+    .menu-item.logout:hover {
+      background: rgba(255,68,68,0.1);
+      border-color: rgba(255,68,68,0.3);
+    }
+    .menu-item.logout .menu-item-left i { color: #ff4444; }
+    .menu-item.logout:hover .menu-item-right i { color: #ff4444; }
   </style>
 </head>
 <body class="rv-shell">
@@ -62,9 +220,11 @@
     
     <!-- Profile Header -->
     <div class="profile-header">
-      <div class="avatar-large"><i class="fa-solid fa-user"></i></div>
-      <h2 id="user-name" style="margin: 0 0 4px 0; font-size: 1.5rem;">Loading...</h2>
-      <p id="user-email" class="text-muted" style="margin: 0; font-size: 0.9rem;">...</p>
+      <div class="avatar-large">
+        <i class="fa-solid fa-user"></i>
+      </div>
+      <h2 class="user-name" id="user-name">Loading...</h2>
+      <p class="user-email" id="user-email">...</p>
       <div class="vip-badge" id="user-tier">
         <i class="fa-solid fa-crown"></i> <span>NEWBIE</span>
       </div>
@@ -73,11 +233,11 @@
     <!-- Wallet Stats -->
     <div class="stats-grid">
       <div class="stat-box">
-        <div class="stat-num text-yellow">₦<span id="wallet-balance">0</span></div>
+        <div class="stat-num gold">₦<span id="wallet-balance">0.00</span></div>
         <div class="stat-lbl">Available Balance</div>
       </div>
       <div class="stat-box">
-        <div class="stat-num">₦<span id="total-earned">0</span></div>
+        <div class="stat-num green">₦<span id="total-earned">0.00</span></div>
         <div class="stat-lbl">Total Earned</div>
       </div>
     </div>
@@ -90,12 +250,10 @@
           <div class="menu-item-left"><i class="fa-solid fa-user-pen"></i> Edit Profile</div>
           <div class="menu-item-right"><i class="fa-solid fa-chevron-right"></i></div>
         </a>
-        <!-- UPDATED LINK -->
         <a href="/change-password.html" class="menu-item security">
           <div class="menu-item-left"><i class="fa-solid fa-shield-halved"></i> Change Password</div>
           <div class="menu-item-right"><i class="fa-solid fa-chevron-right"></i></div>
         </a>
-        <!-- UPDATED LINK -->
         <a href="/bank-account.html" class="menu-item bank">
           <div class="menu-item-left"><i class="fa-solid fa-building-columns"></i> Bank Accounts</div>
           <div class="menu-item-right"><i class="fa-solid fa-chevron-right"></i></div>
@@ -130,8 +288,8 @@
           <div class="menu-item-left"><i class="fa-solid fa-users"></i> My Team & Referrals</div>
           <div class="menu-item-right"><i class="fa-solid fa-chevron-right"></i></div>
         </a>
-        <a href="/gift-codes.html" class="menu-item">
-          <div class="menu-item-left"><i class="fa-solid fa-gift"></i> Gift Codes</div>
+        <a href="/redeem-gift.html" class="menu-item">
+          <div class="menu-item-left"><i class="fa-solid fa-gift"></i> Redeem Gift Code</div>
           <div class="menu-item-right"><i class="fa-solid fa-chevron-right"></i></div>
         </a>
         <a href="/messages.html" class="menu-item">
@@ -172,6 +330,7 @@
 
   <div id="footer-container"></div>
   <script src="/assets/js/components.js"></script>
+  <script src="/assets/js/notifications.js"></script>
   <script type="module">
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
     const supabase = createClient('https://ofysznsajwxnjqaumwch.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9meXN6bnNhand4bmpxYXVtd2NoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgyMzM4NDgsImV4cCI6MjEwMzgwOTg0OH0.XaHkP5WZ2nJVJXVdbG-D13rrD63g_09HxmJoZn7ZoWA');
@@ -181,27 +340,35 @@
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return window.location.href = '/login.html';
 
-      const { data: profile } = await supabase.from('profiles').select('*').eq('id', user.id).single();
-      document.getElementById('user-name').textContent = profile.full_name || 'User';
-      document.getElementById('user-email').textContent = profile.email;
-      
-      const tierBadge = document.getElementById('user-tier');
-      tierBadge.querySelector('span').textContent = profile.vip_level.toUpperCase();
-      if(profile.vip_level !== 'newbie') {
-        tierBadge.style.background = 'linear-gradient(135deg, var(--rms-yellow), #e6c200)';
-        tierBadge.style.color = '#0a0e27';
-      }
+      try {
+        const { data: profile } = await supabase.from('profiles').select('full_name, email, vip_level').eq('id', user.id).single();
+        
+        document.getElementById('user-name').textContent = profile?.full_name || 'User';
+        document.getElementById('user-email').textContent = profile?.email || 'No email';
+        
+        const tierBadge = document.getElementById('user-tier');
+        const tier = profile?.vip_level || 'newbie';
+        tierBadge.querySelector('span').textContent = tier.toUpperCase();
+        
+        // Add premium styling for M1 and above
+        if (tier !== 'newbie' && tier !== 'M0') {
+          tierBadge.classList.add('premium');
+        }
 
-      const { data: wallet } = await supabase.from('wallets').select('balance, total_earned').eq('user_id', user.id).single();
-      if (wallet) {
-        document.getElementById('wallet-balance').textContent = Number(wallet.balance).toLocaleString();
-        document.getElementById('total-earned').textContent = Number(wallet.total_earned || 0).toLocaleString();
+        const { data: wallet } = await supabase.from('wallets').select('balance, total_earned').eq('user_id', user.id).single();
+        if (wallet) {
+          document.getElementById('wallet-balance').textContent = Number(wallet.balance || 0).toLocaleString('en-NG', { minimumFractionDigits: 2 });
+          document.getElementById('total-earned').textContent = Number(wallet.total_earned || 0).toLocaleString('en-NG', { minimumFractionDigits: 2 });
+        }
+      } catch (err) {
+        console.error('Profile load error:', err);
+        showToast('Failed to load profile data', 'error');
       }
     }
 
     document.getElementById('logout-btn').addEventListener('click', async (e) => {
       e.preventDefault();
-      if(confirm('Are you sure you want to logout?')) {
+      if (confirm('Are you sure you want to logout?')) {
         await supabase.auth.signOut();
         window.location.href = '/login.html';
       }
@@ -210,4 +377,4 @@
     loadProfile();
   </script>
 </body>
-            </html>
+</html>
