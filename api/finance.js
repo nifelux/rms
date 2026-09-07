@@ -175,14 +175,20 @@ async function getDepositStatus(req, res) {
   const ref = req.query.ref;
   if (!ref) return res.status(400).json({ error: 'Reference required' });
 
-  const { data: deposit } = await supabaseAdmin
+  const { data: deposit, error } = await supabaseAdmin
     .from('deposits')
-    .select('status, amount, provider_status')
+    .select('status, amount, provider_status, method')
     .eq('reference', ref)
     .eq('user_id', user.id)
     .single();
 
-  if (!deposit) return res.status(404).json({ error: 'Deposit not found' });
+  if (error || !deposit) {
+    console.error('[DEPOSIT-STATUS] Not found:', ref, error);
+    return res.status(404).json({ error: 'Deposit not found' });
+  }
+
+  console.log('[DEPOSIT-STATUS]', { ref, status: deposit.status, amount: deposit.amount });
+  
   return res.status(200).json(deposit);
 }
 
