@@ -312,12 +312,25 @@ async function initiateTargetGrowthDeposit(req, res) {
       created_at: new Date().toISOString()
     });
     
-  if (insertError) return res.status(500).json({ error: insertError.message });
+  if (insertError) {
+    console.error('[TG-DB-ERROR]', insertError);
+    return res.status(500).json({ error: insertError.message });
+  }
 
   // 2. Initiate Payment with Target Growth
   try {
     const origin = getAppUrl(req);
     const ipnUrl = `${origin}/api/webhooks/targetgrowths`;
+    
+    console.log('[TG-INITIATE-REQUEST]', JSON.stringify({
+      identifier,
+      amount: numAmount,
+      ipnUrl,
+      successUrl: `${origin}/deposit-success.html?ref=${encodeURIComponent(reference)}`,
+      cancelUrl: `${origin}/deposit.html?cancelled=true`,
+      email: email || 'user@example.com',
+      name: full_name || 'RMS User'
+    }));
     
     const providerResponse = await initiatePayment({
       identifier: identifier,
@@ -331,10 +344,24 @@ async function initiateTargetGrowthDeposit(req, res) {
       customerEmail: email || 'user@example.com'
     });
 
-    const checkoutUrl = providerResponse?.url || providerResponse?.checkout_url || providerResponse?.payment_url;
-    const providerRef = providerResponse?.transaction_ref || providerResponse?.trx_id;
+    console.log('[TG-INITIATE-RAW-RESPONSE]', JSON.stringify(providerResponse, null, 2));
 
-    if (!checkoutUrl) throw new Error('Target Growth did not return a checkout URL');
+    // Try multiple possible URL fields
+    const checkoutUrl = providerResponse?.url || 
+                       providerResponse?.checkout_url || 
+                       providerResponse?.payment_url || 
+                       providerResponse?.redirect_url ||
+                       providerResponse?.data?.url ||
+                       providerResponse?.data?.checkout_url;
+    
+    const providerRef = providerResponse?.transaction_ref || 
+                       providerResponse?.trx_id ||
+                       providerResponse?.data?.transaction_ref;
+
+    if (!checkoutUrl) {
+      console.error('[TG-ERROR] No checkout URL found in response:', JSON.stringify(providerResponse));
+      throw new Error('Target Growth response missing checkout URL. Check logs for full response.');
+    }
 
     // 3. Update record with checkout info
     await supabaseAdmin
@@ -356,6 +383,12 @@ async function initiateTargetGrowthDeposit(req, res) {
 
   } catch (e) {
     console.error('[TG Deposit Initiate Error]', e);
+    console.error('[TG-FULL-ERROR]', JSON.stringify({
+      message: e.message,
+      retryable: e.retryable,
+      providerResponse: e.providerResponse
+    }));
+    
     await supabaseAdmin
       .from('deposits')
       .update({
@@ -368,7 +401,7 @@ async function initiateTargetGrowthDeposit(req, res) {
     
     return res.status(502).json({ error: e.message || 'Could not start payment' });
   }
-}
+      }
 
 // ==========================================
 // TARGET GROWTH WITHDRAWAL
