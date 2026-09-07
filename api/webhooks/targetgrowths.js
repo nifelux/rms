@@ -1,11 +1,17 @@
 /**
- * Target Growth Webhook Handler (IPN)
- * 
- * Listens for payment status changes from Target Growth.
- * Handles both Deposits (Payins) and Withdrawals (Payouts).
+ * TargetGrowths Webhook Handler
+ * Uses API verification instead of signature for security
  */
+
 import supabaseAdmin from '../../lib/supabase.js';
-import { parseWebhookBody, webhookStatus, webhookIdentifier, webhookAmount, isSuccessfulStatus, verifyPayment } from '../../lib/targetgrowths.js';
+import { 
+  parseWebhookBody, 
+  webhookStatus, 
+  webhookIdentifier, 
+  webhookAmount, 
+  isSuccessfulStatus, 
+  verifyPayment 
+} from '../../lib/targetgrowths.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -21,11 +27,9 @@ export default async function handler(req, res) {
     const amount = webhookAmount(payload);
 
     // 1. SKIP SIGNATURE CHECK - We'll verify via API instead
-    console.log('[TG-WEBHOOK] ️ Using API verification instead of signature');
+    console.log('[TG-WEBHOOK] ⚠️ Using API verification instead of signature');
 
     // 2. VERIFY PAYMENT VIA TARGET GROWTH API (More secure!)
-    const { verifyPayment } = await import('../lib/targetgrowths.js');
-    
     let verification;
     try {
       verification = await verifyPayment(identifier);
@@ -112,7 +116,8 @@ export default async function handler(req, res) {
     console.error('[TG-WEBHOOK] Error:', err);
     return res.status(500).json({ error: err.message });
   }
-      }
+}
+
 
 // ==========================================
 // DEPOSIT HANDLER (PAYIN)
