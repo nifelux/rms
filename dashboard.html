@@ -183,6 +183,68 @@
     const INCOME_TYPES = ['deposit', 'referral_commission', 'task_earning', 'wealth_claim', 'wheel_win', 'admin_credit', 'bonus', 'gift_code'];
     const EXPENSE_TYPES = ['withdraw', 'wealth_invest', 'vip_upgrade', 'fee', 'purchase'];
 
+    // Load dynamic support links from admin settings
+async function loadDashboardSupportLinks() {
+  try {
+    console.log('Loading support links...');
+    const res = await fetch('/api/admin?action=get-settings');
+    const data = await res.json();
+    console.log('Settings data:', data);
+    
+    if (!data.ok) {
+      console.error('Failed to fetch settings');
+      return;
+    }
+    
+    const settings = data.settings || {};
+    
+    // Telegram
+    const telegramBtn = document.getElementById('dash-telegram');
+    if (telegramBtn) {
+      if (settings.telegram_link) {
+        telegramBtn.href = settings.telegram_link;
+        telegramBtn.style.display = 'flex';
+        console.log('Telegram link loaded:', settings.telegram_link);
+      } else {
+        console.log('No Telegram link set');
+        telegramBtn.style.display = 'none';
+      }
+    }
+    
+    // WhatsApp
+    const whatsappBtn = document.getElementById('dash-whatsapp');
+    if (whatsappBtn) {
+      if (settings.whatsapp_link) {
+        whatsappBtn.href = settings.whatsapp_link;
+        whatsappBtn.style.display = 'flex';
+        console.log('WhatsApp link loaded:', settings.whatsapp_link);
+      } else {
+        console.log('No WhatsApp link set');
+        whatsappBtn.style.display = 'none';
+      }
+    }
+    
+    // Support page/email
+    const supportBtn = document.getElementById('dash-support');
+    if (supportBtn && settings.support_link) {
+      if (settings.support_link.includes('@')) {
+        supportBtn.href = `mailto:${settings.support_link}`;
+      } else {
+        supportBtn.href = settings.support_link;
+      }
+      console.log('Support link loaded:', settings.support_link);
+    }
+    
+  } catch (err) {
+    console.error('Error loading support links:', err);
+  }
+}
+
+// Call this when page loads
+document.addEventListener('DOMContentLoaded', loadDashboardSupportLinks);
+// Also call it immediately in case DOM is already loaded
+loadDashboardSupportLinks();
+    
     function getTransactionType(txn) {
       if (INCOME_TYPES.includes(txn.type)) return 'income';
       if (EXPENSE_TYPES.includes(txn.type)) return 'expense';
@@ -305,44 +367,7 @@
 
     loadDashboard();
 
-    // Load dynamic support links from admin settings
-async function loadDashboardSupportLinks() {
-  try {
-    const res = await fetch('/api/admin?action=get-settings');
-    const data = await res.json();
     
-    if (data.settings) {
-      // Telegram
-      const telegramBtn = document.getElementById('dash-telegram');
-      if (telegramBtn && data.settings.telegram_link) {
-        telegramBtn.href = data.settings.telegram_link;
-        telegramBtn.style.display = 'flex';
-      }
-      
-      // WhatsApp
-      const whatsappBtn = document.getElementById('dash-whatsapp');
-      if (whatsappBtn && data.settings.whatsapp_link) {
-        whatsappBtn.href = data.settings.whatsapp_link;
-        whatsappBtn.style.display = 'flex';
-      }
-      
-      // Support page link
-      const supportBtn = document.getElementById('dash-support');
-      if (supportBtn && data.settings.support_link) {
-        if (data.settings.support_link.includes('@')) {
-          supportBtn.href = `mailto:${data.settings.support_link}`;
-        } else {
-          supportBtn.href = data.settings.support_link;
-        }
-      }
-    }
-  } catch (err) {
-    console.error('Failed to load support links:', err);
-  }
-}
-
-// Call this when the page loads
-loadDashboardSupportLinks();
   </script>
 </body>
 </html>
