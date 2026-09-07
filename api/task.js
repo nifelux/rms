@@ -113,7 +113,7 @@ async function getTaskStatus(req, res) {
     if (!tierInfo) return res.status(500).json({ error: 'Tier config not found' });
 
     return res.status(200).json({
-      tier, boxes_opened, max_boxes: tierInfo.daily_boxes, 
+      tier, boxes_opened: boxesOpened, max_boxes: tierInfo.daily_boxes, 
       daily_earning: tierInfo.daily_earning, 
       can_open: boxesOpened < tierInfo.daily_boxes
     });
