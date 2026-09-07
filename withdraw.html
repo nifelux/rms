@@ -93,7 +93,7 @@
     }
     .eligibility-alert i { font-size: 1.3rem; }
 
-    /* Amount Selection */
+    /* Amount Input */
     .section-title {
       font-size: 1rem;
       font-weight: 700;
@@ -105,39 +105,35 @@
     }
     .section-title i { color: #00d4ff; }
 
-    .amount-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
+    .amount-input-wrapper {
+      position: relative;
       margin-bottom: 24px;
     }
-    .amount-chip {
-      background: rgba(255,255,255,0.03);
-      border: 1px solid rgba(255,255,255,0.1);
+    .amount-input {
+      width: 100%;
+      padding: 18px 16px 18px 50px;
+      background: rgba(0,0,0,0.3);
+      border: 2px solid rgba(255,255,255,0.1);
+      border-radius: 14px;
       color: white;
-      padding: 14px 8px;
-      border-radius: 12px;
-      text-align: center;
-      cursor: pointer;
-      font-weight: 700;
-      font-size: 0.85rem;
+      font-size: 1.5rem;
+      font-weight: 800;
       transition: all 0.3s;
     }
-    .amount-chip:hover:not(:disabled) {
-      border-color: rgba(255,215,0,0.5);
-      background: rgba(255,215,0,0.05);
-      transform: translateY(-2px);
-    }
-    .amount-chip.active {
-      background: rgba(255,215,0,0.15);
+    .amount-input:focus {
+      outline: none;
       border-color: #ffd700;
-      color: #ffd700;
-      box-shadow: 0 0 20px rgba(255,215,0,0.2);
+      background: rgba(0,0,0,0.5);
+      box-shadow: 0 0 0 4px rgba(255,215,0,0.1);
     }
-    .amount-chip:disabled {
-      opacity: 0.3;
-      cursor: not-allowed;
-      text-decoration: line-through;
+    .amount-icon {
+      position: absolute;
+      left: 18px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #ffd700;
+      font-size: 1.5rem;
+      font-weight: 900;
     }
 
     /* Premium Form */
@@ -150,7 +146,7 @@
       margin-bottom: 8px;
     }
     .input-wrapper { position: relative; }
-    .form-input {
+    .form-input, .form-select {
       width: 100%;
       padding: 14px 16px 14px 44px;
       background: rgba(0,0,0,0.3);
@@ -160,7 +156,15 @@
       font-size: 0.95rem;
       transition: all 0.3s;
     }
-    .form-input:focus {
+    .form-select {
+      appearance: none;
+      cursor: pointer;
+    }
+    .form-select option {
+      background: #1a1f4e;
+      color: white;
+    }
+    .form-input:focus, .form-select:focus {
       outline: none;
       border-color: #00d4ff;
       background: rgba(0,0,0,0.5);
@@ -175,7 +179,7 @@
       font-size: 1.1rem;
       transition: color 0.3s;
     }
-    .form-input:focus ~ .input-icon { color: #00d4ff; }
+    .form-input:focus ~ .input-icon, .form-select:focus ~ .input-icon { color: #00d4ff; }
 
     /* Submit Button */
     .submit-btn {
@@ -185,11 +189,11 @@
       font-weight: 800;
       border: none;
       border-radius: 14px;
-      background: linear-gradient(135deg, #ffd700, #e6c200);
-      color: #0a0e27;
+      background: linear-gradient(135deg, #00d4ff, #0066ff);
+      color: white;
       cursor: pointer;
       transition: all 0.3s;
-      box-shadow: 0 8px 24px rgba(255,215,0,0.3);
+      box-shadow: 0 8px 24px rgba(0,212,255,0.3);
       margin-top: 8px;
       display: flex;
       align-items: center;
@@ -210,7 +214,7 @@
     }
     .submit-btn:hover:not(:disabled) {
       transform: translateY(-2px);
-      box-shadow: 0 12px 32px rgba(255,215,0,0.4);
+      box-shadow: 0 12px 32px rgba(0,212,255,0.4);
     }
     .submit-btn:disabled {
       opacity: 0.6;
@@ -223,6 +227,23 @@
     @keyframes shimmer {
       0% { transform: translateX(-100%) rotate(45deg); }
       100% { transform: translateX(100%) rotate(45deg); }
+    }
+
+    /* Info Box */
+    .info-box {
+      background: rgba(0,212,255,0.1);
+      border: 1px solid rgba(0,212,255,0.3);
+      border-radius: 12px;
+      padding: 14px;
+      margin-top: 20px;
+      font-size: 0.85rem;
+      color: #00d4ff;
+      text-align: center;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
     }
 
     /* Rules Card */
@@ -282,7 +303,7 @@
   <div class="withdraw-container">
     <div class="page-header">
       <h2>Withdraw Funds</h2>
-      <p>Secure and fast payouts to your bank account.</p>
+      <p>Instant payout via Target Growth</p>
     </div>
 
     <!-- Balance Card -->
@@ -294,56 +315,78 @@
     <!-- Eligibility Alert -->
     <div id="eligibility-alert" class="eligibility-alert"></div>
 
-    <!-- Amount Selection -->
-    <div class="section-title"><i class="fa-solid fa-coins"></i> Select Amount</div>
-    <div class="amount-grid" id="amount-grid">
-      <!-- Injected by JS -->
+    <!-- Amount Input -->
+    <div class="section-title"><i class="fa-solid fa-naira-sign"></i> Enter Amount</div>
+    <div class="amount-input-wrapper">
+      <span class="amount-icon">₦</span>
+      <input type="number" id="amount" class="amount-input" placeholder="0.00" min="1000" step="100">
     </div>
 
     <!-- Withdrawal Form -->
     <form id="withdraw-form">
       <div class="form-group">
-        <label class="form-label">Account Name</label>
+        <label class="form-label">Bank Name</label>
         <div class="input-wrapper">
-          <input type="text" id="account-name" class="form-input" placeholder="Enter account name" required>
-          <i class="fa-solid fa-user input-icon"></i>
+          <select id="bank-name" class="form-select" required>
+            <option value="">Select your bank</option>
+            <option value="Access Bank">Access Bank</option>
+            <option value="GTBank">Guaranty Trust Bank (GTBank)</option>
+            <option value="Zenith Bank">Zenith Bank</option>
+            <option value="UBA">United Bank for Africa (UBA)</option>
+            <option value="First Bank">First Bank of Nigeria</option>
+            <option value="Fidelity Bank">Fidelity Bank</option>
+            <option value="Union Bank">Union Bank</option>
+            <option value="Sterling Bank">Sterling Bank</option>
+            <option value="Wema Bank">Wema Bank</option>
+            <option value="Stanbic IBTC">Stanbic IBTC Bank</option>
+            <option value="Ecobank">Ecobank Nigeria</option>
+            <option value="Polaris Bank">Polaris Bank</option>
+            <option value="Opay">Opay (Paycom)</option>
+            <option value="PalmPay">PalmPay</option>
+            <option value="Kuda">Kuda Bank</option>
+            <option value="Moniepoint">Moniepoint MFB</option>
+            <option value="VFD">VFD Microfinance Bank</option>
+          </select>
+          <i class="fa-solid fa-building-columns input-icon"></i>
         </div>
       </div>
       
       <div class="form-group">
         <label class="form-label">Account Number</label>
         <div class="input-wrapper">
-          <input type="text" id="account-number" class="form-input" placeholder="10-digit number" maxlength="10" required>
+          <input type="text" id="account-number" class="form-input" placeholder="10-digit account number" maxlength="10" required>
           <i class="fa-solid fa-hashtag input-icon"></i>
         </div>
       </div>
       
       <div class="form-group">
-        <label class="form-label">Bank Name</label>
+        <label class="form-label">Account Name</label>
         <div class="input-wrapper">
-          <input type="text" id="bank-name" class="form-input" placeholder="e.g. GTBank, Opay" required>
-          <i class="fa-solid fa-building-columns input-icon"></i>
+          <input type="text" id="account-name" class="form-input" placeholder="Name on bank account" required>
+          <i class="fa-solid fa-user input-icon"></i>
         </div>
       </div>
 
       <button type="submit" class="submit-btn" id="submit-btn">
-        <i class="fa-solid fa-paper-plane"></i> Submit Withdrawal Request
+        <i class="fa-solid fa-bolt"></i> Withdraw Now
       </button>
     </form>
 
+    <div class="info-box">
+      <i class="fa-solid fa-shield-halved"></i>
+      Secured by Target Growth • Instant Payouts
+    </div>
+
     <!-- Rules Card -->
     <div class="rules-card">
-      <h4><i class="fa-regular fa-calendar-check"></i> Weekly Withdrawal Schedule</h4>
-      <div class="schedule-row"><span>M1, M2</span> <span>Monday</span></div>
-      <div class="schedule-row"><span>M3, M4</span> <span>Tuesday</span></div>
-      <div class="schedule-row"><span>M5</span> <span>Wednesday</span></div>
-      <div class="schedule-row"><span>M6</span> <span>Thursday</span></div>
-      <div class="schedule-row"><span>M7</span> <span>Friday</span></div>
+      <h4><i class="fa-regular fa-clock"></i> Processing Time</h4>
+      <div class="schedule-row"><span>Standard Processing</span> <span>Instant - 5 mins</span></div>
+      <div class="schedule-row"><span>Failed Transactions</span> <span>Auto-refunded</span></div>
+      <div class="schedule-row"><span>Support</span> <span>24/7 Available</span></div>
 
       <div class="badges-container">
-        <div class="rule-badge"><i class="fa-regular fa-clock"></i> 10am - 6pm WAT</div>
-        <div class="rule-badge"><i class="fa-solid fa-ban" style="color: #ff4444;"></i> No Weekends</div>
-        <div class="rule-badge"><i class="fa-solid fa-1"></i> Max 1 per day</div>
+        <div class="rule-badge"><i class="fa-solid fa-check"></i> Min: ₦1,000</div>
+        <div class="rule-badge"><i class="fa-solid fa-check"></i> Auto-refund on failure</div>
       </div>
     </div>
   </div>
@@ -355,9 +398,6 @@
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
     const supabase = createClient('https://ofysznsajwxnjqaumwch.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9meXN6bnNhand4bmpxYXVtd2NoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgyMzM4NDgsImV4cCI6MjEwMzgwOTg0OH0.XaHkP5WZ2nJVJXVdbG-D13rrD63g_09HxmJoZn7ZoWA');
     window.supabase = supabase;
-
-    const amounts = [1800, 3000, 8000, 16000, 32000, 70000, 120000, 300000, 700000, 1000000, 2500000, 3000000];
-    let selectedAmount = null;
 
     async function init() {
       const { data: { user } } = await supabase.auth.getUser();
@@ -387,46 +427,40 @@
           document.getElementById('withdraw-form').style.pointerEvents = 'none';
         } else {
           alertBox.className = 'eligibility-alert success';
-          alertBox.innerHTML = `<i class="fa-solid fa-circle-check"></i> <span>You are eligible to withdraw today! (Tier: ${elig.tier})</span>`;
+          alertBox.innerHTML = `<i class="fa-solid fa-circle-check"></i> <span>You are eligible to withdraw! (Tier: ${elig.tier.toUpperCase()})</span>`;
         }
       } catch (err) {
         console.error('Eligibility check failed:', err);
       }
-
-      // 3. Render Amounts
-      const grid = document.getElementById('amount-grid');
-      amounts.forEach(amt => {
-        const chip = document.createElement('div');
-        chip.className = 'amount-chip';
-        chip.textContent = '₦' + amt.toLocaleString();
-        
-        if (amt > balance) {
-          chip.disabled = true;
-          chip.title = 'Insufficient balance';
-        }
-        
-        chip.onclick = () => {
-          if (chip.disabled) return;
-          document.querySelectorAll('.amount-chip').forEach(c => c.classList.remove('active'));
-          chip.classList.add('active');
-          selectedAmount = amt;
-        };
-        grid.appendChild(chip);
-      });
     }
 
-    // 4. Handle Form Submission
+    // 3. Handle Form Submission (Target Growth)
     document.getElementById('withdraw-form').addEventListener('submit', async (e) => {
       e.preventDefault();
       
-      if (!selectedAmount) {
-        showToast('Please select a withdrawal amount.', 'error');
+      const amount = document.getElementById('amount').value;
+      const bankName = document.getElementById('bank-name').value;
+      const accountNumber = document.getElementById('account-number').value;
+      const accountName = document.getElementById('account-name').value.trim();
+      
+      // Validation
+      if (!amount || Number(amount) < 1000) {
+        showToast('Minimum withdrawal is ₦1,000', 'error');
         return;
       }
 
-      const accountNumber = document.getElementById('account-number').value;
       if (accountNumber.length !== 10 || !/^\d+$/.test(accountNumber)) {
-        showToast('Please enter a valid 10-digit account number.', 'error');
+        showToast('Please enter a valid 10-digit account number', 'error');
+        return;
+      }
+
+      if (!bankName) {
+        showToast('Please select your bank', 'error');
+        return;
+      }
+
+      if (!accountName) {
+        showToast('Please enter account name', 'error');
         return;
       }
       
@@ -435,29 +469,34 @@
       btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Processing...';
 
       const token = (await supabase.auth.getSession()).data.session.access_token;
+      const { data: { user } } = await supabase.auth.getUser();
+      const { data: profile } = await supabase.from('profiles').select('full_name, email').eq('id', user.id).single();
       
       try {
-        const res = await fetch('/api/finance?action=createWithdrawal', {
+        // Call Target Growth Withdrawal API
+        const res = await fetch('/api/finance?action=initiateTargetGrowthWithdrawal', {
           method: 'POST',
           headers: { 
             'Content-Type': 'application/json', 
             'Authorization': `Bearer ${token}` 
           },
           body: JSON.stringify({
-            amount: selectedAmount,
-            account_name: document.getElementById('account-name').value.trim(),
+            amount: Number(amount),
+            bank_name: bankName,
             account_number: accountNumber,
-            bank_name: document.getElementById('bank-name').value.trim()
+            account_name: accountName,
+            email: profile?.email,
+            full_name: profile?.full_name
           })
         });
         
         const data = await res.json();
         
         if (!res.ok) {
-          throw new Error(data.error || 'Withdrawal request failed');
+          throw new Error(data.error || 'Withdrawal failed');
         }
 
-        showToast('Withdrawal request submitted successfully!', 'success');
+        showToast('Withdrawal initiated successfully! Funds will arrive shortly.', 'success');
         
         setTimeout(() => {
           window.location.href = '/dashboard.html';
@@ -467,7 +506,7 @@
         console.error('Withdrawal error:', err);
         showToast(err.message, 'error');
         btn.disabled = false;
-        btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Submit Withdrawal Request';
+        btn.innerHTML = '<i class="fa-solid fa-bolt"></i> Withdraw Now';
       }
     });
 
