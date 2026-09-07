@@ -32,16 +32,11 @@ console.log('[TG-WEBHOOK-AMOUNT-DEBUG]', {
   raw_amount: payload?.['data[amount]']
 });
   
-  // 3. SECURITY: Verify the HMAC-SHA256 signature (skip in sandbox for testing)
-  const ENV = process.env.TARGETGROWTHS_ENV || "production";
-  if (ENV !== "sandbox" && !validWebhookSignature(payload)) {
-    console.error('[TG-WEBHOOK] ❌ Invalid signature. Rejecting request.');
-    return res.status(401).json({ error: 'Invalid signature' });
-  }
-  
-  if (ENV === "sandbox") {
-    console.log('[TG-WEBHOOK] ⚠️ Skipping signature verification in sandbox mode');
-  }
+// In production, ALWAYS verify signature
+if (!validWebhookSignature(payload)) {
+  console.error('[TG-WEBHOOK] ❌ Invalid signature. Rejecting request.');
+  return res.status(401).json({ error: 'Invalid signature' });
+}
 
   // 4. Extract core data
   const identifier = webhookIdentifier(payload);
