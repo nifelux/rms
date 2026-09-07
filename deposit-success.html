@@ -40,9 +40,20 @@
     const ref = urlParams.get('ref');
     const result = urlParams.get('result');
 
+    let attempts = 0;
+    const maxAttempts = 20; // 60 seconds max
+
     async function checkStatus() {
       if (!ref) {
         renderStatus('failed', 'Invalid Request', 'No transaction reference found.', 0);
+        return;
+      }
+
+      attempts++;
+      console.log(`[POLL] Attempt ${attempts}/${maxAttempts} for ref: ${ref}`);
+
+      if (attempts > maxAttempts) {
+        renderStatus('failed', 'Timeout', 'We could not confirm the payment automatically. Please check your wallet or contact support.', 0);
         return;
       }
 
@@ -54,20 +65,25 @@
           headers: { 'Authorization': `Bearer ${token}` }
         });
         
-        if (!res.ok) throw new Error('Status check failed');
+        if (!res.ok) {
+          console.error('[POLL] API error:', res.status);
+          throw new Error('Status check failed');
+        }
+        
         const data = await res.json();
+        console.log('[POLL] Response:', data);
 
         if (data.status === 'completed') {
           renderStatus('success', 'Payment Successful!', `₦${Number(data.amount).toLocaleString()} has been added to your wallet.`, data.amount);
         } else if (data.status === 'rejected' || result === 'cancelled') {
           renderStatus('failed', 'Payment Failed', 'The transaction was cancelled or failed. No funds were deducted.', 0);
         } else {
-          // Still pending, wait and retry
+          // Still pending
           setTimeout(checkStatus, 3000);
         }
       } catch (err) {
-        console.error(err);
-        setTimeout(checkStatus, 3000); // Retry on network error
+        console.error('[POLL] Error:', err);
+        setTimeout(checkStatus, 3000);
       }
     }
 
