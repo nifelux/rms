@@ -115,7 +115,7 @@ async function handleDeposit(identifier, amount, status, payload) {
 
     const newBalance = Number(wallet?.balance || 0) + Number(amount);
 
-    // Update wallet using .update() instead of .upsert()
+    // Update wallet
     await supabaseAdmin
       .from('wallets')
       .update({
@@ -127,26 +127,31 @@ async function handleDeposit(identifier, amount, status, payload) {
     console.log(`[TG-DEPOSIT] ✅ Wallet updated: ${wallet?.balance} → ${newBalance}`);
 
     // Record transaction
-    await supabaseAdmin.from('transactions').insert({
-      user_id: deposit.user_id,
-      type: 'deposit',
-      amount: Number(amount),
-      status: 'approved',
-      reference: deposit.reference,
-      description: `Target Growth Deposit (${identifier})`
-    });
+    await supabaseAdmin
+      .from('transactions')
+      .insert({
+        user_id: deposit.user_id,
+        type: 'deposit',
+        amount: Number(amount),
+        status: 'approved',
+        reference: deposit.reference,
+        description: `Target Growth Deposit (${identifier})`
+      });
 
-    // Mark deposit as completed
-    await supabaseAdmin.from('deposits').update({
-      status: 'completed',
-      provider_status: 'success',
-      provider_response: payload,
-      paid_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
-    }).eq('id', deposit.id);
+    // ️ CRITICAL: Mark deposit as completed
+    await supabaseAdmin
+      .from('deposits')
+      .update({
+        status: 'completed',
+        provider_status: 'success',
+        provider_response: payload,
+        paid_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', deposit.id);
 
     console.log(`[TG-DEPOSIT] ✅ Successfully credited ₦${amount} to user ${deposit.user_id}`);
-  } 
+     
   
   // 4. Handle FAILURE
   else if (isFailedStatus(status)) {
