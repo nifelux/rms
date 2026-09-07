@@ -11,346 +11,82 @@
   <meta name="theme-color" content="#0a0e27">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
-    
-    body {
-      background: linear-gradient(135deg, #0a0e27 0%, #1a1f4e 50%, #0a0e27 100%);
-      min-height: 100vh;
-      color: white;
-      padding-bottom: 100px;
-    }
-
+    body { background: linear-gradient(135deg, #0a0e27 0%, #1a1f4e 50%, #0a0e27 100%); min-height: 100vh; color: white; padding-bottom: 100px; }
     .withdraw-container { padding: 20px 16px; max-width: 600px; margin: 0 auto; }
-    
     .page-header { margin-bottom: 24px; }
     .page-header h2 { font-size: 1.8rem; font-weight: 900; color: white; margin-bottom: 6px; }
     .page-header p { color: rgba(255,255,255,0.6); font-size: 0.95rem; }
-
-    /* Premium Balance Card */
-    .balance-card {
-      background: linear-gradient(135deg, #0066ff 0%, #00d4ff 100%);
-      border-radius: 24px;
-      padding: 28px 24px;
-      text-align: center;
-      margin-bottom: 24px;
-      position: relative;
-      overflow: hidden;
-      box-shadow: 0 20px 60px rgba(0,102,255,0.3);
-    }
-    .balance-card::before {
-      content: '';
-      position: absolute;
-      top: -50%;
-      right: -50%;
-      width: 200%;
-      height: 200%;
-      background: radial-gradient(circle, rgba(255,215,0,0.2) 0%, transparent 60%);
-      pointer-events: none;
-    }
-    .balance-label {
-      font-size: 0.85rem;
-      color: rgba(255,255,255,0.8);
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      margin-bottom: 8px;
-      position: relative;
-      z-index: 1;
-    }
-    .balance-amount {
-      font-size: 2.8rem;
-      font-weight: 900;
-      color: white;
-      text-shadow: 0 4px 20px rgba(0,0,0,0.2);
-      position: relative;
-      z-index: 1;
-    }
-
-    /* Eligibility Alert */
-    .eligibility-alert {
-      border-radius: 16px;
-      padding: 16px;
-      margin-bottom: 24px;
-      display: none;
-      align-items: center;
-      gap: 12px;
-      font-size: 0.9rem;
-      font-weight: 600;
-      animation: slideDown 0.3s ease;
-    }
-    @keyframes slideDown {
-      from { opacity: 0; transform: translateY(-10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    .eligibility-alert.success {
-      background: rgba(0,255,136,0.1);
-      border: 1px solid rgba(0,255,136,0.3);
-      color: #00ff88;
-    }
-    .eligibility-alert.error {
-      background: rgba(255,26,26,0.1);
-      border: 1px solid rgba(255,26,26,0.3);
-      color: #ff4444;
-    }
-    .eligibility-alert i { font-size: 1.3rem; }
-
-    /* Amount Input */
-    .section-title {
-      font-size: 1rem;
-      font-weight: 700;
-      color: rgba(255,255,255,0.8);
-      margin-bottom: 12px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
+    .balance-card { background: linear-gradient(135deg, #0066ff 0%, #00d4ff 100%); border-radius: 24px; padding: 28px 24px; text-align: center; margin-bottom: 24px; position: relative; overflow: hidden; box-shadow: 0 20px 60px rgba(0,102,255,0.3); }
+    .balance-label { font-size: 0.85rem; color: rgba(255,255,255,0.8); font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; position: relative; z-index: 1; }
+    .balance-amount { font-size: 2.8rem; font-weight: 900; color: white; text-shadow: 0 4px 20px rgba(0,0,0,0.2); position: relative; z-index: 1; }
+    .eligibility-alert { border-radius: 16px; padding: 16px; margin-bottom: 24px; display: none; align-items: center; gap: 12px; font-size: 0.9rem; font-weight: 600; }
+    .eligibility-alert.success { background: rgba(0,255,136,0.1); border: 1px solid rgba(0,255,136,0.3); color: #00ff88; }
+    .eligibility-alert.error { background: rgba(255,26,26,0.1); border: 1px solid rgba(255,26,26,0.3); color: #ff4444; }
+    .section-title { font-size: 1rem; font-weight: 700; color: rgba(255,255,255,0.8); margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
     .section-title i { color: #00d4ff; }
-
-    .amount-input-wrapper {
-      position: relative;
-      margin-bottom: 24px;
-    }
-    .amount-input {
-      width: 100%;
-      padding: 18px 16px 18px 50px;
-      background: rgba(0,0,0,0.3);
-      border: 2px solid rgba(255,255,255,0.1);
-      border-radius: 14px;
-      color: white;
-      font-size: 1.5rem;
-      font-weight: 800;
-      transition: all 0.3s;
-    }
-    .amount-input:focus {
-      outline: none;
-      border-color: #ffd700;
-      background: rgba(0,0,0,0.5);
-      box-shadow: 0 0 0 4px rgba(255,215,0,0.1);
-    }
-    .amount-icon {
-      position: absolute;
-      left: 18px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: #ffd700;
-      font-size: 1.5rem;
-      font-weight: 900;
-    }
-
-    /* Premium Form */
+    .amount-input-wrapper { position: relative; margin-bottom: 24px; }
+    .amount-input { width: 100%; padding: 18px 16px 18px 50px; background: rgba(0,0,0,0.3); border: 2px solid rgba(255,255,255,0.1); border-radius: 14px; color: white; font-size: 1.5rem; font-weight: 800; transition: all 0.3s; }
+    .amount-input:focus { outline: none; border-color: #ffd700; background: rgba(0,0,0,0.5); box-shadow: 0 0 0 4px rgba(255,215,0,0.1); }
+    .amount-icon { position: absolute; left: 18px; top: 50%; transform: translateY(-50%); color: #ffd700; font-size: 1.5rem; font-weight: 900; }
     .form-group { margin-bottom: 18px; }
-    .form-label {
-      display: block;
-      font-size: 0.85rem;
-      color: rgba(255,255,255,0.7);
-      font-weight: 600;
-      margin-bottom: 8px;
-    }
+    .form-label { display: block; font-size: 0.85rem; color: rgba(255,255,255,0.7); font-weight: 600; margin-bottom: 8px; }
     .input-wrapper { position: relative; }
-    .form-input, .form-select {
-      width: 100%;
-      padding: 14px 16px 14px 44px;
-      background: rgba(0,0,0,0.3);
-      border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 12px;
-      color: white;
-      font-size: 0.95rem;
-      transition: all 0.3s;
-    }
-    .form-select {
-      appearance: none;
-      cursor: pointer;
-    }
-    .form-select option {
-      background: #1a1f4e;
-      color: white;
-    }
-    .form-input:focus, .form-select:focus {
-      outline: none;
-      border-color: #00d4ff;
-      background: rgba(0,0,0,0.5);
-      box-shadow: 0 0 0 3px rgba(0,212,255,0.1);
-    }
-    .input-icon {
-      position: absolute;
-      left: 14px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: rgba(255,255,255,0.4);
-      font-size: 1.1rem;
-      transition: color 0.3s;
-    }
-    .form-input:focus ~ .input-icon, .form-select:focus ~ .input-icon { color: #00d4ff; }
-
-    /* Submit Button */
-    .submit-btn {
-      width: 100%;
-      padding: 16px;
-      font-size: 1.05rem;
-      font-weight: 800;
-      border: none;
-      border-radius: 14px;
-      background: linear-gradient(135deg, #00d4ff, #0066ff);
-      color: white;
-      cursor: pointer;
-      transition: all 0.3s;
-      box-shadow: 0 8px 24px rgba(0,212,255,0.3);
-      margin-top: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      position: relative;
-      overflow: hidden;
-    }
-    .submit-btn::before {
-      content: '';
-      position: absolute;
-      top: -50%;
-      left: -50%;
-      width: 200%;
-      height: 200%;
-      background: linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.3) 50%, transparent 70%);
-      animation: shimmer 3s infinite;
-    }
-    .submit-btn:hover:not(:disabled) {
-      transform: translateY(-2px);
-      box-shadow: 0 12px 32px rgba(0,212,255,0.4);
-    }
-    .submit-btn:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-      background: #555;
-      color: #aaa;
-      box-shadow: none;
-    }
-    .submit-btn:disabled::before { display: none; }
-    @keyframes shimmer {
-      0% { transform: translateX(-100%) rotate(45deg); }
-      100% { transform: translateX(100%) rotate(45deg); }
-    }
-
-    /* Info Box */
-    .info-box {
-      background: rgba(0,212,255,0.1);
-      border: 1px solid rgba(0,212,255,0.3);
-      border-radius: 12px;
-      padding: 14px;
-      margin-top: 20px;
-      font-size: 0.85rem;
-      color: #00d4ff;
-      text-align: center;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-    }
-
-    /* Rules Card */
-    .rules-card {
-      background: rgba(255,255,255,0.03);
-      border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 20px;
-      padding: 20px;
-      margin-top: 32px;
-      backdrop-filter: blur(10px);
-    }
-    .rules-card h4 {
-      margin: 0 0 16px 0;
-      font-size: 1rem;
-      font-weight: 700;
-      color: #ffd700;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .schedule-row {
-      display: flex;
-      justify-content: space-between;
-      padding: 10px 0;
-      border-bottom: 1px solid rgba(255,255,255,0.05);
-      font-size: 0.9rem;
-    }
+    .form-input, .form-select { width: 100%; padding: 14px 16px 14px 44px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; color: white; font-size: 0.95rem; transition: all 0.3s; }
+    .form-select { appearance: none; cursor: pointer; }
+    .form-select option { background: #1a1f4e; color: white; }
+    .form-input:focus, .form-select:focus { outline: none; border-color: #00d4ff; background: rgba(0,0,0,0.5); box-shadow: 0 0 0 3px rgba(0,212,255,0.1); }
+    .input-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: rgba(255,255,255,0.4); font-size: 1.1rem; }
+    .submit-btn { width: 100%; padding: 16px; font-size: 1.05rem; font-weight: 800; border: none; border-radius: 14px; background: linear-gradient(135deg, #ffd700, #e6c200); color: #0a0e27; cursor: pointer; transition: all 0.3s; box-shadow: 0 8px 24px rgba(255,215,0,0.3); margin-top: 8px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .submit-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(255,215,0,0.4); }
+    .submit-btn:disabled { opacity: 0.6; cursor: not-allowed; background: #555; color: #aaa; box-shadow: none; }
+    .info-box { background: rgba(0,212,255,0.1); border: 1px solid rgba(0,212,255,0.3); border-radius: 12px; padding: 14px; margin-top: 20px; font-size: 0.85rem; color: #00d4ff; text-align: center; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .rules-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; padding: 20px; margin-top: 32px; backdrop-filter: blur(10px); }
+    .rules-card h4 { margin: 0 0 16px 0; font-size: 1rem; font-weight: 700; color: #ffd700; display: flex; align-items: center; gap: 8px; }
+    .schedule-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.9rem; }
     .schedule-row:last-child { border-bottom: none; }
     .schedule-row span:first-child { color: rgba(255,255,255,0.7); }
     .schedule-row span:last-child { color: #00d4ff; font-weight: 700; }
-
-    .badges-container {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 16px;
-      justify-content: center;
-    }
-    .rule-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(255,255,255,0.1);
-      padding: 8px 14px;
-      border-radius: 20px;
-      font-size: 0.8rem;
-      color: rgba(255,255,255,0.8);
-      font-weight: 600;
-    }
+    .badges-container { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; justify-content: center; }
+    .rule-badge { display: inline-flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 8px 14px; border-radius: 20px; font-size: 0.8rem; color: rgba(255,255,255,0.8); font-weight: 600; }
     .rule-badge i { color: #ffd700; }
   </style>
 </head>
 <body class="rv-shell">
   <div id="header-container"></div>
-
   <div class="withdraw-container">
     <div class="page-header">
       <h2>Withdraw Funds</h2>
       <p>Instant payout via Target Growth</p>
     </div>
-
-    <!-- Balance Card -->
     <div class="balance-card">
       <div class="balance-label">Available Balance</div>
       <div class="balance-amount">₦<span id="available-balance">0.00</span></div>
     </div>
-
-    <!-- Eligibility Alert -->
     <div id="eligibility-alert" class="eligibility-alert"></div>
-
-    <!-- Amount Input -->
     <div class="section-title"><i class="fa-solid fa-naira-sign"></i> Enter Amount</div>
     <div class="amount-input-wrapper">
       <span class="amount-icon">₦</span>
       <input type="number" id="amount" class="amount-input" placeholder="0.00" min="1000" step="100">
     </div>
-
-    <!-- Withdrawal Form -->
     <form id="withdraw-form">
       <div class="form-group">
         <label class="form-label">Bank Name</label>
         <div class="input-wrapper">
           <select id="bank-name" class="form-select" required>
             <option value="">Select your bank</option>
-            <option value="Access Bank">Access Bank</option>
-            <option value="GTBank">Guaranty Trust Bank (GTBank)</option>
-            <option value="Zenith Bank">Zenith Bank</option>
-            <option value="UBA">United Bank for Africa (UBA)</option>
-            <option value="First Bank">First Bank of Nigeria</option>
-            <option value="Fidelity Bank">Fidelity Bank</option>
-            <option value="Union Bank">Union Bank</option>
-            <option value="Sterling Bank">Sterling Bank</option>
-            <option value="Wema Bank">Wema Bank</option>
-            <option value="Stanbic IBTC">Stanbic IBTC Bank</option>
-            <option value="Ecobank">Ecobank Nigeria</option>
-            <option value="Polaris Bank">Polaris Bank</option>
-            <option value="Opay">Opay (Paycom)</option>
-            <option value="PalmPay">PalmPay</option>
-            <option value="Kuda">Kuda Bank</option>
-            <option value="Moniepoint">Moniepoint MFB</option>
+            <option value="Access Bank">Access Bank</option><option value="GTBank">Guaranty Trust Bank (GTBank)</option>
+            <option value="Zenith Bank">Zenith Bank</option><option value="UBA">United Bank for Africa (UBA)</option>
+            <option value="First Bank">First Bank of Nigeria</option><option value="Fidelity Bank">Fidelity Bank</option>
+            <option value="Union Bank">Union Bank</option><option value="Sterling Bank">Sterling Bank</option>
+            <option value="Wema Bank">Wema Bank</option><option value="Stanbic IBTC">Stanbic IBTC Bank</option>
+            <option value="Ecobank">Ecobank Nigeria</option><option value="Polaris Bank">Polaris Bank</option>
+            <option value="Opay">Opay (Paycom)</option><option value="PalmPay">PalmPay</option>
+            <option value="Kuda">Kuda Bank</option><option value="Moniepoint">Moniepoint MFB</option>
             <option value="VFD">VFD Microfinance Bank</option>
           </select>
           <i class="fa-solid fa-building-columns input-icon"></i>
         </div>
       </div>
-      
       <div class="form-group">
         <label class="form-label">Account Number</label>
         <div class="input-wrapper">
@@ -358,7 +94,6 @@
           <i class="fa-solid fa-hashtag input-icon"></i>
         </div>
       </div>
-      
       <div class="form-group">
         <label class="form-label">Account Name</label>
         <div class="input-wrapper">
@@ -366,31 +101,25 @@
           <i class="fa-solid fa-user input-icon"></i>
         </div>
       </div>
-
       <button type="submit" class="submit-btn" id="submit-btn">
         <i class="fa-solid fa-bolt"></i> Withdraw Now
       </button>
     </form>
-
-    <div class="info-box">
-      <i class="fa-solid fa-shield-halved"></i>
-      Secured by Target Growth • Instant Payouts
-    </div>
-
-    <!-- Rules Card -->
+    <div class="info-box"><i class="fa-solid fa-shield-halved"></i> Secured by Target Growth • Instant Payouts</div>
     <div class="rules-card">
-      <h4><i class="fa-regular fa-clock"></i> Processing Time</h4>
-      <div class="schedule-row"><span>Standard Processing</span> <span>Instant - 5 mins</span></div>
-      <div class="schedule-row"><span>Failed Transactions</span> <span>Auto-refunded</span></div>
-      <div class="schedule-row"><span>Support</span> <span>24/7 Available</span></div>
-
+      <h4><i class="fa-regular fa-calendar-check"></i> Weekly Withdrawal Schedule</h4>
+      <div class="schedule-row"><span>M1, M2</span> <span>Monday</span></div>
+      <div class="schedule-row"><span>M3, M4</span> <span>Tuesday</span></div>
+      <div class="schedule-row"><span>M5</span> <span>Wednesday</span></div>
+      <div class="schedule-row"><span>M6</span> <span>Thursday</span></div>
+      <div class="schedule-row"><span>M7</span> <span>Friday</span></div>
       <div class="badges-container">
-        <div class="rule-badge"><i class="fa-solid fa-check"></i> Min: ₦1,000</div>
-        <div class="rule-badge"><i class="fa-solid fa-check"></i> Auto-refund on failure</div>
+        <div class="rule-badge"><i class="fa-regular fa-clock"></i> 10am - 6pm WAT</div>
+        <div class="rule-badge"><i class="fa-solid fa-ban" style="color: #ff4444;"></i> No Weekends</div>
+        <div class="rule-badge"><i class="fa-solid fa-1"></i> Max 1 per day</div>
       </div>
     </div>
   </div>
-
   <div id="footer-container"></div>
   <script src="/assets/js/components.js"></script>
   <script src="/assets/js/notifications.js"></script>
@@ -402,114 +131,58 @@
     async function init() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return window.location.href = '/login.html';
-      
       const token = (await supabase.auth.getSession()).data.session.access_token;
-
-      // 1. Load Balance
       const { data: wallet } = await supabase.from('wallets').select('balance').eq('user_id', user.id).single();
-      const balance = wallet?.balance || 0;
-      document.getElementById('available-balance').textContent = Number(balance).toLocaleString('en-NG', { minimumFractionDigits: 2 });
+      document.getElementById('available-balance').textContent = Number(wallet?.balance || 0).toLocaleString('en-NG', { minimumFractionDigits: 2 });
 
-      // 2. Check Eligibility
-      try {
-        const res = await fetch('/api/finance?action=getWithdrawalEligibility', { 
-          headers: { 'Authorization': `Bearer ${token}` } 
-        });
-        const elig = await res.json();
-
-        const alertBox = document.getElementById('eligibility-alert');
-        alertBox.style.display = 'flex';
-        
-        if (!elig.can_withdraw_now) {
-          alertBox.className = 'eligibility-alert error';
-          alertBox.innerHTML = `<i class="fa-solid fa-circle-exclamation"></i> <span>${elig.reason_blocked}</span>`;
-          document.getElementById('withdraw-form').style.opacity = '0.5';
-          document.getElementById('withdraw-form').style.pointerEvents = 'none';
-        } else {
-          alertBox.className = 'eligibility-alert success';
-          alertBox.innerHTML = `<i class="fa-solid fa-circle-check"></i> <span>You are eligible to withdraw! (Tier: ${elig.tier.toUpperCase()})</span>`;
-        }
-      } catch (err) {
-        console.error('Eligibility check failed:', err);
+      const res = await fetch('/api/finance?action=getWithdrawalEligibility', { headers: { 'Authorization': `Bearer ${token}` } });
+      const elig = await res.json();
+      const alertBox = document.getElementById('eligibility-alert');
+      alertBox.style.display = 'flex';
+      
+      if (!elig.can_withdraw_now) {
+        alertBox.className = 'eligibility-alert error';
+        alertBox.innerHTML = `<i class="fa-solid fa-circle-exclamation"></i> <span>${elig.reason_blocked}</span>`;
+        document.getElementById('withdraw-form').style.opacity = '0.5';
+        document.getElementById('withdraw-form').style.pointerEvents = 'none';
+      } else {
+        alertBox.className = 'eligibility-alert success';
+        alertBox.innerHTML = `<i class="fa-solid fa-circle-check"></i> <span>You are eligible to withdraw! (Tier: ${elig.tier.toUpperCase()})</span>`;
       }
     }
 
-    // 3. Handle Form Submission (Target Growth)
     document.getElementById('withdraw-form').addEventListener('submit', async (e) => {
       e.preventDefault();
-      
       const amount = document.getElementById('amount').value;
       const bankName = document.getElementById('bank-name').value;
       const accountNumber = document.getElementById('account-number').value;
       const accountName = document.getElementById('account-name').value.trim();
       
-      // Validation
-      if (!amount || Number(amount) < 1000) {
-        showToast('Minimum withdrawal is ₦1,000', 'error');
-        return;
-      }
-
-      if (accountNumber.length !== 10 || !/^\d+$/.test(accountNumber)) {
-        showToast('Please enter a valid 10-digit account number', 'error');
-        return;
-      }
-
-      if (!bankName) {
-        showToast('Please select your bank', 'error');
-        return;
-      }
-
-      if (!accountName) {
-        showToast('Please enter account name', 'error');
-        return;
-      }
+      if (!amount || Number(amount) < 1000) return showToast('Minimum withdrawal is ₦1,000', 'error');
+      if (accountNumber.length !== 10 || !/^\d+$/.test(accountNumber)) return showToast('Please enter a valid 10-digit account number', 'error');
+      if (!bankName) return showToast('Please select your bank', 'error');
+      if (!accountName) return showToast('Please enter account name', 'error');
       
       const btn = document.getElementById('submit-btn');
       btn.disabled = true;
       btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Processing...';
-
       const token = (await supabase.auth.getSession()).data.session.access_token;
-      const { data: { user } } = await supabase.auth.getUser();
-      const { data: profile } = await supabase.from('profiles').select('full_name, email').eq('id', user.id).single();
       
       try {
-        // Call Target Growth Withdrawal API
         const res = await fetch('/api/finance?action=initiateTargetGrowthWithdrawal', {
-          method: 'POST',
-          headers: { 
-            'Content-Type': 'application/json', 
-            'Authorization': `Bearer ${token}` 
-          },
-          body: JSON.stringify({
-            amount: Number(amount),
-            bank_name: bankName,
-            account_number: accountNumber,
-            account_name: accountName,
-            email: profile?.email,
-            full_name: profile?.full_name
-          })
+          method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          body: JSON.stringify({ amount: Number(amount), bank_name: bankName, account_number: accountNumber, account_name: accountName })
         });
-        
         const data = await res.json();
-        
-        if (!res.ok) {
-          throw new Error(data.error || 'Withdrawal failed');
-        }
-
-        showToast('Withdrawal initiated successfully! Funds will arrive shortly.', 'success');
-        
-        setTimeout(() => {
-          window.location.href = '/dashboard.html';
-        }, 2000);
-
+        if (!res.ok) throw new Error(data.error);
+        showToast('Withdrawal request submitted for admin approval!', 'success');
+        setTimeout(() => { window.location.href = '/dashboard.html'; }, 2000);
       } catch (err) {
-        console.error('Withdrawal error:', err);
         showToast(err.message, 'error');
         btn.disabled = false;
         btn.innerHTML = '<i class="fa-solid fa-bolt"></i> Withdraw Now';
       }
     });
-
     init();
   </script>
 </body>
