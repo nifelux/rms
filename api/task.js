@@ -16,7 +16,6 @@ export default async function handler(req, res) {
   }
 }
 
-// WAT (UTC+1) Helpers
 function isTaskDayOpen() {
   const now = new Date();
   const watDate = new Date(now.getTime() + 60 * 60 * 1000);
@@ -67,7 +66,6 @@ async function getTaskStatus(req, res) {
       });
     }
 
-    // Fetch tier config
     const { data: tierInfo, error: tierError } = await supabaseAdmin
       .from('rms_tiers')
       .select('daily_boxes, daily_earning')
@@ -79,12 +77,11 @@ async function getTaskStatus(req, res) {
       return res.status(500).json({ error: 'Tier configuration not found in database.' });
     }
 
-    // Calculate estimated earning per box for the UI
     const earningPerBox = tierInfo.daily_boxes > 0 ? Math.floor(tierInfo.daily_earning / tierInfo.daily_boxes) : 0;
 
     return res.status(200).json({
       tier, 
-      boxes_opened, 
+      boxes_opened: boxesOpened,  // ✅ FIXED
       max_boxes: tierInfo.daily_boxes, 
       earning_per_box: earningPerBox,
       daily_earning: tierInfo.daily_earning, 
@@ -134,7 +131,6 @@ async function openMysteryBox(req, res) {
       return res.status(400).json({ error: 'Daily limit reached.' });
     }
 
-    // SMART RANDOMIZATION LOGIC
     const { data: todayTxns } = await supabaseAdmin
       .from('transactions')
       .select('amount')
@@ -149,7 +145,7 @@ async function openMysteryBox(req, res) {
     let boxAmount;
     
     if (boxesLeft === 1) {
-      boxAmount = Math.max(0, remainingToday); // Ensure it's not negative
+      boxAmount = Math.max(0, remainingToday);
     } else {
       const avgRemaining = remainingToday / boxesLeft;
       const min = avgRemaining * 0.5;
@@ -162,12 +158,10 @@ async function openMysteryBox(req, res) {
       if (boxAmount > maxAllowed) boxAmount = maxAllowed;
     }
 
-    // Ensure minimum amount is at least 1 if remaining is > 0
     if (boxAmount <= 0 && remainingToday > 0) boxAmount = 1;
 
     const reference = `box_${user.id.slice(0, 8)}_${Date.now()}`;
     
-    // 1. Record transaction
     const { error: txnErr } = await supabaseAdmin.from('transactions').insert({
       user_id: user.id, 
       type: 'task_earning', 
@@ -179,7 +173,6 @@ async function openMysteryBox(req, res) {
 
     if (txnErr) return res.status(500).json({ error: txnErr.message });
 
-    // 2. Credit Wallet (Using .update() instead of .upsert() for safety)
     const { data: wallet } = await supabaseAdmin
       .from('wallets')
       .select('balance')
@@ -193,7 +186,6 @@ async function openMysteryBox(req, res) {
       .update({ balance: newBalance, updated_at: new Date().toISOString() })
       .eq('user_id', user.id);
 
-    // 3. Update Profile Counters
     await supabaseAdmin
       .from('profiles')
       .update({ 
@@ -205,7 +197,7 @@ async function openMysteryBox(req, res) {
     return res.status(200).json({ 
       success: true, 
       amount: boxAmount, 
-      boxes_opened: boxesOpened + 1, 
+      boxes_opened: boxesOpened + 1,  // ✅ FIXED
       max_boxes: tierInfo.daily_boxes,
       daily_total: tierInfo.daily_earning
     });
