@@ -274,7 +274,7 @@
   
   <div class="notification" id="notification">
     <i class="fa-solid fa-check-circle" style="font-size: 1.5rem;"></i>
-    <span id="notification-text">You earned ₦0!</span>
+    <span id="notification-text">You earned 0!</span>
   </div>
 
   <script src="/assets/js/components.js"></script>
@@ -298,15 +298,13 @@
           headers: { 'Authorization': `Bearer ${token}` } 
         });
         
-        // ️ REVEAL THE REAL ERROR MESSAGE
         if (!res.ok) {
           const errData = await res.json().catch(() => ({}));
           throw new Error(errData.error || `Failed to load tasks (Status: ${res.status})`);
         }
         
         taskStatus = await res.json();
-        // ... rest of the code remains the same ...
-
+        
         // Handle Weekend
         if (taskStatus.weekend_closed) {
           document.getElementById('tier-badge').textContent = 'Weekend Break';
@@ -322,7 +320,7 @@
             <div class="state-box">
               <i class="fa-solid fa-trophy" style="font-size: 3rem; color: #00ff88; margin-bottom: 16px;"></i>
               <h3 style="color: white; margin-bottom: 8px;">All M0 Tasks Completed!</h3>
-              <p style="color: rgba(255,255,255,0.7); margin-bottom: 20px;">You earned 150 total</p>
+              <p style="color: rgba(255,255,255,0.7); margin-bottom: 20px;">You earned ₦150 total</p>
               <a href="/vip.html" style="display: inline-block; padding: 14px 32px; background: linear-gradient(135deg, #00d4ff, #0066ff); color: white; text-decoration: none; border-radius: 12px; font-weight: 800;">
                 <i class="fa-solid fa-crown"></i> Upgrade to M1
               </a>
@@ -334,11 +332,15 @@
 
         // Set Tier Badge & M0 Notice
         document.getElementById('tier-badge').textContent = `Tier: ${taskStatus.tier.toUpperCase()}`;
-        if (taskStatus.tier === 'M0') {
+        if (taskStatus.tier === 'M0' || taskStatus.tier === 'NEWBIE') {
           document.getElementById('m0-notice').style.display = 'block';
         }
 
-        updateProgress(taskStatus.boxes_opened, taskStatus.max_boxes);
+        // Use correct field names from API response
+        const boxesOpened = taskStatus.boxes_opened || 0;
+        const maxBoxes = taskStatus.max_boxes || 0;
+        
+        updateProgress(boxesOpened, maxBoxes);
         renderBoxes();
 
       } catch (err) {
@@ -371,7 +373,7 @@
       const earning = taskStatus.earning_per_box || 0;
       
       // M0 gets 1 big box, M1+ gets a grid
-      if (taskStatus.tier === 'M0') {
+      if (taskStatus.tier === 'M0' || taskStatus.tier === 'NEWBIE') {
         grid.style.gridTemplateColumns = '1fr';
         const box = document.createElement('div');
         box.className = `mystery-box ${opened >= 1 ? 'opened' : ''}`;
@@ -473,7 +475,7 @@
           boxElement.classList.remove('opening');
           boxElement.classList.add('opened');
           
-          // 1. UPDATE THE REWARD TEXT WITH THE REAL RANDOM AMOUNT
+          // Update the reward text with the real random amount
           const rewardAmountDiv = boxElement.querySelector('.reward-amount');
           if (rewardAmountDiv) {
             rewardAmountDiv.textContent = `+₦${Number(data.amount).toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -499,6 +501,7 @@
         showToast(err.message, 'error');
       }
     }
+    
     loadTasks();
   </script>
 </body>
