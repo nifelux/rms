@@ -76,7 +76,7 @@ export default async function handler(req, res) {
       return res.status(200).json({ message: 'Already processed' });
     }
 
-    // Credit wallet
+    // Credit wallet using .update() instead of .upsert()
     const { data: wallet } = await supabaseAdmin
       .from('wallets')
       .select('balance')
@@ -85,38 +85,22 @@ export default async function handler(req, res) {
 
     const newBalance = (wallet?.balance || 0) + Number(deposit.amount);
 
-    await supabaseAdmin.from('wallets').upsert({
-      user_id: deposit.user_id,
-      balance: newBalance,
-      updated_at: new Date().toISOString()
-    });
+    console.log(`[TG-WEBHOOK] Updating wallet: ${wallet?.balance} → ${newBalance} for user ${deposit.user_id}`);
 
-    await supabaseAdmin.from('transactions').insert({
-      user_id: deposit.user_id,
-      type: 'deposit',
-      amount: Number(deposit.amount),
-      status: 'approved',
-      reference: deposit.reference,
-      description: `Target Growth Deposit (${identifier})`
-    });
+    const { error: walletError } = await supabaseAdmin
+      .from('wallets')
+      .update({ 
+        balance: newBalance, 
+        updated_at: new Date().toISOString() 
+      })
+      .eq('user_id', deposit.user_id);
 
-    await supabaseAdmin.from('deposits').update({
-      status: 'completed',
-      provider_status: 'success',
-      provider_response: verification,
-      paid_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
-    }).eq('id', deposit.id);
+    if (walletError) {
+      console.error('[TG-WEBHOOK]  Wallet update failed:', walletError.message);
+      throw new Error(`Wallet update failed: ${walletError.message}`);
+    }
 
-    console.log(`[TG-DEPOSIT] ✅ Successfully credited ₦${deposit.amount} to user ${deposit.user_id}`);
-
-    return res.status(200).json({ success: true });
-
-  } catch (err) {
-    console.error('[TG-WEBHOOK] Error:', err);
-    return res.status(500).json({ error: err.message });
-  }
-}
+    console.log(`[TG-WEBHOOK] ✅ Wallet updated successfully`);
 
 
 // ==========================================
