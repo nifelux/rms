@@ -109,10 +109,6 @@ async function getTaskStatus(req, res) {
       await supabaseAdmin.from('profiles').update({ boxes_opened_today: 0, last_task_reset_date: now.toISOString() }).eq('id', user.id);
     }
 
-    if (tier === 'newbie' || tier === 'M0') {
-      return res.status(200).json({ tier, boxes_opened: 0, max_boxes: 0, earning_per_box: 0, can_open: false });
-    }
-
     const { data: tierInfo } = await supabaseAdmin.from('rms_tiers').select('daily_boxes, daily_earning').eq('tier', tier).single();
     if (!tierInfo) return res.status(500).json({ error: 'Tier config not found' });
 
@@ -196,7 +192,7 @@ async function openMysteryBox(req, res) {
       });
 
       // Update Profile: Increment daily counter and total newbie counter
-      const updates: any = { 
+      const updates = { 
         boxes_opened_today: boxesOpenedToday + 1, 
         last_task_reset_date: now.toISOString(),
         newbie_boxes_claimed: newbieBoxesClaimed + 1
