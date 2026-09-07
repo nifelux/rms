@@ -118,7 +118,6 @@
 
     const tierOrder = ['M0', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7'];
 
-    // Updated benefits matching the new database prices
     const tierBenefits = {
       'M1': [
         { text: '5 Daily Mystery Boxes', unlocked: true },
@@ -165,7 +164,7 @@
       'M7': [
         { text: '35 Daily Mystery Boxes', unlocked: true },
         { text: 'Earn ₦51,204 Daily', unlocked: true },
-        { text: 'Total Return: 18,689,460', unlocked: true },
+        { text: 'Total Return: ₦18,689,460', unlocked: true },
         { text: 'Withdrawal Day: Friday', unlocked: true },
         { text: 'Lifetime premium access', unlocked: true }
       ]
@@ -248,18 +247,19 @@
       }
     }
 
+    // ✅ FIXED: Calls the correct finance API with correct payload
     window.upgradeToTier = async (targetTier, cost) => {
       showConfirm(`Upgrade to ${targetTier} for ₦${Number(cost).toLocaleString()}? This will be deducted from your wallet.`, async () => {
         try {
           const token = (await supabase.auth.getSession()).data.session.access_token;
-          const res = await fetch('/api/admin?action=upgradeTier', {
+          const res = await fetch('/api/finance?action=upgradeVip', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-            body: JSON.stringify({ target_tier: targetTier })
+            body: JSON.stringify({ tier: targetTier, amount: cost })
           });
           const data = await res.json();
           if (!res.ok) throw new Error(data.error || 'Upgrade failed');
-          showToast(` Successfully upgraded to ${targetTier}!`, 'success');
+          showToast(`Successfully upgraded to ${targetTier}!`, 'success');
           setTimeout(() => loadVIPPage(), 1500);
         } catch (err) {
           showToast(err.message, 'error');
