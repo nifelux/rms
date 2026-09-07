@@ -15,128 +15,247 @@
       background: linear-gradient(135deg, #0a0e27 0%, #1a1f4e 50%, #0a0e27 100%);
       min-height: 100vh;
       color: white;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
+      padding-bottom: 40px;
     }
 
-    .deposit-card {
-      background: linear-gradient(135deg, rgba(17,22,58,0.9), rgba(26,32,80,0.9));
-      border: 1px solid rgba(255,215,0,0.15);
+    .page-container {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px 16px;
+    }
+
+    /* Top Navigation */
+    .top-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+      padding: 12px 0;
+    }
+
+    .back-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: rgba(255,255,255,0.7);
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 600;
+      transition: all 0.3s;
+      padding: 8px 12px;
+      border-radius: 10px;
+    }
+
+    .back-btn:hover {
+      color: #ffd700;
+      background: rgba(255,215,0,0.1);
+    }
+
+    .page-title {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: white;
+    }
+
+    .spacer { width: 80px; }
+
+    /* Hero Card */
+    .hero-card {
+      background: linear-gradient(135deg, rgba(0,102,255,0.15), rgba(0,212,255,0.08));
+      border: 1px solid rgba(0,212,255,0.2);
       border-radius: 24px;
-      padding: 40px 32px;
-      max-width: 450px;
-      width: 100%;
-      backdrop-filter: blur(20px);
-      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+      padding: 32px 24px;
+      text-align: center;
+      margin-bottom: 24px;
       position: relative;
       overflow: hidden;
     }
 
-    .deposit-card::before {
+    .hero-card::before {
       content: '';
       position: absolute;
       top: -50%;
       right: -50%;
       width: 200%;
       height: 200%;
-      background: radial-gradient(circle, rgba(255,215,0,0.05) 0%, transparent 60%);
+      background: radial-gradient(circle, rgba(255,215,0,0.1) 0%, transparent 60%);
       pointer-events: none;
     }
 
-    .header {
-      text-align: center;
-      margin-bottom: 32px;
-      position: relative;
-      z-index: 1;
-    }
-
-    .header-icon {
-      width: 70px;
-      height: 70px;
+    .hero-icon {
+      width: 80px;
+      height: 80px;
       background: linear-gradient(135deg, #ffd700, #e6c200);
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
       margin: 0 auto 20px;
-      font-size: 2rem;
+      font-size: 2.2rem;
       color: #0a0e27;
-      box-shadow: 0 8px 24px rgba(255,215,0,0.3);
-    }
-
-    .header h2 {
-      font-size: 1.8rem;
-      font-weight: 900;
-      color: white;
-      margin-bottom: 8px;
-    }
-
-    .header p {
-      color: rgba(255,255,255,0.7);
-      font-size: 0.95rem;
-    }
-
-    .form-group {
-      margin-bottom: 24px;
+      box-shadow: 0 8px 32px rgba(255,215,0,0.3);
       position: relative;
       z-index: 1;
     }
 
-    .form-group label {
-      display: block;
-      font-size: 0.9rem;
-      color: rgba(255,255,255,0.8);
-      margin-bottom: 10px;
-      font-weight: 600;
-    }
-
-    .input-wrapper {
+    .hero-card h1 {
+      font-size: 1.8rem;
+      font-weight: 900;
+      margin-bottom: 8px;
       position: relative;
+      z-index: 1;
     }
 
-    .form-control {
+    .hero-card p {
+      color: rgba(255,255,255,0.7);
+      font-size: 0.95rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Amount Input Card */
+    .input-card {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 20px;
+      padding: 24px;
+      margin-bottom: 20px;
+      backdrop-filter: blur(10px);
+    }
+
+    .input-label {
+      font-size: 0.85rem;
+      color: rgba(255,255,255,0.6);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .amount-input-wrapper {
+      position: relative;
+      margin-bottom: 12px;
+    }
+
+    .amount-input {
       width: 100%;
-      padding: 18px 18px 18px 50px;
+      padding: 20px 20px 20px 50px;
       background: rgba(0,0,0,0.3);
       border: 2px solid rgba(255,255,255,0.1);
       border-radius: 14px;
       color: white;
-      font-size: 1.2rem;
-      font-weight: 700;
+      font-size: 1.8rem;
+      font-weight: 900;
       transition: all 0.3s;
     }
 
-    .form-control:focus {
+    .amount-input:focus {
       outline: none;
       border-color: #ffd700;
       background: rgba(0,0,0,0.4);
       box-shadow: 0 0 0 4px rgba(255,215,0,0.1);
     }
 
-    .input-icon {
+    .currency-icon {
       position: absolute;
       left: 18px;
       top: 50%;
       transform: translateY(-50%);
-      color: rgba(255,255,255,0.5);
-      font-size: 1.2rem;
-      transition: color 0.3s;
-    }
-
-    .form-control:focus ~ .input-icon {
       color: #ffd700;
+      font-size: 1.5rem;
+      font-weight: 900;
     }
 
-    .amount-hint {
+    .amount-limits {
       display: flex;
       justify-content: space-between;
-      margin-top: 8px;
       font-size: 0.8rem;
       color: rgba(255,255,255,0.5);
     }
 
+    /* Quick Amounts */
+    .quick-amounts {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .quick-btn {
+      padding: 14px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px;
+      color: white;
+      font-weight: 700;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .quick-btn:hover {
+      background: rgba(255,215,0,0.1);
+      border-color: rgba(255,215,0,0.3);
+      transform: translateY(-2px);
+    }
+
+    .quick-btn:active {
+      transform: translateY(0);
+    }
+
+    /* Payment Method */
+    .payment-method {
+      background: rgba(0,212,255,0.08);
+      border: 1px solid rgba(0,212,255,0.2);
+      border-radius: 14px;
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    .payment-method-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .payment-method-icon {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, #00d4ff, #0066ff);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 1.1rem;
+    }
+
+    .payment-method-name {
+      font-weight: 700;
+      font-size: 0.95rem;
+    }
+
+    .payment-method-desc {
+      font-size: 0.8rem;
+      color: rgba(255,255,255,0.6);
+    }
+
+    .payment-method-badge {
+      background: rgba(0,255,136,0.15);
+      color: #00ff88;
+      padding: 4px 10px;
+      border-radius: 8px;
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+
+    /* Submit Button */
     .submit-btn {
       width: 100%;
       padding: 18px;
@@ -153,8 +272,7 @@
       align-items: center;
       justify-content: center;
       gap: 10px;
-      position: relative;
-      z-index: 1;
+      margin-bottom: 16px;
     }
 
     .submit-btn:hover:not(:disabled) {
@@ -170,123 +288,157 @@
       box-shadow: none;
     }
 
-    .back-link {
-      display: block;
-      text-align: center;
-      margin-top: 24px;
-      color: rgba(255,255,255,0.6);
-      text-decoration: none;
-      font-size: 0.9rem;
-      font-weight: 600;
-      transition: color 0.3s;
-      position: relative;
-      z-index: 1;
-    }
-
-    .back-link:hover {
-      color: #ffd700;
-    }
-
-    .secure-badge {
+    /* Security Badge */
+    .security-badge {
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 8px;
-      margin-top: 20px;
       padding: 12px;
-      background: rgba(0,255,136,0.1);
+      background: rgba(0,255,136,0.08);
       border: 1px solid rgba(0,255,136,0.2);
-      border-radius: 10px;
-      font-size: 0.8rem;
+      border-radius: 12px;
+      font-size: 0.85rem;
       color: #00ff88;
       font-weight: 600;
-      position: relative;
-      z-index: 1;
     }
 
-    .quick-amounts {
+    /* Info Cards */
+    .info-grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 8px;
-      margin-bottom: 20px;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 20px;
     }
 
-    .quick-amount-btn {
-      padding: 12px;
-      background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 10px;
+    .info-card {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px;
+      padding: 16px;
+      text-align: center;
+    }
+
+    .info-card i {
+      font-size: 1.5rem;
+      color: #ffd700;
+      margin-bottom: 8px;
+    }
+
+    .info-card-title {
+      font-size: 0.8rem;
+      color: rgba(255,255,255,0.6);
+      margin-bottom: 4px;
+    }
+
+    .info-card-value {
+      font-size: 1rem;
+      font-weight: 800;
       color: white;
-      font-weight: 700;
-      cursor: pointer;
-      transition: all 0.2s;
-      font-size: 0.9rem;
-    }
-
-    .quick-amount-btn:hover {
-      background: rgba(255,215,0,0.1);
-      border-color: rgba(255,215,0,0.3);
-      transform: translateY(-2px);
     }
 
     @media (max-width: 480px) {
-      .deposit-card { padding: 32px 24px; }
-      .header h2 { font-size: 1.5rem; }
+      .hero-card h1 { font-size: 1.5rem; }
+      .amount-input { font-size: 1.5rem; }
     }
   </style>
 </head>
 <body>
-  <div class="deposit-card">
-    <div class="header">
-      <div class="header-icon">
+  <div class="page-container">
+    <!-- Top Navigation -->
+    <div class="top-nav">
+      <a href="/dashboard.html" class="back-btn">
+        <i class="fa-solid fa-arrow-left"></i>
+        <span>Back</span>
+      </a>
+      <div class="page-title">Deposit</div>
+      <div class="spacer"></div>
+    </div>
+
+    <!-- Hero Card -->
+    <div class="hero-card">
+      <div class="hero-icon">
         <i class="fa-solid fa-wallet"></i>
       </div>
-      <h2>Fund Your Wallet</h2>
-      <p>Secure instant deposit via Target Growth</p>
+      <h1>Fund Your Wallet</h1>
+      <p>Instant deposit via Target Growth Gateway</p>
     </div>
 
-    <form id="deposit-form">
-      <div class="form-group">
-        <label>Amount (₦)</label>
-        <div class="input-wrapper">
-          <input 
-            type="number" 
-            id="amount" 
-            class="form-control" 
-            placeholder="Enter amount" 
-            min="100" 
-            max="1000000" 
-            step="100"
-            required 
-            autocomplete="off"
-          >
-          <i class="fa-solid fa-naira-sign input-icon"></i>
+    <!-- Amount Input -->
+    <div class="input-card">
+      <div class="input-label">
+        <i class="fa-solid fa-coins"></i>
+        Enter Amount
+      </div>
+      <div class="amount-input-wrapper">
+        <input 
+          type="number" 
+          id="amount" 
+          class="amount-input" 
+          placeholder="0.00" 
+          min="100" 
+          max="1000000" 
+          step="100"
+          required 
+          autocomplete="off"
+        >
+        <span class="currency-icon">₦</span>
+      </div>
+      <div class="amount-limits">
+        <span>Min: ₦15000</span>
+        <span>Max: ₦1,000,000</span>
+      </div>
+    </div>
+
+    <!-- Quick Amounts -->
+    <div class="quick-amounts">
+      <button type="button" class="quick-btn" onclick="setAmount(15000)">₦15,000</button>
+      <button type="button" class="quick-btn" onclick="setAmount(5000)">₦5,000</button>
+      <button type="button" class="quick-btn" onclick="setAmount(10000)">₦10,000</button>
+      <button type="button" class="quick-btn" onclick="setAmount(20000)">₦20,000</button>
+      <button type="button" class="quick-btn" onclick="setAmount(50000)">₦50,000</button>
+      <button type="button" class="quick-btn" onclick="setAmount(100000)">₦100,000</button>
+    </div>
+
+    <!-- Payment Method -->
+    <div class="payment-method">
+      <div class="payment-method-left">
+        <div class="payment-method-icon">
+          <i class="fa-solid fa-bolt"></i>
         </div>
-        <div class="amount-hint">
-          <span>Min: ₦100</span>
-          <span>Max: ₦1,000,000</span>
+        <div>
+          <div class="payment-method-name">Target Growth</div>
+          <div class="payment-method-desc">Instant Processing</div>
         </div>
       </div>
+      <div class="payment-method-badge">SECURE</div>
+    </div>
 
-      <div class="quick-amounts">
-        <button type="button" class="quick-amount-btn" onclick="setAmount(1000)">1,000</button>
-        <button type="button" class="quick-amount-btn" onclick="setAmount(5000)">₦5,000</button>
-        <button type="button" class="quick-amount-btn" onclick="setAmount(10000)">₦10,000</button>
-      </div>
+    <!-- Submit Button -->
+    <button type="button" class="submit-btn" id="submit-btn" onclick="handleDeposit()">
+      <i class="fa-solid fa-bolt"></i>
+      <span>Pay Now</span>
+    </button>
 
-      <button type="submit" class="submit-btn" id="submit-btn">
-        <i class="fa-solid fa-bolt"></i> Pay Now
-      </button>
-    </form>
-
-    <div class="secure-badge">
+    <!-- Security Badge -->
+    <div class="security-badge">
       <i class="fa-solid fa-shield-halved"></i>
-      <span>Secured by Target Growth</span>
+      <span>256-bit SSL Encrypted & Secured by Target Growth</span>
     </div>
 
-    <a href="/dashboard.html" class="back-link">
-      <i class="fa-solid fa-arrow-left"></i> Back to Dashboard
-    </a>
+    <!-- Info Cards -->
+    <div class="info-grid">
+      <div class="info-card">
+        <i class="fa-solid fa-clock"></i>
+        <div class="info-card-title">Processing Time</div>
+        <div class="info-card-value">Instant</div>
+      </div>
+      <div class="info-card">
+        <i class="fa-solid fa-percent"></i>
+        <div class="info-card-title">Transaction Fee</div>
+        <div class="info-card-value">0%</div>
+      </div>
+    </div>
   </div>
 
   <script src="/assets/js/notifications.js"></script>
@@ -294,23 +446,26 @@
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
     const supabase = createClient('https://ofysznsajwxnjqaumwch.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9meXN6bnNhand4bmpxYXVtd2NoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgyMzM4NDgsImV4cCI6MjEwMzgwOTg0OH0.XaHkP5WZ2nJVJXVdbG-D13rrD63g_09HxmJoZn7ZoWA');
 
-    // Quick amount selector
     window.setAmount = (amount) => {
-      document.getElementById('amount').value = amount;
-      document.getElementById('amount').focus();
+      const input = document.getElementById('amount');
+      input.value = amount;
+      input.focus();
+      
+      // Visual feedback
+      input.style.borderColor = '#ffd700';
+      setTimeout(() => {
+        input.style.borderColor = '';
+      }, 500);
     };
 
-    document.getElementById('deposit-form').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      
+    window.handleDeposit = async () => {
       const amountInput = document.getElementById('amount');
       const amount = amountInput.value;
       const btn = document.getElementById('submit-btn');
       
-      // Validation
       const numAmount = Number(amount);
-      if (!numAmount || numAmount < 100) {
-        showToast('Minimum deposit is ₦100', 'error');
+      if (!numAmount || numAmount < 600) {
+        showToast('Minimum deposit is 600', 'error');
         amountInput.focus();
         return;
       }
@@ -355,7 +510,6 @@
           })
         });
 
-        // Check content type
         const contentType = res.headers.get("content-type");
         if (!contentType || !contentType.includes("application/json")) {
           const text = await res.text();
@@ -374,12 +528,11 @@
           throw new Error('No checkout URL received');
         }
 
-        showToast('Redirecting to payment...', 'success');
+        showToast('Redirecting to secure payment...', 'success');
         
-        // Small delay to show the success message
         setTimeout(() => {
           window.location.href = data.checkout_url;
-        }, 1000);
+        }, 800);
 
       } catch (err) {
         console.error('❌ Deposit Error:', err);
@@ -387,7 +540,7 @@
         btn.disabled = false;
         btn.innerHTML = '<i class="fa-solid fa-bolt"></i> Pay Now';
       }
-    });
+    };
   </script>
 </body>
 </html>
