@@ -5,16 +5,7 @@
  * Handles both Deposits (Payins) and Withdrawals (Payouts).
  */
 import supabaseAdmin from '../../lib/supabase.js';
-import { 
-  parseWebhookBody, 
-  validWebhookSignature, 
-  webhookIdentifier, 
-  webhookAmount, 
-  webhookStatus, 
-  webhookType,
-  isSuccessfulStatus,
-  isFailedStatus
-} from '../../lib/targetgrowths.js';
+import { parseWebhookBody, webhookStatus, webhookIdentifier, webhookAmount, isSuccessfulStatus, verifyPayment } from '../../lib/targetgrowths.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
