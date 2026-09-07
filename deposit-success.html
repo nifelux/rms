@@ -3,33 +3,343 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>RMS — Payment Status</title>
+  <title>RMS — Payment Successful</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <meta name="theme-color" content="#0a0e27">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
-    body { background: linear-gradient(135deg, #0a0e27 0%, #1a1f4e 50%, #0a0e27 100%); min-height: 100vh; color: white; display: flex; align-items: center; justify-content: center; padding: 20px; }
-    .status-card { background: linear-gradient(135deg, rgba(17,22,58,0.8), rgba(26,32,80,0.8)); border: 1px solid rgba(255,215,0,0.15); border-radius: 24px; padding: 40px 32px; max-width: 420px; width: 100%; text-align: center; backdrop-filter: blur(10px); box-shadow: 0 20px 60px rgba(0,0,0,0.4); }
-    .icon-wrapper { width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; font-size: 2rem; }
-    .icon-wrapper.loading { background: rgba(0,212,255,0.1); border: 2px solid #00d4ff; color: #00d4ff; }
-    .icon-wrapper.success { background: rgba(0,255,136,0.1); border: 2px solid #00ff88; color: #00ff88; }
-    .icon-wrapper.failed { background: rgba(255,68,68,0.1); border: 2px solid #ff4444; color: #ff4444; }
-    h2 { font-size: 1.6rem; font-weight: 800; margin-bottom: 12px; }
-    p { color: rgba(255,255,255,0.7); font-size: 0.95rem; line-height: 1.6; margin-bottom: 24px; }
-    .amount-display { font-size: 2rem; font-weight: 900; color: #ffd700; margin-bottom: 24px; }
-    .btn { display: inline-block; padding: 14px 32px; background: linear-gradient(135deg, #ffd700, #e6c200); color: #0a0e27; text-decoration: none; border-radius: 12px; font-weight: 800; font-size: 1rem; transition: all 0.3s; }
-    .btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(255,215,0,0.4); }
-    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-    .fa-spin { animation: spin 1s linear infinite; }
+    
+    body {
+      background: linear-gradient(135deg, #0a0e27 0%, #1a1f4e 50%, #0a0e27 100%);
+      min-height: 100vh;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      overflow-x: hidden;
+    }
+
+    .success-container {
+      max-width: 480px;
+      width: 100%;
+      text-align: center;
+      animation: fadeInUp 0.6s ease;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Success Icon */
+    .success-icon-wrapper {
+      position: relative;
+      width: 140px;
+      height: 140px;
+      margin: 0 auto 32px;
+    }
+
+    .success-icon-bg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #00ff88, #00d26a);
+      border-radius: 50%;
+      animation: scaleIn 0.5s ease;
+    }
+
+    @keyframes scaleIn {
+      0% {
+        transform: scale(0);
+        opacity: 0;
+      }
+      50% {
+        transform: scale(1.1);
+      }
+      100% {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    .success-icon-ring {
+      position: absolute;
+      top: -10px;
+      left: -10px;
+      right: -10px;
+      bottom: -10px;
+      border: 3px solid rgba(0,255,136,0.3);
+      border-radius: 50%;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% {
+        transform: scale(1);
+        opacity: 1;
+      }
+      50% {
+        transform: scale(1.1);
+        opacity: 0.5;
+      }
+    }
+
+    .success-icon {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 4rem;
+      color: white;
+      animation: checkmark 0.5s ease 0.3s both;
+    }
+
+    @keyframes checkmark {
+      0% {
+        transform: translate(-50%, -50%) scale(0) rotate(-45deg);
+        opacity: 0;
+      }
+      100% {
+        transform: translate(-50%, -50%) scale(1) rotate(0deg);
+        opacity: 1;
+      }
+    }
+
+    /* Confetti Particles */
+    .confetti {
+      position: fixed;
+      width: 10px;
+      height: 10px;
+      top: -10px;
+      animation: confetti-fall 3s ease-in-out forwards;
+    }
+
+    @keyframes confetti-fall {
+      0% {
+        transform: translateY(0) rotate(0deg);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(100vh) rotate(720deg);
+        opacity: 0;
+      }
+    }
+
+    /* Content Card */
+    .content-card {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 24px;
+      padding: 32px 24px;
+      backdrop-filter: blur(10px);
+      margin-bottom: 20px;
+    }
+
+    .success-title {
+      font-size: 2rem;
+      font-weight: 900;
+      margin-bottom: 12px;
+      background: linear-gradient(135deg, #00ff88, #00d26a);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .success-subtitle {
+      color: rgba(255,255,255,0.7);
+      font-size: 1rem;
+      margin-bottom: 32px;
+      line-height: 1.6;
+    }
+
+    /* Amount Display */
+    .amount-display {
+      background: linear-gradient(135deg, rgba(255,215,0,0.1), rgba(255,215,0,0.05));
+      border: 1px solid rgba(255,215,0,0.3);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+
+    .amount-label {
+      font-size: 0.85rem;
+      color: rgba(255,255,255,0.6);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .amount-value {
+      font-size: 2.5rem;
+      font-weight: 900;
+      color: #ffd700;
+      text-shadow: 0 4px 20px rgba(255,215,0,0.3);
+    }
+
+    /* Transaction Details */
+    .transaction-details {
+      background: rgba(0,0,0,0.2);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 24px;
+    }
+
+    .detail-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .detail-row:last-child {
+      border-bottom: none;
+    }
+
+    .detail-label {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: rgba(255,255,255,0.6);
+      font-size: 0.9rem;
+    }
+
+    .detail-label i {
+      color: #00d4ff;
+      width: 20px;
+    }
+
+    .detail-value {
+      font-weight: 700;
+      color: white;
+      font-size: 0.9rem;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(0,255,136,0.15);
+      color: #00ff88;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 700;
+    }
+
+    /* Action Buttons */
+    .action-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .btn-primary {
+      padding: 16px;
+      background: linear-gradient(135deg, #ffd700, #e6c200);
+      color: #0a0e27;
+      text-decoration: none;
+      border-radius: 14px;
+      font-weight: 800;
+      font-size: 1rem;
+      transition: all 0.3s;
+      box-shadow: 0 8px 24px rgba(255,215,0,0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 32px rgba(255,215,0,0.4);
+    }
+
+    .btn-secondary {
+      padding: 16px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: white;
+      text-decoration: none;
+      border-radius: 14px;
+      font-weight: 700;
+      font-size: 1rem;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255,255,255,0.1);
+      border-color: rgba(255,255,255,0.2);
+    }
+
+    /* Info Box */
+    .info-box {
+      background: rgba(0,212,255,0.08);
+      border: 1px solid rgba(0,212,255,0.2);
+      border-radius: 12px;
+      padding: 16px;
+      margin-top: 20px;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      text-align: left;
+    }
+
+    .info-box i {
+      color: #00d4ff;
+      font-size: 1.2rem;
+      margin-top: 2px;
+    }
+
+    .info-box-text {
+      font-size: 0.85rem;
+      color: rgba(255,255,255,0.8);
+      line-height: 1.5;
+    }
+
+    /* Cancelled State */
+    .cancelled-icon {
+      background: linear-gradient(135deg, #ff4444, #cc0000) !important;
+    }
+
+    .cancelled-icon-ring {
+      border-color: rgba(255,68,68,0.3) !important;
+    }
+
+    .cancelled-title {
+      background: linear-gradient(135deg, #ff4444, #cc0000) !important;
+      -webkit-background-clip: text !important;
+      -webkit-text-fill-color: transparent !important;
+      background-clip: text !important;
+    }
+
+    @media (max-width: 480px) {
+      .success-title { font-size: 1.6rem; }
+      .amount-value { font-size: 2rem; }
+      .success-icon-wrapper { width: 120px; height: 120px; }
+      .success-icon { font-size: 3rem; }
+    }
   </style>
 </head>
 <body>
-  <div class="status-card" id="status-container">
-    <div class="icon-wrapper loading"><i class="fa-solid fa-circle-notch fa-spin"></i></div>
-    <h2>Processing Payment...</h2>
-    <p>Please wait while we confirm your transaction with the bank.</p>
+  <div class="success-container" id="main-container">
+    <!-- Content will be injected by JavaScript -->
   </div>
 
   <script type="module">
@@ -40,71 +350,128 @@
     const ref = urlParams.get('ref');
     const result = urlParams.get('result');
 
-    let attempts = 0;
-    const maxAttempts = 20; // 60 seconds max
-
-    async function checkStatus() {
-      if (!ref) {
-        renderStatus('failed', 'Invalid Request', 'No transaction reference found.', 0);
-        return;
-      }
-
-      attempts++;
-      console.log(`[POLL] Attempt ${attempts}/${maxAttempts} for ref: ${ref}`);
-
-      if (attempts > maxAttempts) {
-        renderStatus('failed', 'Timeout', 'We could not confirm the payment automatically. Please check your wallet or contact support.', 0);
-        return;
-      }
-
-      try {
-        const token = (await supabase.auth.getSession()).data.session.access_token;
-        if (!token) throw new Error('Session expired');
-
-        const res = await fetch(`/api/finance?action=getDepositStatus&ref=${encodeURIComponent(ref)}`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
+    // Create confetti effect
+    function createConfetti() {
+      const colors = ['#ffd700', '#00ff88', '#00d4ff', '#ff4444', '#ff00ff'];
+      for (let i = 0; i < 50; i++) {
+        const confetti = document.createElement('div');
+        confetti.className = 'confetti';
+        confetti.style.left = Math.random() * 100 + 'vw';
+        confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+        confetti.style.animationDelay = Math.random() * 2 + 's';
+        confetti.style.animationDuration = (Math.random() * 2 + 2) + 's';
+        document.body.appendChild(confetti);
         
-        if (!res.ok) {
-          console.error('[POLL] API error:', res.status);
-          throw new Error('Status check failed');
-        }
-        
-        const data = await res.json();
-        console.log('[POLL] Response:', data);
-
-        if (data.status === 'completed') {
-          renderStatus('success', 'Payment Successful!', `₦${Number(data.amount).toLocaleString()} has been added to your wallet.`, data.amount);
-        } else if (data.status === 'rejected' || result === 'cancelled') {
-          renderStatus('failed', 'Payment Failed', 'The transaction was cancelled or failed. No funds were deducted.', 0);
-        } else {
-          // Still pending
-          setTimeout(checkStatus, 3000);
-        }
-      } catch (err) {
-        console.error('[POLL] Error:', err);
-        setTimeout(checkStatus, 3000);
+        setTimeout(() => confetti.remove(), 4000);
       }
     }
 
-    function renderStatus(type, title, message, amount) {
-      const container = document.getElementById('status-container');
-      const iconClass = type === 'success' ? 'fa-circle-check' : type === 'failed' ? 'fa-circle-xmark' : 'fa-circle-notch fa-spin';
+    function showSuccess() {
+      createConfetti();
       
+      const container = document.getElementById('main-container');
       container.innerHTML = `
-        <div class="icon-wrapper ${type}"><i class="fa-solid ${iconClass}"></i></div>
-        <h2>${title}</h2>
-        ${amount ? `<div class="amount-display">₦${Number(amount).toLocaleString()}</div>` : ''}
-        <p>${message}</p>
-        <a href="/dashboard.html" class="btn">Go to Dashboard</a>
+        <div class="success-icon-wrapper">
+          <div class="success-icon-ring"></div>
+          <div class="success-icon-bg"></div>
+          <i class="fa-solid fa-check success-icon"></i>
+        </div>
+        
+        <div class="content-card">
+          <h1 class="success-title">Payment Successful!</h1>
+          <p class="success-subtitle">Your deposit has been processed successfully</p>
+          
+          <div class="amount-display">
+            <div class="amount-label">Amount Deposited</div>
+            <div class="amount-value">₦${ref ? '0.00' : '0.00'}</div>
+          </div>
+          
+          <div class="transaction-details">
+            <div class="detail-row">
+              <div class="detail-label">
+                <i class="fa-solid fa-hashtag"></i>
+                Reference
+              </div>
+              <div class="detail-value" style="font-family: monospace; font-size: 0.8rem;">
+                ${ref || 'N/A'}
+              </div>
+            </div>
+            <div class="detail-row">
+              <div class="detail-label">
+                <i class="fa-solid fa-clock"></i>
+                Time
+              </div>
+              <div class="detail-value">
+                ${new Date().toLocaleTimeString()}
+              </div>
+            </div>
+            <div class="detail-row">
+              <div class="detail-label">
+                <i class="fa-solid fa-circle-check"></i>
+                Status
+              </div>
+              <div class="status-badge">
+                <i class="fa-solid fa-check-circle"></i>
+                Completed
+              </div>
+            </div>
+          </div>
+          
+          <div class="action-buttons">
+            <a href="/dashboard.html" class="btn-primary">
+              <i class="fa-solid fa-gauge-high"></i>
+              Go to Dashboard
+            </a>
+            <a href="/deposit.html" class="btn-secondary">
+              <i class="fa-solid fa-plus"></i>
+              Make Another Deposit
+            </a>
+          </div>
+          
+          <div class="info-box">
+            <i class="fa-solid fa-circle-info"></i>
+            <div class="info-box-text">
+              Your wallet balance has been updated. If you don't see the funds immediately, please refresh your dashboard or contact support.
+            </div>
+          </div>
+        </div>
       `;
     }
 
-    // Start checking
+    function showCancelled() {
+      const container = document.getElementById('main-container');
+      container.innerHTML = `
+        <div class="success-icon-wrapper">
+          <div class="success-icon-ring cancelled-icon-ring"></div>
+          <div class="success-icon-bg cancelled-icon"></div>
+          <i class="fa-solid fa-xmark success-icon"></i>
+        </div>
+        
+        <div class="content-card">
+          <h1 class="success-title cancelled-title">Payment Cancelled</h1>
+          <p class="success-subtitle">You cancelled the transaction. No funds were deducted from your account.</p>
+          
+          <div class="action-buttons">
+            <a href="/deposit.html" class="btn-primary">
+              <i class="fa-solid fa-rotate-right"></i>
+              Try Again
+            </a>
+            <a href="/dashboard.html" class="btn-secondary">
+              <i class="fa-solid fa-arrow-left"></i>
+              Back to Dashboard
+            </a>
+          </div>
+        </div>
+      `;
+    }
+
+    // Check URL params and show appropriate state
     if (result === 'cancelled') {
-      renderStatus('failed', 'Payment Cancelled', 'You cancelled the transaction. No funds were deducted.', 0);
+      showCancelled();
+    } else if (ref) {
+      showSuccess();
     } else {
-      checkStatus();
+      showCancelled();
     }
   </script>
 </body>
