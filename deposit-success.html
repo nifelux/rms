@@ -366,78 +366,98 @@
       }
     }
 
-    function showSuccess() {
-      createConfetti();
+    async function showSuccess() {
+  createConfetti();
+  
+  // Fetch deposit details to get the amount
+  let depositAmount = '0.00';
+  let depositRef = ref || 'N/A';
+  
+  if (ref) {
+    try {
+      const token = (await supabase.auth.getSession()).data.session.access_token;
+      const res = await fetch(`/api/finance?action=getDepositStatus&ref=${encodeURIComponent(ref)}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
       
-      const container = document.getElementById('main-container');
-      container.innerHTML = `
-        <div class="success-icon-wrapper">
-          <div class="success-icon-ring"></div>
-          <div class="success-icon-bg"></div>
-          <i class="fa-solid fa-check success-icon"></i>
-        </div>
-        
-        <div class="content-card">
-          <h1 class="success-title">Payment Successful!</h1>
-          <p class="success-subtitle">Your deposit has been processed successfully</p>
-          
-          <div class="amount-display">
-            <div class="amount-label">Amount Deposited</div>
-            <div class="amount-value">₦${ref ? '0.00' : '0.00'}</div>
-          </div>
-          
-          <div class="transaction-details">
-            <div class="detail-row">
-              <div class="detail-label">
-                <i class="fa-solid fa-hashtag"></i>
-                Reference
-              </div>
-              <div class="detail-value" style="font-family: monospace; font-size: 0.8rem;">
-                ${ref || 'N/A'}
-              </div>
-            </div>
-            <div class="detail-row">
-              <div class="detail-label">
-                <i class="fa-solid fa-clock"></i>
-                Time
-              </div>
-              <div class="detail-value">
-                ${new Date().toLocaleTimeString()}
-              </div>
-            </div>
-            <div class="detail-row">
-              <div class="detail-label">
-                <i class="fa-solid fa-circle-check"></i>
-                Status
-              </div>
-              <div class="status-badge">
-                <i class="fa-solid fa-check-circle"></i>
-                Completed
-              </div>
-            </div>
-          </div>
-          
-          <div class="action-buttons">
-            <a href="/dashboard.html" class="btn-primary">
-              <i class="fa-solid fa-gauge-high"></i>
-              Go to Dashboard
-            </a>
-            <a href="/deposit.html" class="btn-secondary">
-              <i class="fa-solid fa-plus"></i>
-              Make Another Deposit
-            </a>
-          </div>
-          
-          <div class="info-box">
-            <i class="fa-solid fa-circle-info"></i>
-            <div class="info-box-text">
-              Your wallet balance has been updated. If you don't see the funds immediately, please refresh your dashboard or contact support.
-            </div>
-          </div>
-        </div>
-      `;
+      if (res.ok) {
+        const data = await res.json();
+        depositAmount = Number(data.amount || 0).toLocaleString('en-NG', { minimumFractionDigits: 2 });
+        depositRef = data.reference || ref;
+      }
+    } catch (err) {
+      console.error('[AMOUNT-FETCH] Error:', err);
     }
-
+  }
+  
+  const container = document.getElementById('main-container');
+  container.innerHTML = `
+    <div class="success-icon-wrapper">
+      <div class="success-icon-ring"></div>
+      <div class="success-icon-bg"></div>
+      <i class="fa-solid fa-check success-icon"></i>
+    </div>
+    
+    <div class="content-card">
+      <h1 class="success-title">Payment Successful!</h1>
+      <p class="success-subtitle">Your deposit has been processed successfully</p>
+      
+      <div class="amount-display">
+        <div class="amount-label">Amount Deposited</div>
+        <div class="amount-value">₦${depositAmount}</div>
+      </div>
+      
+      <div class="transaction-details">
+        <div class="detail-row">
+          <div class="detail-label">
+            <i class="fa-solid fa-hashtag"></i>
+            Reference
+          </div>
+          <div class="detail-value" style="font-family: monospace; font-size: 0.8rem;">
+            ${depositRef}
+          </div>
+        </div>
+        <div class="detail-row">
+          <div class="detail-label">
+            <i class="fa-solid fa-clock"></i>
+            Time
+          </div>
+          <div class="detail-value">
+            ${new Date().toLocaleTimeString()}
+          </div>
+        </div>
+        <div class="detail-row">
+          <div class="detail-label">
+            <i class="fa-solid fa-circle-check"></i>
+            Status
+          </div>
+          <div class="status-badge">
+            <i class="fa-solid fa-check-circle"></i>
+            Completed
+          </div>
+        </div>
+      </div>
+      
+      <div class="action-buttons">
+        <a href="/dashboard.html" class="btn-primary">
+          <i class="fa-solid fa-gauge-high"></i>
+          Go to Dashboard
+        </a>
+        <a href="/deposit.html" class="btn-secondary">
+          <i class="fa-solid fa-plus"></i>
+          Make Another Deposit
+        </a>
+      </div>
+      
+      <div class="info-box">
+        <i class="fa-solid fa-circle-info"></i>
+        <div class="info-box-text">
+          Your wallet balance has been updated. If you don't see the funds immediately, please refresh your dashboard or contact support.
+        </div>
+      </div>
+    </div>
+  `;
+    }
     function showCancelled() {
       const container = document.getElementById('main-container');
       container.innerHTML = `
