@@ -106,7 +106,7 @@ async function handleDeposit(identifier, amount, status, payload) {
       return;
     }
 
-    // Credit the user's wallet
+// Credit the user's wallet
     const { data: wallet } = await supabaseAdmin
       .from('wallets')
       .select('balance')
@@ -115,12 +115,16 @@ async function handleDeposit(identifier, amount, status, payload) {
 
     const newBalance = Number(wallet?.balance || 0) + Number(amount);
 
-    // Update wallet
-    await supabaseAdmin.from('wallets').upsert({
-      user_id: deposit.user_id,
-      balance: newBalance,
-      updated_at: new Date().toISOString()
-    });
+    // Update wallet using .update() instead of .upsert()
+    await supabaseAdmin
+      .from('wallets')
+      .update({
+        balance: newBalance,
+        updated_at: new Date().toISOString()
+      })
+      .eq('user_id', deposit.user_id);
+
+    console.log(`[TG-DEPOSIT] ✅ Wallet updated: ${wallet?.balance} → ${newBalance}`);
 
     // Record transaction
     await supabaseAdmin.from('transactions').insert({
