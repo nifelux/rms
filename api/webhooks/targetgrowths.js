@@ -17,51 +17,111 @@ import {
 } from '../../lib/targetgrowths.js';
 
 export default async function handler(req, res) {
-  // 1. Only allow POST requests
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  // 2. Parse the incoming payload (handles both JSON and form-urlencoded)
-  const payload = parseWebhookBody(req.body);
-  console.log('[TG-WEBHOOK-RECEIVED]', JSON.stringify(payload, null, 2));
-  console.log('[TG-WEBHOOK-FULL-PAYLOAD]', JSON.stringify(payload, null, 2));
-console.log('[TG-WEBHOOK-AMOUNT-DEBUG]', {
-  direct: payload?.amount,
-  nested: payload?.data?.amount,
-  raw_amount: payload?.['data[amount]']
-});
-  
-// In production, ALWAYS verify signature
-if (!validWebhookSignature(payload)) {
-  console.error('[TG-WEBHOOK] ❌ Invalid signature. Rejecting request.');
-  return res.status(401).json({ error: 'Invalid signature' });
-}
+  try {
+    const payload = parseWebhookBody(req.body);
+    console.log('[TG-WEBHOOK-RECEIVED]', payload);
 
-  // 4. Extract core data
-  const identifier = webhookIdentifier(payload);
-  const amount = webhookAmount(payload);
-  const status = webhookStatus(payload);
-  const type = webhookType(payload); // 'payin' or 'payout'
+    const status = webhookStatus(payload);
+    const identifier = webhookIdentifier(payload);
+    const amount = webhookAmount(payload);
 
-  if (!identifier) {
-    console.error('[TG-WEBHOOK]  No identifier found in payload.');
-    return res.status(400).json({ error: 'Missing identifier' });
+    // 1. SKIP SIGNATURE CHECK - We'll verify via API instead
+    console.log('[TG-WEBHOOK] ️ Using API verification instead of signature');
+
+    // 2. VERIFY PAYMENT VIA TARGET GROWTH API (More secure!)
+    const { verifyPayment } = await import('../lib/targetgrowths.js');
+    
+    let verification;
+    try {
+      verification = await verifyPayment(identifier);
+      console.log('[TG-API-VERIFY] Response:', verification);
+    } catch (verifyErr) {
+      console.error('[TG-API-VERIFY] Failed:', verifyErr.message);
+      return res.status(500).json({ error: 'Payment verification failed' });
+    }
+
+    // 3. CHECK IF PAYMENT IS SUCCESSFUL
+    const apiStatus = verification?.data?.payment_status || 
+                      verification?.data?.status || 
+                      verification?.status || 
+                      '';
+    
+    if (!isSuccessfulStatus(apiStatus)) {
+      console.log('[TG-WEBHOOK] Payment not successful:', apiStatus);
+      return res.status(200).json({ message: 'Payment not successful yet' });
+    }
+
+    // 4. VERIFY AMOUNT MATCHES
+    const apiAmount = Number(verification?.data?.amount || verification?.amount);
+    if (apiAmount !== amount) {
+      console.error(`[TG-WEBHOOK] Amount mismatch! Webhook: ${amount}, API: ${apiAmount}`);
+      return res.status(400).json({ error: 'Amount mismatch' });
+    }
+
+    console.log(`[TG-WEBHOOK] ✅ Payment verified via API: ${identifier} - ₦${amount}`);
+
+    // 5. PROCESS THE DEPOSIT
+    const { data: deposit } = await supabaseAdmin
+      .from('deposits')
+      .select('id, user_id, amount, status')
+      .eq('provider_identifier', identifier)
+      .single();
+
+    if (!deposit) {
+      console.error('[TG-WEBHOOK] Deposit not found for identifier:', identifier);
+      return res.status(404).json({ error: 'Deposit not found' });
+    }
+
+    if (deposit.status === 'completed') {
+      console.log('[TG-WEBHOOK] Already processed, skipping duplicate');
+      return res.status(200).json({ message: 'Already processed' });
+    }
+
+    // Credit wallet
+    const { data: wallet } = await supabaseAdmin
+      .from('wallets')
+      .select('balance')
+      .eq('user_id', deposit.user_id)
+      .single();
+
+    const newBalance = (wallet?.balance || 0) + Number(deposit.amount);
+
+    await supabaseAdmin.from('wallets').upsert({
+      user_id: deposit.user_id,
+      balance: newBalance,
+      updated_at: new Date().toISOString()
+    });
+
+    await supabaseAdmin.from('transactions').insert({
+      user_id: deposit.user_id,
+      type: 'deposit',
+      amount: Number(deposit.amount),
+      status: 'approved',
+      reference: deposit.reference,
+      description: `Target Growth Deposit (${identifier})`
+    });
+
+    await supabaseAdmin.from('deposits').update({
+      status: 'completed',
+      provider_status: 'success',
+      provider_response: verification,
+      paid_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    }).eq('id', deposit.id);
+
+    console.log(`[TG-DEPOSIT] ✅ Successfully credited ₦${deposit.amount} to user ${deposit.user_id}`);
+
+    return res.status(200).json({ success: true });
+
+  } catch (err) {
+    console.error('[TG-WEBHOOK] Error:', err);
+    return res.status(500).json({ error: err.message });
   }
-
-  // 5. Route to Deposit or Withdrawal handler
-  // We check the 'type' first, then fallback to identifier prefix (TGD vs TGW)
-  if (type === 'payin' || identifier.startsWith('TGD')) {
-    await handleDeposit(identifier, amount, status, payload);
-  } else if (type === 'payout' || identifier.startsWith('TGW')) {
-    await handleWithdrawal(identifier, amount, status, payload);
-  } else {
-    console.warn('[TG-WEBHOOK] ⚠️ Unknown webhook type:', type);
-  }
-
-  // 6. Always return 200 OK to Target Growth to stop retries
-  return res.status(200).json({ ok: true, message: 'Webhook processed' });
-}
+      }
 
 // ==========================================
 // DEPOSIT HANDLER (PAYIN)
