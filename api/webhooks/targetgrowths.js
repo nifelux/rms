@@ -96,7 +96,7 @@ async function handleDeposit(identifier, amount, status, payload) {
   if (isSuccessfulStatus(status)) {
     // Safety check: Ensure amount matches
     if (Number(amount) !== Number(deposit.amount)) {
-      console.error(`[TG-DEPOSIT] ️ Amount mismatch! Expected: ${deposit.amount}, Got: ${amount}`);
+      console.error(`[TG-DEPOSIT] ⚠️ Amount mismatch! Expected: ${deposit.amount}, Got: ${amount}`);
       await supabaseAdmin.from('deposits').update({
         status: 'pending',
         provider_status: 'amount_mismatch',
@@ -106,7 +106,7 @@ async function handleDeposit(identifier, amount, status, payload) {
       return;
     }
 
-// Credit the user's wallet
+    // Credit the user's wallet
     const { data: wallet } = await supabaseAdmin
       .from('wallets')
       .select('balance')
@@ -115,7 +115,7 @@ async function handleDeposit(identifier, amount, status, payload) {
 
     const newBalance = Number(wallet?.balance || 0) + Number(amount);
 
-    // Update wallet
+    // Update wallet using .update()
     await supabaseAdmin
       .from('wallets')
       .update({
@@ -138,7 +138,7 @@ async function handleDeposit(identifier, amount, status, payload) {
         description: `Target Growth Deposit (${identifier})`
       });
 
-    // ️ CRITICAL: Mark deposit as completed
+    // CRITICAL: Mark deposit as completed
     await supabaseAdmin
       .from('deposits')
       .update({
@@ -151,8 +151,7 @@ async function handleDeposit(identifier, amount, status, payload) {
       .eq('id', deposit.id);
 
     console.log(`[TG-DEPOSIT] ✅ Successfully credited ₦${amount} to user ${deposit.user_id}`);
-     
-  
+  } 
   // 4. Handle FAILURE
   else if (isFailedStatus(status)) {
     await supabaseAdmin.from('deposits').update({
@@ -161,7 +160,7 @@ async function handleDeposit(identifier, amount, status, payload) {
       provider_response: payload,
       updated_at: new Date().toISOString()
     }).eq('id', deposit.id);
-    
+
     console.log(`[TG-DEPOSIT] ❌ Deposit failed for ${identifier}`);
   }
 }
