@@ -19,7 +19,7 @@
     .logout-btn { background: rgba(255,68,68,0.2); border: 1px solid var(--danger); color: var(--danger); padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 600; }
     .nav-tabs { background: rgba(10,14,39,0.8); padding: 0 20px; border-bottom: 1px solid rgba(255,255,255,0.1); position: sticky; top: 73px; z-index: 99; }
     .nav-content { max-width: 1400px; margin: 0 auto; display: flex; gap: 8px; overflow-x: auto; }
-    .nav-tab { padding: 14px 24px; background: transparent; border: none; color: rgba(255,255,255,0.6); font-weight: 600; cursor: pointer; border-bottom: 3px solid transparent; }
+    .nav-tab { padding: 14px 24px; background: transparent; border: none; color: rgba(255,255,255,0.6); font-weight: 600; cursor: pointer; border-bottom: 3px solid transparent; white-space: nowrap; }
     .nav-tab.active { color: var(--primary); border-bottom-color: var(--primary); }
     .admin-container { max-width: 1400px; margin: 0 auto; padding: 32px 20px; }
     .section { display: none; animation: fadeIn 0.3s ease; }
@@ -38,6 +38,8 @@
     .stat-icon.red { background: rgba(255,68,68,0.2); color: var(--danger); }
     .stat-value { font-size: 2rem; font-weight: 900; }
     .card { background: var(--card); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 24px; backdrop-filter: blur(10px); margin-bottom: 24px; }
+    .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .card-title { font-size: 1.2rem; font-weight: 800; }
     .table-container { overflow-x: auto; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); }
     table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
     thead { background: rgba(0,0,0,0.3); }
@@ -45,9 +47,13 @@
     td { padding: 14px; border-bottom: 1px solid rgba(255,255,255,0.05); }
     tbody tr:hover { background: rgba(255,255,255,0.03); }
     .status-badge { padding: 6px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; }
+    .status-badge::before { content: ''; width: 6px; height: 6px; border-radius: 50%; }
     .status-badge.pending { background: rgba(255,165,0,0.2); color: var(--warning); }
+    .status-badge.pending::before { background: var(--warning); }
     .status-badge.completed, .status-badge.approved { background: rgba(0,255,136,0.2); color: var(--success); }
+    .status-badge.completed::before, .status-badge.approved::before { background: var(--success); }
     .status-badge.rejected, .status-badge.failed { background: rgba(255,68,68,0.2); color: var(--danger); }
+    .status-badge.rejected::before, .status-badge.failed::before { background: var(--danger); }
     .status-badge.frozen { background: rgba(255,68,68,0.2); color: var(--danger); }
     .btn { padding: 8px 16px; border-radius: 8px; border: none; cursor: pointer; font-weight: 700; font-size: 0.85rem; transition: all 0.3s; display: inline-flex; align-items: center; gap: 6px; }
     .btn-primary { background: var(--primary); color: var(--dark); }
@@ -55,12 +61,15 @@
     .btn-danger { background: var(--danger); color: white; }
     .btn-sm { padding: 6px 12px; font-size: 0.8rem; }
     .btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+    .filters { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
+    .filter-select { padding: 10px 16px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: white; font-weight: 600; }
+    .loading { text-align: center; padding: 40px; color: rgba(255,255,255,0.5); }
+    .loading i { font-size: 2.5rem; animation: spin 1s linear infinite; color: var(--primary); }
+    @keyframes spin { to { transform: rotate(360deg); } }
     .form-group { margin-bottom: 20px; }
     .form-label { display: block; margin-bottom: 8px; font-weight: 600; color: rgba(255,255,255,0.8); }
     .form-input, .form-select { width: 100%; padding: 12px 16px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: white; font-size: 0.95rem; }
     .form-input:focus, .form-select:focus { outline: none; border-color: var(--primary); }
-    
-    /* Modal Styles */
     .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(5px); }
     .modal-overlay.active { display: flex; }
     .modal { background: linear-gradient(135deg, #1a1f4e, #0a0e27); border: 1px solid rgba(255,215,0,0.3); border-radius: 20px; padding: 32px; max-width: 500px; width: 90%; max-height: 90vh; overflow-y: auto; }
@@ -72,12 +81,7 @@
     .user-info-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.9rem; }
     .user-info-row span:first-child { color: rgba(255,255,255,0.6); }
     .user-info-row span:last-child { font-weight: 700; }
-    .action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
-    .action-btn { padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); color: white; cursor: pointer; font-weight: 600; transition: all 0.3s; }
-    .action-btn:hover { background: rgba(255,255,255,0.1); }
-    .action-btn.credit { border-color: var(--success); color: var(--success); }
-    .action-btn.debit { border-color: var(--danger); color: var(--danger); }
-    .action-btn.active { background: var(--primary); color: var(--dark); border-color: var(--primary); }
+    @media (max-width: 768px) { .stats-grid { grid-template-columns: 1fr; } .table-container { font-size: 0.8rem; } th, td { padding: 10px 8px; } }
   </style>
 </head>
 <body>
@@ -93,6 +97,8 @@
   <nav class="nav-tabs">
     <div class="nav-content">
       <button class="nav-tab active" onclick="showSection('dashboard', this)"><i class="fa-solid fa-chart-line"></i> Dashboard</button>
+      <button class="nav-tab" onclick="showSection('deposits', this)"><i class="fa-solid fa-arrow-down"></i> Deposits</button>
+      <button class="nav-tab" onclick="showSection('withdrawals', this)"><i class="fa-solid fa-arrow-up"></i> Withdrawals</button>
       <button class="nav-tab" onclick="showSection('users', this)"><i class="fa-solid fa-users"></i> Users</button>
       <button class="nav-tab" onclick="showSection('settings', this)"><i class="fa-solid fa-gear"></i> Settings</button>
     </div>
@@ -103,16 +109,86 @@
     <section id="dashboard" class="section active">
       <h2 class="section-title"><i class="fa-solid fa-chart-line"></i> Overview</h2>
       <div class="stats-grid">
-        <div class="stat-card"><div class="stat-header"><div><div class="stat-label">Total Users</div><div class="stat-value" id="stat-users">0</div></div><div class="stat-icon blue"><i class="fa-solid fa-users"></i></div></div></div>
+        <div class="stat-card">
+          <div class="stat-header">
+            <div><div class="stat-label">Total Users</div><div class="stat-value" id="stat-users">0</div></div>
+            <div class="stat-icon blue"><i class="fa-solid fa-users"></i></div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-header">
+            <div><div class="stat-label">Total Deposits</div><div class="stat-value" id="stat-deposits">₦0</div></div>
+            <div class="stat-icon green"><i class="fa-solid fa-arrow-down"></i></div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-header">
+            <div><div class="stat-label">Total Withdrawals</div><div class="stat-value" id="stat-withdrawals">₦0</div></div>
+            <div class="stat-icon yellow"><i class="fa-solid fa-arrow-up"></i></div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-header">
+            <div><div class="stat-label">Pending Withdrawals</div><div class="stat-value" id="stat-pending">0</div></div>
+            <div class="stat-icon red"><i class="fa-solid fa-clock"></i></div>
+          </div>
+        </div>
       </div>
+    </section>
+
+    <!-- Deposits Section (Read-only, auto-approved) -->
+    <section id="deposits" class="section">
+      <h2 class="section-title"><i class="fa-solid fa-arrow-down"></i> Deposit History</h2>
+      <div class="card" style="background: rgba(0,255,136,0.1); border: 1px solid rgba(0,255,136,0.3); padding: 16px; margin-bottom: 20px; border-radius: 12px;">
+        <p style="color: var(--success); font-weight: 600;"><i class="fa-solid fa-circle-check"></i> All deposits are auto-approved via Target Growth webhook. No manual approval needed.</p>
+      </div>
+      <div class="filters">
+        <select class="filter-select" id="deposit-filter" onchange="loadDeposits()">
+          <option value="all">All Status</option>
+          <option value="completed">Completed</option>
+          <option value="pending">Pending</option>
+          <option value="rejected">Rejected</option>
+        </select>
+      </div>
+      <div class="card"><div class="table-container">
+        <table>
+          <thead><tr><th>User</th><th>Amount</th><th>Method</th><th>Status</th><th>Date</th></tr></thead>
+          <tbody id="deposits-table"><tr><td colspan="5" class="loading"><i class="fa-solid fa-circle-notch fa-spin"></i></td></tr></tbody>
+        </table>
+      </div></div>
+    </section>
+
+    <!-- Withdrawals Section (Requires approval) -->
+    <section id="withdrawals" class="section">
+      <h2 class="section-title"><i class="fa-solid fa-arrow-up"></i> Withdrawal Management</h2>
+      <div class="card" style="background: rgba(255,165,0,0.1); border: 1px solid rgba(255,165,0,0.3); padding: 16px; margin-bottom: 20px; border-radius: 12px;">
+        <p style="color: var(--warning); font-weight: 600;"><i class="fa-solid fa-circle-exclamation"></i> Withdrawals require admin approval. Click "Pay" to initiate Target Growth payout.</p>
+      </div>
+      <div class="filters">
+        <select class="filter-select" id="withdrawal-filter" onchange="loadWithdrawals()">
+          <option value="pending">Pending</option>
+          <option value="approved">Approved</option>
+          <option value="completed">Completed</option>
+          <option value="rejected">Rejected</option>
+          <option value="all">All</option>
+        </select>
+      </div>
+      <div class="card"><div class="table-container">
+        <table>
+          <thead><tr><th>User</th><th>Amount</th><th>Bank</th><th>Account</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody id="withdrawals-table"><tr><td colspan="6" class="loading"><i class="fa-solid fa-circle-notch fa-spin"></i></td></tr></tbody>
+        </table>
+      </div></div>
     </section>
 
     <!-- Users Section -->
     <section id="users" class="section">
       <h2 class="section-title"><i class="fa-solid fa-users"></i> User Management</h2>
       <div class="card"><div class="table-container">
-        <table><thead><tr><th>Email</th><th>Name</th><th>Tier</th><th>Balance</th><th>Status</th><th>Actions</th></tr></thead>
-        <tbody id="users-table"><tr><td colspan="6" class="loading" style="text-align:center;padding:40px;">Loading...</td></tr></tbody></table>
+        <table>
+          <thead><tr><th>Email</th><th>Name</th><th>Tier</th><th>Balance</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody id="users-table"><tr><td colspan="6" class="loading"><i class="fa-solid fa-circle-notch fa-spin"></i></td></tr></tbody>
+        </table>
       </div></div>
     </section>
 
@@ -140,7 +216,7 @@
       <div class="card">
         <h3 style="margin-bottom: 20px; color: var(--secondary);"><i class="fa-solid fa-money-bill-transfer"></i> Withdrawal Limits</h3>
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
-          <div class="form-group"><label class="form-label">Min Withdrawal ()</label><input type="number" id="min-withdraw" class="form-input" value="1000"></div>
+          <div class="form-group"><label class="form-label">Min Withdrawal (₦)</label><input type="number" id="min-withdraw" class="form-input" value="1000"></div>
           <div class="form-group"><label class="form-label">Max Withdrawal (₦)</label><input type="number" id="max-withdraw" class="form-input" value="1000000"></div>
         </div>
         <button class="btn btn-primary" onclick="saveWithdrawalSettings()"><i class="fa-solid fa-save"></i> Save Limits</button>
@@ -162,7 +238,6 @@
           <div class="user-info-row"><span>Current Tier:</span><span id="m-tier">-</span></div>
           <div class="user-info-row"><span>Status:</span><span id="m-status">Active</span></div>
         </div>
-
         <div class="form-group">
           <label class="form-label">Change VIP Tier</label>
           <select id="m-tier-select" class="form-select">
@@ -171,7 +246,6 @@
             <option value="M4">M4</option><option value="M5">M5</option><option value="M6">M6</option><option value="M7">M7</option>
           </select>
         </div>
-
         <div class="form-group">
           <label class="form-label">Account Status</label>
           <select id="m-freeze-select" class="form-select">
@@ -179,7 +253,6 @@
             <option value="true">Frozen (Blocked)</option>
           </select>
         </div>
-
         <div class="form-group">
           <label class="form-label">Adjust Balance (Credit/Debit)</label>
           <div style="display:flex; gap:10px;">
@@ -189,7 +262,6 @@
           </div>
           <input type="text" id="m-reason" class="form-input" placeholder="Reason (e.g. Bonus, Penalty)" style="margin-top:10px;">
         </div>
-
         <button class="btn btn-primary" style="width:100%; justify-content:center;" onclick="saveUserUpdates()">
           <i class="fa-solid fa-save"></i> Save Tier & Status Changes
         </button>
@@ -220,25 +292,111 @@
       document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
       document.getElementById(section).classList.add('active');
       btn.classList.add('active');
+      if (section === 'deposits') loadDeposits();
+      if (section === 'withdrawals') loadWithdrawals();
       if (section === 'users') loadUsers();
     };
 
     async function loadDashboard() {
       const { count } = await supabase.from('profiles').select('*', { count: 'exact', head: true });
       document.getElementById('stat-users').textContent = count || 0;
+
+      const { data: deposits } = await supabase.from('deposits').select('amount, status');
+      const { data: withdrawals } = await supabase.from('withdrawals').select('amount, status');
+      
+      const totalDeposits = deposits?.filter(d => d.status === 'completed').reduce((sum, d) => sum + Number(d.amount), 0) || 0;
+      const totalWithdrawals = withdrawals?.filter(w => w.status === 'completed').reduce((sum, w) => sum + Number(w.amount), 0) || 0;
+      const pendingCount = withdrawals?.filter(w => w.status === 'pending').length || 0;
+      
+      document.getElementById('stat-deposits').textContent = '₦' + totalDeposits.toLocaleString();
+      document.getElementById('stat-withdrawals').textContent = '₦' + totalWithdrawals.toLocaleString();
+      document.getElementById('stat-pending').textContent = pendingCount;
     }
 
+    // DEPOSITS (Read-only)
+    async function loadDeposits() {
+      const status = document.getElementById('deposit-filter').value;
+      const token = (await supabase.auth.getSession()).data.session.access_token;
+      const res = await fetch(`/api/admin?action=get-deposits&status=${status}`, { headers: { 'Authorization': `Bearer ${token}` } });
+      const data = await res.json();
+      const tbody = document.getElementById('deposits-table');
+      
+      if (!data.deposits || data.deposits.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:40px;color:rgba(255,255,255,0.5);">No deposits found</td></tr>';
+        return;
+      }
+      
+      tbody.innerHTML = data.deposits.map(d => `
+        <tr>
+          <td><div style="font-weight:700;">${d.profiles?.full_name || d.profiles?.email || 'User'}</div><div style="font-size:0.8rem;color:rgba(255,255,255,0.6);">${d.profiles?.email}</div></td>
+          <td style="font-weight:800;color:var(--success);">₦${Number(d.amount).toLocaleString()}</td>
+          <td>${d.method || 'targetgrowths'}</td>
+          <td><span class="status-badge ${d.status}">${d.status}</span></td>
+          <td>${new Date(d.created_at).toLocaleDateString()}</td>
+        </tr>
+      `).join('');
+    }
+
+    // WITHDRAWALS (Requires approval)
+    async function loadWithdrawals() {
+      const status = document.getElementById('withdrawal-filter').value;
+      const token = (await supabase.auth.getSession()).data.session.access_token;
+      const res = await fetch(`/api/admin?action=get-withdrawals&status=${status}`, { headers: { 'Authorization': `Bearer ${token}` } });
+      const data = await res.json();
+      const tbody = document.getElementById('withdrawals-table');
+      
+      if (!data.withdrawals || data.withdrawals.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:40px;color:rgba(255,255,255,0.5);">No withdrawals found</td></tr>';
+        return;
+      }
+      
+      tbody.innerHTML = data.withdrawals.map(w => `
+        <tr>
+          <td><div style="font-weight:700;">${w.profiles?.full_name || w.profiles?.email || 'User'}</div><div style="font-size:0.8rem;color:rgba(255,255,255,0.6);">${w.profiles?.email}</div></td>
+          <td style="font-weight:800;color:var(--warning);">₦${Number(w.amount).toLocaleString()}</td>
+          <td>${w.bank_name}</td>
+          <td>${w.account_number}</td>
+          <td><span class="status-badge ${w.status}">${w.status}</span></td>
+          <td>${w.status === 'pending' ? `
+            <button class="btn btn-success btn-sm" onclick="processWithdrawal('${w.id}', 'approve')"><i class="fa-solid fa-check"></i> Pay</button>
+            <button class="btn btn-danger btn-sm" onclick="processWithdrawal('${w.id}', 'reject')"><i class="fa-solid fa-xmark"></i></button>
+          ` : '-'}</td>
+        </tr>
+      `).join('');
+    }
+
+    window.processWithdrawal = async (id, act) => {
+      if (!confirm(`Are you sure you want to ${act} this withdrawal?`)) return;
+      const token = (await supabase.auth.getSession()).data.session.access_token;
+      const res = await fetch('/api/admin?action=process-withdrawal', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ withdrawal_id: id, act })
+      });
+      const data = await res.json();
+      if (!res.ok) return alert(data.error);
+      alert(`Withdrawal ${act}d!`);
+      loadWithdrawals();
+      loadDashboard();
+    };
+
+    // USERS
     async function loadUsers() {
       const token = (await supabase.auth.getSession()).data.session.access_token;
       const res = await fetch('/api/admin?action=get-users', { headers: { 'Authorization': `Bearer ${token}` } });
       const data = await res.json();
       const tbody = document.getElementById('users-table');
-      if (!data.users || data.users.length === 0) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:40px;">No users found</td></tr>'; return; }
+      
+      if (!data.users || data.users.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:40px;color:rgba(255,255,255,0.5);">No users found</td></tr>';
+        return;
+      }
       
       tbody.innerHTML = data.users.map(u => {
         const isFrozen = u.is_frozen ? '<span class="status-badge frozen">Frozen</span>' : '<span class="status-badge approved">Active</span>';
         return `<tr>
-          <td>${u.email}</td><td>${u.full_name || '-'}</td>
+          <td>${u.email}</td>
+          <td>${u.full_name || '-'}</td>
           <td><span class="status-badge" style="background:rgba(0,212,255,0.2);color:var(--primary);">${u.vip_level || 'newbie'}</span></td>
           <td style="font-weight:700;">₦${Number(u.wallets?.[0]?.balance || 0).toLocaleString()}</td>
           <td>${isFrozen}</td>
@@ -264,10 +422,10 @@
       const token = (await supabase.auth.getSession()).data.session.access_token;
       const vip_level = document.getElementById('m-tier-select').value;
       const is_frozen = document.getElementById('m-freeze-select').value === 'true';
-      
-      const res = await fetch('/api/admin?action=update-user', { 
-        method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, 
-        body: JSON.stringify({ user_id: currentUserId, vip_level, is_frozen }) 
+      const res = await fetch('/api/admin?action=update-user', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ user_id: currentUserId, vip_level, is_frozen })
       });
       const data = await res.json();
       if (!res.ok) return alert(data.error);
@@ -280,20 +438,21 @@
       const amount = document.getElementById('m-amount').value;
       const reason = document.getElementById('m-reason').value;
       if (!amount) return alert('Enter an amount');
-      
       const token = (await supabase.auth.getSession()).data.session.access_token;
-      const res = await fetch('/api/admin?action=adjust-balance', { 
-        method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, 
-        body: JSON.stringify({ user_id: currentUserId, amount, type, reason }) 
+      const res = await fetch('/api/admin?action=adjust-balance', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ user_id: currentUserId, amount, type, reason })
       });
       const data = await res.json();
       if (!res.ok) return alert(data.error);
       alert(`Successfully ${type}ed ₦${amount}!`);
       document.getElementById('m-amount').value = '';
       document.getElementById('m-reason').value = '';
-      loadUsers(); // Refresh to show new balance
+      loadUsers();
     };
 
+    // SETTINGS
     async function loadSettings() {
       const token = (await supabase.auth.getSession()).data.session.access_token;
       const res = await fetch('/api/admin?action=get-settings', { headers: { 'Authorization': `Bearer ${token}` } });
@@ -309,13 +468,14 @@
 
     window.saveSupportLinks = async () => {
       const token = (await supabase.auth.getSession()).data.session.access_token;
-      const res = await fetch('/api/admin?action=save-support-links', { 
-        method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, 
-        body: JSON.stringify({ 
+      const res = await fetch('/api/admin?action=save-support-links', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({
           telegram: document.getElementById('link-telegram').value,
           whatsapp: document.getElementById('link-whatsapp').value,
           support: document.getElementById('link-support').value
-        }) 
+        })
       });
       if (res.ok) alert('Support links saved!');
     };
