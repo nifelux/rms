@@ -25,7 +25,13 @@ export default async function handler(req, res) {
   // 2. Parse the incoming payload (handles both JSON and form-urlencoded)
   const payload = parseWebhookBody(req.body);
   console.log('[TG-WEBHOOK-RECEIVED]', JSON.stringify(payload, null, 2));
-
+  console.log('[TG-WEBHOOK-FULL-PAYLOAD]', JSON.stringify(payload, null, 2));
+console.log('[TG-WEBHOOK-AMOUNT-DEBUG]', {
+  direct: payload?.amount,
+  nested: payload?.data?.amount,
+  raw_amount: payload?.['data[amount]']
+});
+  
   // 3. SECURITY: Verify the HMAC-SHA256 signature (skip in sandbox for testing)
   const ENV = process.env.TARGETGROWTHS_ENV || "production";
   if (ENV !== "sandbox" && !validWebhookSignature(payload)) {
