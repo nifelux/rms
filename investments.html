@@ -473,6 +473,12 @@
           boxElement.classList.remove('opening');
           boxElement.classList.add('opened');
           
+          // 1. UPDATE THE REWARD TEXT WITH THE REAL RANDOM AMOUNT
+          const rewardAmountDiv = boxElement.querySelector('.reward-amount');
+          if (rewardAmountDiv) {
+            rewardAmountDiv.textContent = `+₦${Number(data.amount).toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+          }
+
           // Update UI locally for smooth experience
           taskStatus.boxes_opened = data.boxes_opened;
           taskStatus.can_open = data.boxes_opened < data.max_boxes;
@@ -493,7 +499,6 @@
         showToast(err.message, 'error');
       }
     }
-
     loadTasks();
   </script>
 </body>
