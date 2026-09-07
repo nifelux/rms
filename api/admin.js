@@ -5,6 +5,13 @@ import { initiateTransfer } from '../lib/targetgrowths.js';
 export default async function handler(req, res) {
   const action = req.query.action;
   try {
+    // 1. ALLOW PUBLIC ACCESS TO GET SETTINGS 
+    // (This allows the regular user dashboard to load Telegram/WhatsApp links without admin rights)
+    if (action === 'get-settings') {
+      return await getSettings(req, res);
+    }
+
+    // 2. PROTECT ALL OTHER ADMIN ACTIONS
     const user = await verifyUser(req);
     if (!user) return res.status(401).json({ error: 'Unauthorized' });
     
@@ -18,7 +25,6 @@ export default async function handler(req, res) {
       case 'get-users': return await getUsers(req, res);
       case 'update-user': return await updateUser(req, res);
       case 'adjust-balance': return await adjustBalance(req, res);
-      case 'get-settings': return await getSettings(req, res);
       case 'save-setting': return await saveSetting(req, res);
       case 'save-support-links': return await saveSupportLinks(req, res);
       default: return res.status(400).json({ error: 'Invalid action' });
@@ -96,7 +102,6 @@ async function processWithdrawal(req, res) {
   if (w.status !== 'pending') return res.status(400).json({ error: 'Already processed' });
 
   if (act === 'reject') {
-    // Refund the user
     const { data: wallet } = await supabaseAdmin
       .from('wallets')
       .select('balance')
@@ -113,7 +118,6 @@ async function processWithdrawal(req, res) {
       .update({ status: 'rejected', note, processed_at: new Date().toISOString() })
       .eq('id', w.id);
       
-    // Update transaction status
     await supabaseAdmin
       .from('transactions')
       .update({ status: 'rejected' })
@@ -128,7 +132,6 @@ async function processWithdrawal(req, res) {
 
     const identifier = `TGW${String(w.id).replace(/-/g, '').slice(0, 12)}${Date.now().toString(36).toUpperCase()}`;
     
-    // Update status to processing
     await supabaseAdmin
       .from('withdrawals')
       .update({ 
@@ -158,7 +161,6 @@ async function processWithdrawal(req, res) {
         })
         .eq('id', w.id);
 
-      // Update transaction
       await supabaseAdmin
         .from('transactions')
         .update({ status: 'approved' })
