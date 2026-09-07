@@ -26,10 +26,15 @@ export default async function handler(req, res) {
   const payload = parseWebhookBody(req.body);
   console.log('[TG-WEBHOOK-RECEIVED]', JSON.stringify(payload, null, 2));
 
-  // 3. SECURITY: Verify the HMAC-SHA256 signature
-  if (!validWebhookSignature(payload)) {
+  // 3. SECURITY: Verify the HMAC-SHA256 signature (skip in sandbox for testing)
+  const ENV = process.env.TARGETGROWTHS_ENV || "production";
+  if (ENV !== "sandbox" && !validWebhookSignature(payload)) {
     console.error('[TG-WEBHOOK] ❌ Invalid signature. Rejecting request.');
     return res.status(401).json({ error: 'Invalid signature' });
+  }
+  
+  if (ENV === "sandbox") {
+    console.log('[TG-WEBHOOK] ⚠️ Skipping signature verification in sandbox mode');
   }
 
   // 4. Extract core data
