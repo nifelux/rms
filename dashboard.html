@@ -115,22 +115,22 @@
       </a>
 
       <!-- Row 2 -->
-      <a href="https://t.me/rms888" target="_blank" class="action-item">
-        <div class="action-icon blue"><i class="fa-brands fa-telegram"></i></div>
-        <div class="action-label">Telegram</div>
-      </a>
-      <a href="https://wa.me/2348000000000" target="_blank" class="action-item">
-        <div class="action-icon green"><i class="fa-brands fa-whatsapp"></i></div>
-        <div class="action-label">WhatsApp</div>
-      </a>
-      <a href="/support.html" class="action-item">
-        <div class="action-icon gold"><i class="fa-solid fa-headset"></i></div>
-        <div class="action-label">Support</div>
-      </a>
-      <a href="/withdraw.html" class="action-item">
-        <div class="action-icon red"><i class="fa-solid fa-building-columns"></i></div>
-        <div class="action-label">Bank</div>
-      </a>
+<a id="dash-telegram" href="#" target="_blank" class="action-item" style="display: none;">
+  <div class="action-icon blue"><i class="fa-brands fa-telegram"></i></div>
+  <div class="action-label">Telegram</div>
+</a>
+<a id="dash-whatsapp" href="#" target="_blank" class="action-item" style="display: none;">
+  <div class="action-icon green"><i class="fa-brands fa-whatsapp"></i></div>
+  <div class="action-label">WhatsApp</div>
+</a>
+<a id="dash-support" href="/support.html" class="action-item">
+  <div class="action-icon gold"><i class="fa-solid fa-headset"></i></div>
+  <div class="action-label">Support</div>
+</a>
+<a href="/withdraw.html" class="action-item">
+  <div class="action-icon red"><i class="fa-solid fa-building-columns"></i></div>
+  <div class="action-label">Bank</div>
+</a>
     </div>
 
     <div class="stats-row">
@@ -304,6 +304,45 @@
     }
 
     loadDashboard();
+
+    // Load dynamic support links from admin settings
+async function loadDashboardSupportLinks() {
+  try {
+    const res = await fetch('/api/admin?action=get-settings');
+    const data = await res.json();
+    
+    if (data.settings) {
+      // Telegram
+      const telegramBtn = document.getElementById('dash-telegram');
+      if (telegramBtn && data.settings.telegram_link) {
+        telegramBtn.href = data.settings.telegram_link;
+        telegramBtn.style.display = 'flex';
+      }
+      
+      // WhatsApp
+      const whatsappBtn = document.getElementById('dash-whatsapp');
+      if (whatsappBtn && data.settings.whatsapp_link) {
+        whatsappBtn.href = data.settings.whatsapp_link;
+        whatsappBtn.style.display = 'flex';
+      }
+      
+      // Support page link
+      const supportBtn = document.getElementById('dash-support');
+      if (supportBtn && data.settings.support_link) {
+        if (data.settings.support_link.includes('@')) {
+          supportBtn.href = `mailto:${data.settings.support_link}`;
+        } else {
+          supportBtn.href = data.settings.support_link;
+        }
+      }
+    }
+  } catch (err) {
+    console.error('Failed to load support links:', err);
+  }
+}
+
+// Call this when the page loads
+loadDashboardSupportLinks();
   </script>
 </body>
 </html>
