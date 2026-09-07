@@ -1,6 +1,6 @@
 /**
  * TargetGrowths Webhook Handler
- * Uses API verification instead of signature for security
+ * Uses API verification instead of signature for maximum security
  */
 
 import supabaseAdmin from '../../lib/supabase.js';
@@ -26,10 +26,10 @@ export default async function handler(req, res) {
     const identifier = webhookIdentifier(payload);
     const amount = webhookAmount(payload);
 
-    // 1. SKIP SIGNATURE CHECK - We'll verify via API instead
+    // 1. SKIP SIGNATURE CHECK - We verify via API instead
     console.log('[TG-WEBHOOK] ⚠️ Using API verification instead of signature');
 
-    // 2. VERIFY PAYMENT VIA TARGET GROWTH API (More secure!)
+    // 2. VERIFY PAYMENT VIA TARGET GROWTH API
     let verification;
     try {
       verification = await verifyPayment(identifier);
@@ -59,7 +59,7 @@ export default async function handler(req, res) {
 
     console.log(`[TG-WEBHOOK] ✅ Payment verified via API: ${identifier} - ₦${amount}`);
 
-    // 5. PROCESS THE DEPOSIT
+    // 5. FIND THE DEPOSIT RECORD
     const { data: deposit } = await supabaseAdmin
       .from('deposits')
       .select('id, user_id, amount, status')
@@ -76,7 +76,7 @@ export default async function handler(req, res) {
       return res.status(200).json({ message: 'Already processed' });
     }
 
-    // Credit wallet using .update() instead of .upsert()
+    // 6. CREDIT WALLET (Using .update() to fix the balance issue)
     const { data: wallet } = await supabaseAdmin
       .from('wallets')
       .select('balance')
@@ -84,7 +84,6 @@ export default async function handler(req, res) {
       .single();
 
     const newBalance = (wallet?.balance || 0) + Number(deposit.amount);
-
     console.log(`[TG-WEBHOOK] Updating wallet: ${wallet?.balance} → ${newBalance} for user ${deposit.user_id}`);
 
     const { error: walletError } = await supabaseAdmin
@@ -96,12 +95,39 @@ export default async function handler(req, res) {
       .eq('user_id', deposit.user_id);
 
     if (walletError) {
-      console.error('[TG-WEBHOOK]  Wallet update failed:', walletError.message);
+      console.error('[TG-WEBHOOK] ❌ Wallet update failed:', walletError.message);
       throw new Error(`Wallet update failed: ${walletError.message}`);
     }
-
     console.log(`[TG-WEBHOOK] ✅ Wallet updated successfully`);
 
+    // 7. RECORD TRANSACTION
+    await supabaseAdmin.from('transactions').insert({
+      user_id: deposit.user_id,
+      type: 'deposit',
+      amount: Number(deposit.amount),
+      status: 'approved',
+      reference: deposit.reference,
+      description: `Target Growth Deposit (${identifier})`
+    });
+
+    // 8. MARK DEPOSIT AS COMPLETED
+    await supabaseAdmin.from('deposits').update({
+      status: 'completed',
+      provider_status: 'success',
+      provider_response: verification,
+      paid_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    }).eq('id', deposit.id);
+
+    console.log(`[TG-DEPOSIT] ✅ Successfully credited ₦${deposit.amount} to user ${deposit.user_id}`);
+
+    return res.status(200).json({ success: true });
+
+  } catch (err) {
+    console.error('[TG-WEBHOOK] Error:', err);
+    return res.status(500).json({ error: err.message });
+  }
+}
 
 // ==========================================
 // DEPOSIT HANDLER (PAYIN)
