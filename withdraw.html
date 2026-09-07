@@ -22,12 +22,16 @@
     .eligibility-alert { border-radius: 16px; padding: 16px; margin-bottom: 24px; display: none; align-items: center; gap: 12px; font-size: 0.9rem; font-weight: 600; }
     .eligibility-alert.success { background: rgba(0,255,136,0.1); border: 1px solid rgba(0,255,136,0.3); color: #00ff88; }
     .eligibility-alert.error { background: rgba(255,26,26,0.1); border: 1px solid rgba(255,26,26,0.3); color: #ff4444; }
+    
     .section-title { font-size: 1rem; font-weight: 700; color: rgba(255,255,255,0.8); margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
     .section-title i { color: #00d4ff; }
-    .amount-input-wrapper { position: relative; margin-bottom: 24px; }
-    .amount-input { width: 100%; padding: 18px 16px 18px 50px; background: rgba(0,0,0,0.3); border: 2px solid rgba(255,255,255,0.1); border-radius: 14px; color: white; font-size: 1.5rem; font-weight: 800; transition: all 0.3s; }
-    .amount-input:focus { outline: none; border-color: #ffd700; background: rgba(0,0,0,0.5); box-shadow: 0 0 0 4px rgba(255,215,0,0.1); }
-    .amount-icon { position: absolute; left: 18px; top: 50%; transform: translateY(-50%); color: #ffd700; font-size: 1.5rem; font-weight: 900; }
+    
+    .amount-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 24px; }
+    .amount-btn { padding: 16px; background: rgba(255,255,255,0.05); border: 2px solid rgba(255,255,255,0.1); border-radius: 14px; color: white; font-weight: 700; font-size: 1.1rem; cursor: pointer; transition: all 0.3s; }
+    .amount-btn:hover:not(:disabled) { border-color: rgba(255,215,0,0.5); background: rgba(255,215,0,0.1); transform: translateY(-2px); }
+    .amount-btn.active { background: rgba(255,215,0,0.2); border-color: #ffd700; color: #ffd700; box-shadow: 0 0 20px rgba(255,215,0,0.3); }
+    .amount-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+    
     .form-group { margin-bottom: 18px; }
     .form-label { display: block; font-size: 0.85rem; color: rgba(255,255,255,0.7); font-weight: 600; margin-bottom: 8px; }
     .input-wrapper { position: relative; }
@@ -36,10 +40,14 @@
     .form-select option { background: #1a1f4e; color: white; }
     .form-input:focus, .form-select:focus { outline: none; border-color: #00d4ff; background: rgba(0,0,0,0.5); box-shadow: 0 0 0 3px rgba(0,212,255,0.1); }
     .input-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: rgba(255,255,255,0.4); font-size: 1.1rem; }
+    .form-input:focus ~ .input-icon, .form-select:focus ~ .input-icon { color: #00d4ff; }
+    
     .submit-btn { width: 100%; padding: 16px; font-size: 1.05rem; font-weight: 800; border: none; border-radius: 14px; background: linear-gradient(135deg, #ffd700, #e6c200); color: #0a0e27; cursor: pointer; transition: all 0.3s; box-shadow: 0 8px 24px rgba(255,215,0,0.3); margin-top: 8px; display: flex; align-items: center; justify-content: center; gap: 8px; }
     .submit-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(255,215,0,0.4); }
     .submit-btn:disabled { opacity: 0.6; cursor: not-allowed; background: #555; color: #aaa; box-shadow: none; }
+    
     .info-box { background: rgba(0,212,255,0.1); border: 1px solid rgba(0,212,255,0.3); border-radius: 12px; padding: 14px; margin-top: 20px; font-size: 0.85rem; color: #00d4ff; text-align: center; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    
     .rules-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; padding: 20px; margin-top: 32px; backdrop-filter: blur(10px); }
     .rules-card h4 { margin: 0 0 16px 0; font-size: 1rem; font-weight: 700; color: #ffd700; display: flex; align-items: center; gap: 8px; }
     .schedule-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.9rem; }
@@ -58,35 +66,54 @@
       <h2>Withdraw Funds</h2>
       <p>Instant payout via Target Growth</p>
     </div>
+    
     <div class="balance-card">
       <div class="balance-label">Available Balance</div>
       <div class="balance-amount">₦<span id="available-balance">0.00</span></div>
     </div>
+    
     <div id="eligibility-alert" class="eligibility-alert"></div>
-    <div class="section-title"><i class="fa-solid fa-naira-sign"></i> Enter Amount</div>
-    <div class="amount-input-wrapper">
-      <span class="amount-icon">₦</span>
-      <input type="number" id="amount" class="amount-input" placeholder="0.00" min="1000" step="100">
+    
+    <div class="section-title"><i class="fa-solid fa-naira-sign"></i> Select Amount</div>
+    <div class="amount-grid" id="amount-grid">
+      <button class="amount-btn" data-amount="1000" onclick="selectAmount(1000)">1,000</button>
+      <button class="amount-btn" data-amount="3000" onclick="selectAmount(3000)">₦3,000</button>
+      <button class="amount-btn" data-amount="5000" onclick="selectAmount(5000)">₦5,000</button>
+      <button class="amount-btn" data-amount="7000" onclick="selectAmount(7000)">₦7,000</button>
+      <button class="amount-btn" data-amount="10000" onclick="selectAmount(10000)">10,000</button>
+      <button class="amount-btn" data-amount="15000" onclick="selectAmount(15000)">₦15,000</button>
+      <button class="amount-btn" data-amount="20000" onclick="selectAmount(20000)">₦20,000</button>
+      <button class="amount-btn" data-amount="30000" onclick="selectAmount(30000)">₦30,000</button>
     </div>
+    
     <form id="withdraw-form">
       <div class="form-group">
         <label class="form-label">Bank Name</label>
         <div class="input-wrapper">
           <select id="bank-name" class="form-select" required>
             <option value="">Select your bank</option>
-            <option value="Access Bank">Access Bank</option><option value="GTBank">Guaranty Trust Bank (GTBank)</option>
-            <option value="Zenith Bank">Zenith Bank</option><option value="UBA">United Bank for Africa (UBA)</option>
-            <option value="First Bank">First Bank of Nigeria</option><option value="Fidelity Bank">Fidelity Bank</option>
-            <option value="Union Bank">Union Bank</option><option value="Sterling Bank">Sterling Bank</option>
-            <option value="Wema Bank">Wema Bank</option><option value="Stanbic IBTC">Stanbic IBTC Bank</option>
-            <option value="Ecobank">Ecobank Nigeria</option><option value="Polaris Bank">Polaris Bank</option>
-            <option value="Opay">Opay (Paycom)</option><option value="PalmPay">PalmPay</option>
-            <option value="Kuda">Kuda Bank</option><option value="Moniepoint">Moniepoint MFB</option>
+            <option value="Access Bank">Access Bank</option>
+            <option value="GTBank">Guaranty Trust Bank (GTBank)</option>
+            <option value="Zenith Bank">Zenith Bank</option>
+            <option value="UBA">United Bank for Africa (UBA)</option>
+            <option value="First Bank">First Bank of Nigeria</option>
+            <option value="Fidelity Bank">Fidelity Bank</option>
+            <option value="Union Bank">Union Bank</option>
+            <option value="Sterling Bank">Sterling Bank</option>
+            <option value="Wema Bank">Wema Bank</option>
+            <option value="Stanbic IBTC">Stanbic IBTC Bank</option>
+            <option value="Ecobank">Ecobank Nigeria</option>
+            <option value="Polaris Bank">Polaris Bank</option>
+            <option value="Opay">Opay (Paycom)</option>
+            <option value="PalmPay">PalmPay</option>
+            <option value="Kuda">Kuda Bank</option>
+            <option value="Moniepoint">Moniepoint MFB</option>
             <option value="VFD">VFD Microfinance Bank</option>
           </select>
           <i class="fa-solid fa-building-columns input-icon"></i>
         </div>
       </div>
+      
       <div class="form-group">
         <label class="form-label">Account Number</label>
         <div class="input-wrapper">
@@ -94,6 +121,7 @@
           <i class="fa-solid fa-hashtag input-icon"></i>
         </div>
       </div>
+      
       <div class="form-group">
         <label class="form-label">Account Name</label>
         <div class="input-wrapper">
@@ -101,20 +129,26 @@
           <i class="fa-solid fa-user input-icon"></i>
         </div>
       </div>
+      
       <button type="submit" class="submit-btn" id="submit-btn">
         <i class="fa-solid fa-bolt"></i> Withdraw Now
       </button>
     </form>
-    <div class="info-box"><i class="fa-solid fa-shield-halved"></i> Secured by Target Growth • Instant Payouts</div>
+    
+    <div class="info-box">
+      <i class="fa-solid fa-shield-halved"></i>
+      Secured by Target Growth • Instant Payouts
+    </div>
+    
     <div class="rules-card">
-      <h4><i class="fa-regular fa-calendar-check"></i> Weekly Withdrawal Schedule</h4>
+      <h4><i class="fa-regular fa-clock"></i> Withdrawal Schedule</h4>
       <div class="schedule-row"><span>M1, M2</span> <span>Monday</span></div>
       <div class="schedule-row"><span>M3, M4</span> <span>Tuesday</span></div>
       <div class="schedule-row"><span>M5</span> <span>Wednesday</span></div>
       <div class="schedule-row"><span>M6</span> <span>Thursday</span></div>
       <div class="schedule-row"><span>M7</span> <span>Friday</span></div>
       <div class="badges-container">
-        <div class="rule-badge"><i class="fa-regular fa-clock"></i> 10am - 6pm WAT</div>
+        <div class="rule-badge"><i class="fa-regular fa-clock"></i> 9am - 6pm WAT</div>
         <div class="rule-badge"><i class="fa-solid fa-ban" style="color: #ff4444;"></i> No Weekends</div>
         <div class="rule-badge"><i class="fa-solid fa-1"></i> Max 1 per day</div>
       </div>
@@ -128,13 +162,57 @@
     const supabase = createClient('https://ofysznsajwxnjqaumwch.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9meXN6bnNhand4bmpxYXVtd2NoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgyMzM4NDgsImV4cCI6MjEwMzgwOTg0OH0.XaHkP5WZ2nJVJXVdbG-D13rrD63g_09HxmJoZn7ZoWA');
     window.supabase = supabase;
 
+    let selectedAmount = null;
+
+    window.selectAmount = (amount) => {
+      selectedAmount = amount;
+      document.querySelectorAll('.amount-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if (Number(btn.dataset.amount) === amount) {
+          btn.classList.add('active');
+        }
+      });
+    };
+
+    function checkWithdrawalTime() {
+      const now = new Date();
+      const watTime = new Date(now.getTime() + (60 * 60 * 1000)); // WAT is UTC+1
+      const hour = watTime.getHours();
+      const day = watTime.getDay();
+      
+      if (day === 0 || day === 6) {
+        return { allowed: false, reason: 'Withdrawals are closed on weekends' };
+      }
+      
+      if (hour < 9 || hour >= 18) {
+        return { allowed: false, reason: 'Withdrawals are only available from 9am to 6pm WAT' };
+      }
+      
+      return { allowed: true };
+    }
+
     async function init() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return window.location.href = '/login.html';
+      
       const token = (await supabase.auth.getSession()).data.session.access_token;
       const { data: wallet } = await supabase.from('wallets').select('balance').eq('user_id', user.id).single();
       document.getElementById('available-balance').textContent = Number(wallet?.balance || 0).toLocaleString('en-NG', { minimumFractionDigits: 2 });
 
+      // Check time restrictions
+      const timeCheck = checkWithdrawalTime();
+      if (!timeCheck.allowed) {
+        const alertBox = document.getElementById('eligibility-alert');
+        alertBox.className = 'eligibility-alert error';
+        alertBox.style.display = 'flex';
+        alertBox.innerHTML = `<i class="fa-solid fa-circle-exclamation"></i> <span>${timeCheck.reason}</span>`;
+        document.getElementById('withdraw-form').style.opacity = '0.5';
+        document.getElementById('withdraw-form').style.pointerEvents = 'none';
+        document.querySelectorAll('.amount-btn').forEach(btn => btn.disabled = true);
+        return;
+      }
+
+      // Check eligibility
       const res = await fetch('/api/finance?action=getWithdrawalEligibility', { headers: { 'Authorization': `Bearer ${token}` } });
       const elig = await res.json();
       const alertBox = document.getElementById('eligibility-alert');
@@ -145,23 +223,47 @@
         alertBox.innerHTML = `<i class="fa-solid fa-circle-exclamation"></i> <span>${elig.reason_blocked}</span>`;
         document.getElementById('withdraw-form').style.opacity = '0.5';
         document.getElementById('withdraw-form').style.pointerEvents = 'none';
+        document.querySelectorAll('.amount-btn').forEach(btn => btn.disabled = true);
       } else {
         alertBox.className = 'eligibility-alert success';
         alertBox.innerHTML = `<i class="fa-solid fa-circle-check"></i> <span>You are eligible to withdraw! (Tier: ${elig.tier.toUpperCase()})</span>`;
       }
+
+      // Disable buttons that exceed balance
+      const balance = wallet?.balance || 0;
+      document.querySelectorAll('.amount-btn').forEach(btn => {
+        const amount = Number(btn.dataset.amount);
+        if (amount > balance) {
+          btn.disabled = true;
+          btn.title = 'Insufficient balance';
+        }
+      });
     }
 
     document.getElementById('withdraw-form').addEventListener('submit', async (e) => {
       e.preventDefault();
-      const amount = document.getElementById('amount').value;
+      
+      if (!selectedAmount) {
+        showToast('Please select a withdrawal amount', 'error');
+        return;
+      }
+      
       const bankName = document.getElementById('bank-name').value;
       const accountNumber = document.getElementById('account-number').value;
       const accountName = document.getElementById('account-name').value.trim();
       
-      if (!amount || Number(amount) < 1000) return showToast('Minimum withdrawal is ₦1,000', 'error');
-      if (accountNumber.length !== 10 || !/^\d+$/.test(accountNumber)) return showToast('Please enter a valid 10-digit account number', 'error');
-      if (!bankName) return showToast('Please select your bank', 'error');
-      if (!accountName) return showToast('Please enter account name', 'error');
+      if (accountNumber.length !== 10 || !/^\d+$/.test(accountNumber)) {
+        showToast('Please enter a valid 10-digit account number', 'error');
+        return;
+      }
+      if (!bankName) {
+        showToast('Please select your bank', 'error');
+        return;
+      }
+      if (!accountName) {
+        showToast('Please enter account name', 'error');
+        return;
+      }
       
       const btn = document.getElementById('submit-btn');
       btn.disabled = true;
@@ -170,8 +272,14 @@
       
       try {
         const res = await fetch('/api/finance?action=initiateTargetGrowthWithdrawal', {
-          method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-          body: JSON.stringify({ amount: Number(amount), bank_name: bankName, account_number: accountNumber, account_name: accountName })
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          body: JSON.stringify({
+            amount: selectedAmount,
+            bank_name: bankName,
+            account_number: accountNumber,
+            account_name: accountName
+          })
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error);
@@ -183,6 +291,7 @@
         btn.innerHTML = '<i class="fa-solid fa-bolt"></i> Withdraw Now';
       }
     });
+
     init();
   </script>
 </body>
