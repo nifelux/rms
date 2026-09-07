@@ -62,18 +62,36 @@ async function getTaskStatus(req, res) {
 
     const tier = profile?.vip_level || 'newbie';
     if (tier === 'newbie' || tier === 'M0') {
-      return res.status(200).json({ tier, boxes_opened: 0, max_boxes: 0, earning_per_box: 0, can_open: false });
+      return res.status(200).json({ 
+        tier, boxes_opened: 0, max_boxes: 0, earning_per_box: 0, can_open: false 
+      });
     }
 
-    const { data: tierInfo } = await supabaseAdmin.from('rms_tiers').select('daily_boxes, daily_earning').eq('tier', tier).single();
-    if (!tierInfo) return res.status(500).json({ error: 'Tier config not found' });
+    // Fetch tier config
+    const { data: tierInfo, error: tierError } = await supabaseAdmin
+      .from('rms_tiers')
+      .select('daily_boxes, daily_earning')
+      .eq('tier', tier)
+      .single();
+      
+    if (tierError || !tierInfo) {
+      console.error('Tier config error:', tierError);
+      return res.status(500).json({ error: 'Tier configuration not found in database.' });
+    }
+
+    // Calculate estimated earning per box for the UI
+    const earningPerBox = tierInfo.daily_boxes > 0 ? Math.floor(tierInfo.daily_earning / tierInfo.daily_boxes) : 0;
 
     return res.status(200).json({
-      tier, boxes_opened, max_boxes: tierInfo.daily_boxes, 
+      tier, 
+      boxes_opened, 
+      max_boxes: tierInfo.daily_boxes, 
+      earning_per_box: earningPerBox,
       daily_earning: tierInfo.daily_earning, 
       can_open: boxesOpened < tierInfo.daily_boxes
     });
   } catch (err) {
+    console.error('getTaskStatus error:', err);
     return res.status(500).json({ error: err.message });
   }
 }
@@ -85,11 +103,18 @@ async function openMysteryBox(req, res) {
 
     if (!isTaskDayOpen()) return res.status(400).json({ error: 'Tasks closed on weekends.' });
 
-    const { data: profile } = await supabaseAdmin.from('profiles').select('vip_level, boxes_opened_today, last_task_reset_date').eq('id', user.id).single();
+    const { data: profile } = await supabaseAdmin
+      .from('profiles')
+      .select('vip_level, boxes_opened_today, last_task_reset_date')
+      .eq('id', user.id)
+      .single();
+      
     if (!profile) return res.status(500).json({ error: 'Profile not found' });
 
     const tier = profile.vip_level;
-    if (!tier || tier === 'newbie' || tier === 'M0') return res.status(400).json({ error: 'You must have an active VIP tier.' });
+    if (!tier || tier === 'newbie' || tier === 'M0') {
+      return res.status(400).json({ error: 'You must have an active VIP tier.' });
+    }
 
     const now = new Date();
     const todayStart = startOfTodayWAT();
@@ -97,16 +122,19 @@ async function openMysteryBox(req, res) {
     let boxesOpened = profile.boxes_opened_today || 0;
     if (lastReset < todayStart) boxesOpened = 0;
 
-    const { data: tierInfo } = await supabaseAdmin.from('rms_tiers').select('daily_boxes, daily_earning').eq('tier', tier).single();
+    const { data: tierInfo } = await supabaseAdmin
+      .from('rms_tiers')
+      .select('daily_boxes, daily_earning')
+      .eq('tier', tier)
+      .single();
+      
     if (!tierInfo) return res.status(500).json({ error: 'Tier config not found' });
 
-    if (boxesOpened >= tierInfo.daily_boxes) return res.status(400).json({ error: 'Daily limit reached.' });
+    if (boxesOpened >= tierInfo.daily_boxes) {
+      return res.status(400).json({ error: 'Daily limit reached.' });
+    }
 
-    // ==========================================
     // SMART RANDOMIZATION LOGIC
-    // ==========================================
-    
-    // 1. Calculate how much they've already earned today
     const { data: todayTxns } = await supabaseAdmin
       .from('transactions')
       .select('amount')
@@ -120,52 +148,59 @@ async function openMysteryBox(req, res) {
 
     let boxAmount;
     
-    // 2. If it's the last box, give the exact remainder to hit the daily target perfectly
     if (boxesLeft === 1) {
-      boxAmount = remainingToday;
+      boxAmount = Math.max(0, remainingToday); // Ensure it's not negative
     } else {
-      // 3. Otherwise, randomize between 50% and 150% of the average remaining per box
       const avgRemaining = remainingToday / boxesLeft;
       const min = avgRemaining * 0.5;
       const max = avgRemaining * 1.5;
       
-      // Generate random float and round to 2 decimal places
       boxAmount = Math.random() * (max - min) + min;
       boxAmount = Math.round(boxAmount * 100) / 100;
       
-      // Safety cap: ensure we don't overshoot the remaining total
       const maxAllowed = remainingToday - (boxesLeft - 1); 
       if (boxAmount > maxAllowed) boxAmount = maxAllowed;
     }
 
-    // ==========================================
-    // CREDIT WALLET & RECORD TRANSACTION
-    // ==========================================
+    // Ensure minimum amount is at least 1 if remaining is > 0
+    if (boxAmount <= 0 && remainingToday > 0) boxAmount = 1;
 
-    const reference = `box_${user.id}_${Date.now()}`;
+    const reference = `box_${user.id.slice(0, 8)}_${Date.now()}`;
     
-    // Record transaction
+    // 1. Record transaction
     const { error: txnErr } = await supabaseAdmin.from('transactions').insert({
-      user_id: user.id, type: 'task_earning', amount: boxAmount, 
-      status: 'approved', reference: reference, 
+      user_id: user.id, 
+      type: 'task_earning', 
+      amount: boxAmount, 
+      status: 'approved', 
+      reference: reference, 
       description: `Mystery Box Reward (${tier}) - Box ${boxesOpened + 1}/${tierInfo.daily_boxes}`
     });
 
     if (txnErr) return res.status(500).json({ error: txnErr.message });
 
-    // Credit Wallet
-    const { data: wallet } = await supabaseAdmin.from('wallets').select('balance').eq('user_id', user.id).single();
+    // 2. Credit Wallet (Using .update() instead of .upsert() for safety)
+    const { data: wallet } = await supabaseAdmin
+      .from('wallets')
+      .select('balance')
+      .eq('user_id', user.id)
+      .single();
+      
     const newBalance = (wallet?.balance || 0) + boxAmount;
     
-    await supabaseAdmin.from('wallets').upsert({
-      user_id: user.id, balance: newBalance, updated_at: new Date()
-    });
+    await supabaseAdmin
+      .from('wallets')
+      .update({ balance: newBalance, updated_at: new Date().toISOString() })
+      .eq('user_id', user.id);
 
-    // Update Profile Counters
-    await supabaseAdmin.from('profiles').update({ 
-      boxes_opened_today: boxesOpened + 1, 
-      last_task_reset_date: now.toISOString() 
-    }).eq('id', user.id);
+    // 3. Update Profile Counters
+    await supabaseAdmin
+      .from('profiles')
+      .update({ 
+        boxes_opened_today: boxesOpened + 1, 
+        last_task_reset_date: now.toISOString() 
+      })
+      .eq('id', user.id);
 
     return res.status(200).json({ 
       success: true, 
