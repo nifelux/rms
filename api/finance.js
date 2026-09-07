@@ -75,15 +75,9 @@ function getTargetGrowthBankCode(bankName) {
 }
 
 function getAppUrl(req) {
-  const configured = String(process.env.APP_URL || "").trim();
-  if (configured) {
-    // Ensure it starts with https://
-    return configured.replace(/\/$/, "").replace(/^http:\/\//, "https://");
-  }
-  
-  // Fallback: always use https for Vercel
-  const host = String(req.headers["x-forwarded-host"] || req.headers.host || "rms888.vercel.app").split(",")[0].trim();
-  return `https://${host}`.replace(/\/$/, "");
+  // ALWAYS return https://rms888.vercel.app for production
+  // This is hardcoded to avoid any protocol issues
+  return "https://rms888.vercel.app";
 }
 
 function generateGiftCode() {
