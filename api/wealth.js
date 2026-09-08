@@ -31,7 +31,6 @@ async function invest(req, res) {
     const { data: { user }, error: userError } = await supabaseAdmin.auth.getUser(token);
     if (userError || !user) return res.status(401).json({ error: 'Invalid token' });
 
-    // Accept both package_id (new) and plan_id (old) for backward compatibility
     const { package_id, plan_id, amount, plan_name, daily_return, duration_days, return_amount } = req.body;
     const investAmount = Number(amount);
     const pkgId = package_id || plan_id;
@@ -56,7 +55,7 @@ async function invest(req, res) {
       return res.status(400).json({ error: 'This package is no longer available' });
     }
 
-    // 3. Check date availability (start_date and end_date)
+    // 3. Check date availability
     const now = new Date();
     const startDate = pkg.start_date ? new Date(pkg.start_date) : null;
     const endDate = pkg.end_date ? new Date(pkg.end_date + 'T23:59:59') : null;
@@ -95,22 +94,20 @@ async function invest(req, res) {
       .update({ balance: newBalance, updated_at: new Date().toISOString() })
       .eq('user_id', user.id);
 
-    // 7. Calculate total return if not provided
+    // 7. Calculate total return
     const totalReturn = return_amount ? Number(return_amount) : (Number(pkg.total_return) || (Number(pkg.daily_return) * Number(pkg.duration_days)));
-    const dailyReturn = daily_return ? Number(daily_return) : Number(pkg.daily_return);
     const duration = duration_days ? Number(duration_days) : Number(pkg.duration_days);
     const packageName = plan_name || pkg.name;
 
-    // 8. Save Investment
+    // 8. Save Investment (REMOVED daily_return field)
     const { data: investment, error: invError } = await supabaseAdmin
       .from('wealth_investments')
       .insert({
         user_id: user.id,
-        plan_id: pkg.id, // Keep plan_id for backward compatibility
+        plan_id: pkg.id,
         plan_name: packageName,
         amount: investAmount,
         return_amount: totalReturn,
-        daily_return: dailyReturn,
         duration_days: duration,
         status: 'active',
         created_at: new Date().toISOString()
