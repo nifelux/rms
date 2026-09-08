@@ -62,24 +62,56 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: 'Amount mismatch' });
       }
 
-      // Credit wallet
-      const { data: wallet } = await supabaseAdmin
+      // --- FIXED WALLET LOGIC ---
+      // 1. Check if wallet exists
+      const { data: wallet, error: walletSelectError } = await supabaseAdmin
         .from('wallets')
         .select('balance')
         .eq('user_id', deposit.user_id)
         .single();
 
-      const newBalance = (wallet?.balance || 0) + Number(deposit.amount);
+      if (walletSelectError && walletSelectError.code !== 'PGRST116') {
+        console.error('[TG-WEBHOOK] Error fetching wallet:', walletSelectError);
+      }
 
-      await supabaseAdmin
-        .from('wallets')
-        .update({ 
-          balance: newBalance, 
-          updated_at: new Date().toISOString() 
-        })
-        .eq('user_id', deposit.user_id);
+      const currentBalance = Number(wallet?.balance || 0);
+      const newBalance = currentBalance + Number(deposit.amount);
+      
+      console.log(`[TG-WEBHOOK] Current Balance: ${currentBalance} | Adding: ${deposit.amount} | New Balance: ${newBalance}`);
 
-      console.log(`[TG-WEBHOOK] ✅ Wallet updated: ${wallet?.balance} → ${newBalance}`);
+      let walletError = null;
+
+      // 2. Update or Create Wallet
+      if (wallet) {
+        // Wallet exists, update it
+        const { error } = await supabaseAdmin
+          .from('wallets')
+          .update({ 
+            balance: newBalance, 
+            updated_at: new Date().toISOString() 
+          })
+          .eq('user_id', deposit.user_id);
+        walletError = error;
+      } else {
+        // Wallet doesn't exist, create it (upsert)
+        console.log('[TG-WEBHOOK] Wallet not found, creating new wallet record...');
+        const { error } = await supabaseAdmin
+          .from('wallets')
+          .upsert({ 
+            user_id: deposit.user_id, 
+            balance: newBalance, 
+            updated_at: new Date().toISOString() 
+          });
+        walletError = error;
+      }
+
+      if (walletError) {
+        console.error('[TG-WEBHOOK] ❌ Wallet save failed:', walletError.message);
+        // We continue to record the transaction anyway so we don't lose the record
+      } else {
+        console.log(`[TG-WEBHOOK] ✅ Wallet updated successfully to ${newBalance}`);
+      }
+      // --------------------------
 
       // Record transaction
       await supabaseAdmin.from('transactions').insert({
@@ -181,11 +213,11 @@ async function handleDeposit(identifier, amount, status, payload) {
 
     await supabaseAdmin
       .from('wallets')
-      .update({
+      .upsert({
+        user_id: deposit.user_id,
         balance: newBalance,
         updated_at: new Date().toISOString()
-      })
-      .eq('user_id', deposit.user_id);
+      });
 
     console.log(`[TG-DEPOSIT] ✅ Wallet updated: ${wallet?.balance} → ${newBalance}`);
 
@@ -266,11 +298,11 @@ async function handleWithdrawal(identifier, amount, status, payload) {
     const refundAmount = Number(amount);
     const newBalance = Number(wallet?.balance || 0) + refundAmount;
 
-    await supabaseAdmin.from('wallets').update({
+    await supabaseAdmin.from('wallets').upsert({
       user_id: withdrawal.user_id,
       balance: newBalance,
       updated_at: new Date().toISOString()
-    }).eq('user_id', withdrawal.user_id);
+    });
 
     await supabaseAdmin.from('transactions').insert({
       user_id: withdrawal.user_id,
