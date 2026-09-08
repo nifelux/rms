@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>RMS — Admin Dashboard</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -10,78 +10,99 @@
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
     :root { --primary: #00d4ff; --secondary: #ffd700; --success: #00ff88; --danger: #ff4444; --warning: #ffa500; --dark: #0a0e27; --card: rgba(17,22,58,0.8); }
-    body { background: linear-gradient(135deg, #0a0e27 0%, #1a1f4e 100%); min-height: 100vh; color: white; }
-    .admin-header { background: rgba(10,14,39,0.95); border-bottom: 1px solid rgba(255,215,0,0.2); padding: 20px; position: sticky; top: 0; z-index: 100; backdrop-filter: blur(10px); }
+    body { background: linear-gradient(135deg, #0a0e27 0%, #1a1f4e 100%); min-height: 100vh; color: white; padding-bottom: 40px; }
+    
+    /* Header */
+    .admin-header { background: rgba(10,14,39,0.95); border-bottom: 1px solid rgba(255,215,0,0.2); padding: 16px 20px; position: sticky; top: 0; z-index: 100; backdrop-filter: blur(10px); }
     .header-content { max-width: 1400px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
-    .logo { display: flex; align-items: center; gap: 12px; font-size: 1.5rem; font-weight: 900; color: var(--secondary); }
-    .admin-info { display: flex; align-items: center; gap: 16px; }
-    .admin-badge { background: rgba(0,212,255,0.15); color: var(--primary); padding: 8px 16px; border-radius: 20px; font-weight: 700; font-size: 0.85rem; }
-    .logout-btn { background: rgba(255,68,68,0.2); border: 1px solid var(--danger); color: var(--danger); padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 600; }
-    .nav-tabs { background: rgba(10,14,39,0.8); padding: 0 20px; border-bottom: 1px solid rgba(255,255,255,0.1); position: sticky; top: 73px; z-index: 99; }
-    .nav-content { max-width: 1400px; margin: 0 auto; display: flex; gap: 8px; overflow-x: auto; }
-    .nav-tab { padding: 14px 24px; background: transparent; border: none; color: rgba(255,255,255,0.6); font-weight: 600; cursor: pointer; border-bottom: 3px solid transparent; white-space: nowrap; }
+    .logo { display: flex; align-items: center; gap: 10px; font-size: 1.3rem; font-weight: 900; color: var(--secondary); }
+    .admin-info { display: flex; align-items: center; gap: 12px; }
+    .admin-badge { background: rgba(0,212,255,0.15); color: var(--primary); padding: 6px 12px; border-radius: 20px; font-weight: 700; font-size: 0.8rem; }
+    .logout-btn { background: rgba(255,68,68,0.2); border: 1px solid var(--danger); color: var(--danger); padding: 6px 12px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.85rem; }
+    
+    /* Navigation */
+    .nav-tabs { background: rgba(10,14,39,0.9); border-bottom: 1px solid rgba(255,255,255,0.1); position: sticky; top: 65px; z-index: 99; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .nav-tabs::-webkit-scrollbar { display: none; }
+    .nav-content { max-width: 1400px; margin: 0 auto; display: flex; gap: 4px; padding: 0 16px; min-width: max-content; }
+    .nav-tab { padding: 14px 16px; background: transparent; border: none; color: rgba(255,255,255,0.6); font-weight: 600; cursor: pointer; border-bottom: 3px solid transparent; white-space: nowrap; font-size: 0.9rem; transition: all 0.3s; }
     .nav-tab.active { color: var(--primary); border-bottom-color: var(--primary); }
-    .admin-container { max-width: 1400px; margin: 0 auto; padding: 32px 20px; }
+    .nav-tab i { margin-right: 6px; }
+    
+    /* Layout */
+    .admin-container { max-width: 1400px; margin: 0 auto; padding: 24px 16px; }
     .section { display: none; animation: fadeIn 0.3s ease; }
     .section.active { display: block; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-    .section-title { font-size: 1.8rem; font-weight: 900; margin-bottom: 24px; display: flex; align-items: center; gap: 12px; }
+    
+    .section-title { font-size: 1.5rem; font-weight: 900; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
     .section-title i { color: var(--secondary); }
-    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 32px; }
-    .stat-card { background: var(--card); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 24px; backdrop-filter: blur(10px); }
-    .stat-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-    .stat-label { color: rgba(255,255,255,0.7); font-size: 0.9rem; font-weight: 600; }
-    .stat-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; }
+    
+    /* Stats */
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 16px; margin-bottom: 24px; }
+    .stat-card { background: var(--card); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 20px; backdrop-filter: blur(10px); }
+    .stat-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+    .stat-label { color: rgba(255,255,255,0.7); font-size: 0.8rem; font-weight: 600; }
+    .stat-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
     .stat-icon.blue { background: rgba(0,212,255,0.2); color: var(--primary); }
     .stat-icon.green { background: rgba(0,255,136,0.2); color: var(--success); }
     .stat-icon.yellow { background: rgba(255,215,0,0.2); color: var(--secondary); }
     .stat-icon.red { background: rgba(255,68,68,0.2); color: var(--danger); }
-    .stat-value { font-size: 2rem; font-weight: 900; }
-    .card { background: var(--card); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 24px; backdrop-filter: blur(10px); margin-bottom: 24px; }
-    .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-    .card-title { font-size: 1.2rem; font-weight: 800; }
-    .table-container { overflow-x: auto; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); }
-    table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+    .stat-value { font-size: 1.6rem; font-weight: 900; }
+    
+    /* Cards & Tables */
+    .card { background: var(--card); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 20px; backdrop-filter: blur(10px); margin-bottom: 20px; }
+    .table-container { overflow-x: auto; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); -webkit-overflow-scrolling: touch; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.85rem; min-width: 600px; }
     thead { background: rgba(0,0,0,0.3); }
-    th { padding: 14px; text-align: left; font-weight: 700; color: rgba(255,255,255,0.8); border-bottom: 2px solid rgba(255,255,255,0.1); }
-    td { padding: 14px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+    th { padding: 12px; text-align: left; font-weight: 700; color: rgba(255,255,255,0.8); border-bottom: 2px solid rgba(255,255,255,0.1); white-space: nowrap; }
+    td { padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); vertical-align: middle; }
     tbody tr:hover { background: rgba(255,255,255,0.03); }
-    .status-badge { padding: 6px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; }
+    
+    /* Badges & Buttons */
+    .status-badge { padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
     .status-badge::before { content: ''; width: 6px; height: 6px; border-radius: 50%; }
-    .status-badge.pending { background: rgba(255,165,0,0.2); color: var(--warning); }
-    .status-badge.pending::before { background: var(--warning); }
-    .status-badge.completed, .status-badge.approved { background: rgba(0,255,136,0.2); color: var(--success); }
-    .status-badge.completed::before, .status-badge.approved::before { background: var(--success); }
-    .status-badge.rejected, .status-badge.failed { background: rgba(255,68,68,0.2); color: var(--danger); }
-    .status-badge.rejected::before, .status-badge.failed::before { background: var(--danger); }
+    .status-badge.pending { background: rgba(255,165,0,0.2); color: var(--warning); } .status-badge.pending::before { background: var(--warning); }
+    .status-badge.completed, .status-badge.approved { background: rgba(0,255,136,0.2); color: var(--success); } .status-badge.completed::before, .status-badge.approved::before { background: var(--success); }
+    .status-badge.rejected, .status-badge.failed { background: rgba(255,68,68,0.2); color: var(--danger); } .status-badge.rejected::before, .status-badge.failed::before { background: var(--danger); }
     .status-badge.frozen { background: rgba(255,68,68,0.2); color: var(--danger); }
-    .btn { padding: 8px 16px; border-radius: 8px; border: none; cursor: pointer; font-weight: 700; font-size: 0.85rem; transition: all 0.3s; display: inline-flex; align-items: center; gap: 6px; }
+    
+    .btn { padding: 8px 14px; border-radius: 8px; border: none; cursor: pointer; font-weight: 700; font-size: 0.8rem; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
     .btn-primary { background: var(--primary); color: var(--dark); }
     .btn-success { background: var(--success); color: var(--dark); }
     .btn-danger { background: var(--danger); color: white; }
-    .btn-sm { padding: 6px 12px; font-size: 0.8rem; }
-    .btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
-    .filters { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
-    .filter-select { padding: 10px 16px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: white; font-weight: 600; }
-    .loading { text-align: center; padding: 40px; color: rgba(255,255,255,0.5); }
-    .loading i { font-size: 2.5rem; animation: spin 1s linear infinite; color: var(--primary); }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .form-group { margin-bottom: 20px; }
-    .form-label { display: block; margin-bottom: 8px; font-weight: 600; color: rgba(255,255,255,0.8); }
-    .form-input, .form-select { width: 100%; padding: 12px 16px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: white; font-size: 0.95rem; }
+    .btn-sm { padding: 6px 10px; font-size: 0.75rem; }
+    .btn:hover { transform: translateY(-1px); opacity: 0.9; }
+    
+    /* Forms & Filters */
+    .filters { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
+    .filter-select, .form-input, .form-select { padding: 10px 14px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: white; font-size: 0.9rem; width: 100%; }
+    .filter-select { width: auto; min-width: 140px; }
     .form-input:focus, .form-select:focus { outline: none; border-color: var(--primary); }
-    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(5px); }
+    .form-group { margin-bottom: 16px; }
+    .form-label { display: block; margin-bottom: 6px; font-weight: 600; color: rgba(255,255,255,0.8); font-size: 0.85rem; }
+    
+    /* Modals */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: none; align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(5px); padding: 20px; }
     .modal-overlay.active { display: flex; }
-    .modal { background: linear-gradient(135deg, #1a1f4e, #0a0e27); border: 1px solid rgba(255,215,0,0.3); border-radius: 20px; padding: 32px; max-width: 500px; width: 90%; max-height: 90vh; overflow-y: auto; }
-    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
-    .modal-title { font-size: 1.5rem; font-weight: 900; }
-    .modal-close { background: transparent; border: none; color: rgba(255,255,255,0.5); font-size: 1.5rem; cursor: pointer; }
+    .modal { background: linear-gradient(135deg, #1a1f4e, #0a0e27); border: 1px solid rgba(255,215,0,0.3); border-radius: 20px; padding: 24px; max-width: 500px; width: 100%; max-height: 90vh; overflow-y: auto; }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .modal-title { font-size: 1.3rem; font-weight: 900; }
+    .modal-close { background: transparent; border: none; color: rgba(255,255,255,0.5); font-size: 1.3rem; cursor: pointer; }
     .modal-close:hover { color: var(--danger); }
-    .user-info-box { background: rgba(0,0,0,0.2); padding: 16px; border-radius: 12px; margin-bottom: 20px; }
-    .user-info-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.9rem; }
+    .user-info-box { background: rgba(0,0,0,0.2); padding: 14px; border-radius: 12px; margin-bottom: 16px; }
+    .user-info-row { display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 0.85rem; }
     .user-info-row span:first-child { color: rgba(255,255,255,0.6); }
     .user-info-row span:last-child { font-weight: 700; }
-    @media (max-width: 768px) { .stats-grid { grid-template-columns: 1fr; } .table-container { font-size: 0.8rem; } th, td { padding: 10px 8px; } }
+
+    .loading { text-align: center; padding: 40px; color: rgba(255,255,255,0.5); }
+    .loading i { font-size: 2rem; animation: spin 1s linear infinite; color: var(--primary); }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    @media (max-width: 768px) {
+      .stats-grid { grid-template-columns: 1fr 1fr; }
+      .logo span { display: none; }
+      .admin-badge { display: none; }
+    }
   </style>
 </head>
 <body>
@@ -94,53 +115,44 @@
       </div>
     </div>
   </header>
+  
   <nav class="nav-tabs">
     <div class="nav-content">
       <button class="nav-tab active" onclick="showSection('dashboard', this)"><i class="fa-solid fa-chart-line"></i> Dashboard</button>
       <button class="nav-tab" onclick="showSection('deposits', this)"><i class="fa-solid fa-arrow-down"></i> Deposits</button>
       <button class="nav-tab" onclick="showSection('withdrawals', this)"><i class="fa-solid fa-arrow-up"></i> Withdrawals</button>
       <button class="nav-tab" onclick="showSection('users', this)"><i class="fa-solid fa-users"></i> Users</button>
+      <button class="nav-tab" onclick="showSection('tiers', this)"><i class="fa-solid fa-crown"></i> VIP Tiers</button>
+      <button class="nav-tab" onclick="showSection('giftcodes', this)"><i class="fa-solid fa-gift"></i> Gift Codes</button>
       <button class="nav-tab" onclick="showSection('settings', this)"><i class="fa-solid fa-gear"></i> Settings</button>
     </div>
   </nav>
+
   <div class="admin-container">
-    
-    <!-- Dashboard Section -->
+    <!-- Dashboard -->
     <section id="dashboard" class="section active">
       <h2 class="section-title"><i class="fa-solid fa-chart-line"></i> Overview</h2>
       <div class="stats-grid">
         <div class="stat-card">
-          <div class="stat-header">
-            <div><div class="stat-label">Total Users</div><div class="stat-value" id="stat-users">0</div></div>
-            <div class="stat-icon blue"><i class="fa-solid fa-users"></i></div>
-          </div>
+          <div class="stat-header"><div><div class="stat-label">Total Users</div><div class="stat-value" id="stat-users">0</div></div><div class="stat-icon blue"><i class="fa-solid fa-users"></i></div></div>
         </div>
         <div class="stat-card">
-          <div class="stat-header">
-            <div><div class="stat-label">Total Deposits</div><div class="stat-value" id="stat-deposits">₦0</div></div>
-            <div class="stat-icon green"><i class="fa-solid fa-arrow-down"></i></div>
-          </div>
+          <div class="stat-header"><div><div class="stat-label">Total Deposits</div><div class="stat-value" id="stat-deposits">₦0</div></div><div class="stat-icon green"><i class="fa-solid fa-arrow-down"></i></div></div>
         </div>
         <div class="stat-card">
-          <div class="stat-header">
-            <div><div class="stat-label">Total Withdrawals</div><div class="stat-value" id="stat-withdrawals">₦0</div></div>
-            <div class="stat-icon yellow"><i class="fa-solid fa-arrow-up"></i></div>
-          </div>
+          <div class="stat-header"><div><div class="stat-label">Total Withdrawals</div><div class="stat-value" id="stat-withdrawals">₦0</div></div><div class="stat-icon yellow"><i class="fa-solid fa-arrow-up"></i></div></div>
         </div>
         <div class="stat-card">
-          <div class="stat-header">
-            <div><div class="stat-label">Pending Withdrawals</div><div class="stat-value" id="stat-pending">0</div></div>
-            <div class="stat-icon red"><i class="fa-solid fa-clock"></i></div>
-          </div>
+          <div class="stat-header"><div><div class="stat-label">Pending Withdrawals</div><div class="stat-value" id="stat-pending">0</div></div><div class="stat-icon red"><i class="fa-solid fa-clock"></i></div></div>
         </div>
       </div>
     </section>
 
-    <!-- Deposits Section (Read-only, auto-approved) -->
+    <!-- Deposits -->
     <section id="deposits" class="section">
       <h2 class="section-title"><i class="fa-solid fa-arrow-down"></i> Deposit History</h2>
       <div class="card" style="background: rgba(0,255,136,0.1); border: 1px solid rgba(0,255,136,0.3); padding: 16px; margin-bottom: 20px; border-radius: 12px;">
-        <p style="color: var(--success); font-weight: 600;"><i class="fa-solid fa-circle-check"></i> All deposits are auto-approved via Target Growth webhook. No manual approval needed.</p>
+        <p style="color: var(--success); font-weight: 600; font-size: 0.9rem;"><i class="fa-solid fa-circle-check"></i> All deposits are auto-approved via Target Growth webhook.</p>
       </div>
       <div class="filters">
         <select class="filter-select" id="deposit-filter" onchange="loadDeposits()">
@@ -151,18 +163,16 @@
         </select>
       </div>
       <div class="card"><div class="table-container">
-        <table>
-          <thead><tr><th>User</th><th>Amount</th><th>Method</th><th>Status</th><th>Date</th></tr></thead>
-          <tbody id="deposits-table"><tr><td colspan="5" class="loading"><i class="fa-solid fa-circle-notch fa-spin"></i></td></tr></tbody>
-        </table>
+        <table><thead><tr><th>User</th><th>Amount</th><th>Method</th><th>Status</th><th>Date</th></tr></thead>
+        <tbody id="deposits-table"><tr><td colspan="5" class="loading"><i class="fa-solid fa-circle-notch fa-spin"></i></td></tr></tbody></table>
       </div></div>
     </section>
 
-    <!-- Withdrawals Section (Requires approval) -->
+    <!-- Withdrawals -->
     <section id="withdrawals" class="section">
       <h2 class="section-title"><i class="fa-solid fa-arrow-up"></i> Withdrawal Management</h2>
       <div class="card" style="background: rgba(255,165,0,0.1); border: 1px solid rgba(255,165,0,0.3); padding: 16px; margin-bottom: 20px; border-radius: 12px;">
-        <p style="color: var(--warning); font-weight: 600;"><i class="fa-solid fa-circle-exclamation"></i> Withdrawals require admin approval. Click "Pay" to initiate Target Growth payout.</p>
+        <p style="color: var(--warning); font-weight: 600; font-size: 0.9rem;"><i class="fa-solid fa-circle-exclamation"></i> Withdrawals require admin approval. Fees are auto-calculated.</p>
       </div>
       <div class="filters">
         <select class="filter-select" id="withdrawal-filter" onchange="loadWithdrawals()">
@@ -174,52 +184,65 @@
         </select>
       </div>
       <div class="card"><div class="table-container">
-        <table>
-          <thead><tr><th>User</th><th>Amount</th><th>Bank</th><th>Account</th><th>Status</th><th>Actions</th></tr></thead>
-          <tbody id="withdrawals-table"><tr><td colspan="6" class="loading"><i class="fa-solid fa-circle-notch fa-spin"></i></td></tr></tbody>
-        </table>
+        <table><thead><tr><th>User</th><th>Amount</th><th>Bank</th><th>Account</th><th>Status</th><th>Actions</th></tr></thead>
+        <tbody id="withdrawals-table"><tr><td colspan="6" class="loading"><i class="fa-solid fa-circle-notch fa-spin"></i></td></tr></tbody></table>
       </div></div>
     </section>
 
-    <!-- Users Section -->
+    <!-- Users -->
     <section id="users" class="section">
       <h2 class="section-title"><i class="fa-solid fa-users"></i> User Management</h2>
+      <div class="filters">
+        <input type="text" id="user-search" class="form-input" placeholder="Search by email or name..." onkeyup="loadUsers()" style="max-width: 300px;">
+      </div>
       <div class="card"><div class="table-container">
-        <table>
-          <thead><tr><th>Email</th><th>Name</th><th>Tier</th><th>Balance</th><th>Status</th><th>Actions</th></tr></thead>
-          <tbody id="users-table"><tr><td colspan="6" class="loading"><i class="fa-solid fa-circle-notch fa-spin"></i></td></tr></tbody>
-        </table>
+        <table><thead><tr><th>Email</th><th>Name</th><th>Tier</th><th>Balance</th><th>Status</th><th>Actions</th></tr></thead>
+        <tbody id="users-table"><tr><td colspan="6" class="loading"><i class="fa-solid fa-circle-notch fa-spin"></i></td></tr></tbody></table>
       </div></div>
     </section>
 
-    <!-- Settings Section -->
+    <!-- VIP Tiers -->
+    <section id="tiers" class="section">
+      <h2 class="section-title"><i class="fa-solid fa-crown"></i> Manage VIP Tiers</h2>
+      <div class="card"><div class="table-container">
+        <table><thead><tr><th>Tier</th><th>Upgrade Cost (₦)</th><th>Daily Boxes</th><th>Daily Earning (₦)</th><th>Action</th></tr></thead>
+        <tbody id="tiers-table"><tr><td colspan="5" class="loading"><i class="fa-solid fa-circle-notch fa-spin"></i></td></tr></tbody></table>
+      </div></div>
+    </section>
+
+    <!-- Gift Codes -->
+    <section id="giftcodes" class="section">
+      <h2 class="section-title"><i class="fa-solid fa-gift"></i> Generate Gift Code</h2>
+      <div class="card">
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap:16px;">
+          <div class="form-group"><label class="form-label">Amount (₦)</label><input type="number" id="gc-amount" class="form-input" value="1000"></div>
+          <div class="form-group"><label class="form-label">Max Uses</label><input type="number" id="gc-uses" class="form-input" value="1"></div>
+          <div class="form-group"><label class="form-label">Expires In (Days)</label><input type="number" id="gc-days" class="form-input" value="30"></div>
+        </div>
+        <button class="btn btn-primary" onclick="generateAdminGiftCode()"><i class="fa-solid fa-wand-magic-sparkles"></i> Generate Code</button>
+        <div id="gc-result" style="margin-top:16px; font-weight:700; color:var(--success); font-size:1.1rem; word-break: break-all;"></div>
+      </div>
+    </section>
+
+    <!-- Settings -->
     <section id="settings" class="section">
       <h2 class="section-title"><i class="fa-solid fa-gear"></i> Site Settings</h2>
       
       <div class="card">
-        <h3 style="margin-bottom: 20px; color: var(--secondary);"><i class="fa-solid fa-headset"></i> Support Links</h3>
-        <div class="form-group">
-          <label class="form-label">Telegram Link</label>
-          <input type="text" id="link-telegram" class="form-input" placeholder="https://t.me/yourchannel">
+        <h3 style="margin-bottom: 16px; color: var(--secondary); font-size: 1.1rem;"><i class="fa-solid fa-percent"></i> Withdrawal Fee</h3>
+        <div class="form-group" style="max-width: 300px;">
+          <label class="form-label">Fee Percentage (%)</label>
+          <input type="number" id="withdrawal-fee" class="form-input" placeholder="e.g., 10 for 10%">
         </div>
-        <div class="form-group">
-          <label class="form-label">WhatsApp Link</label>
-          <input type="text" id="link-whatsapp" class="form-input" placeholder="https://wa.me/1234567890">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Customer Service / Email</label>
-          <input type="text" id="link-support" class="form-input" placeholder="support@rms.com">
-        </div>
-        <button class="btn btn-primary" onclick="saveSupportLinks()"><i class="fa-solid fa-save"></i> Save Support Links</button>
+        <button class="btn btn-primary" onclick="saveWithdrawalFee()"><i class="fa-solid fa-save"></i> Save Fee</button>
       </div>
 
       <div class="card">
-        <h3 style="margin-bottom: 20px; color: var(--secondary);"><i class="fa-solid fa-money-bill-transfer"></i> Withdrawal Limits</h3>
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
-          <div class="form-group"><label class="form-label">Min Withdrawal (₦)</label><input type="number" id="min-withdraw" class="form-input" value="1000"></div>
-          <div class="form-group"><label class="form-label">Max Withdrawal (₦)</label><input type="number" id="max-withdraw" class="form-input" value="1000000"></div>
-        </div>
-        <button class="btn btn-primary" onclick="saveWithdrawalSettings()"><i class="fa-solid fa-save"></i> Save Limits</button>
+        <h3 style="margin-bottom: 16px; color: var(--secondary); font-size: 1.1rem;"><i class="fa-solid fa-headset"></i> Support Links</h3>
+        <div class="form-group"><label class="form-label">Telegram Link</label><input type="text" id="link-telegram" class="form-input" placeholder="https://t.me/yourchannel"></div>
+        <div class="form-group"><label class="form-label">WhatsApp Link</label><input type="text" id="link-whatsapp" class="form-input" placeholder="https://wa.me/1234567890"></div>
+        <div class="form-group"><label class="form-label">Customer Service / Email</label><input type="text" id="link-support" class="form-input" placeholder="support@rms.com"></div>
+        <button class="btn btn-primary" onclick="saveSupportLinks()"><i class="fa-solid fa-save"></i> Save Support Links</button>
       </div>
     </section>
   </div>
@@ -227,45 +250,43 @@
   <!-- User Management Modal -->
   <div class="modal-overlay" id="user-modal">
     <div class="modal">
-      <div class="modal-header">
-        <h3 class="modal-title">Manage User</h3>
-        <button class="modal-close" onclick="closeModal()"><i class="fa-solid fa-xmark"></i></button>
+      <div class="modal-header"><h3 class="modal-title">Manage User</h3><button class="modal-close" onclick="closeModal('user-modal')"><i class="fa-solid fa-xmark"></i></button></div>
+      <div class="user-info-box">
+        <div class="user-info-row"><span>Email:</span><span id="m-email">-</span></div>
+        <div class="user-info-row"><span>Current Balance:</span><span id="m-balance">₦0</span></div>
+        <div class="user-info-row"><span>Current Tier:</span><span id="m-tier">-</span></div>
+        <div class="user-info-row"><span>Status:</span><span id="m-status">Active</span></div>
       </div>
-      <div id="modal-content">
-        <div class="user-info-box">
-          <div class="user-info-row"><span>Email:</span><span id="m-email">-</span></div>
-          <div class="user-info-row"><span>Current Balance:</span><span id="m-balance">₦0</span></div>
-          <div class="user-info-row"><span>Current Tier:</span><span id="m-tier">-</span></div>
-          <div class="user-info-row"><span>Status:</span><span id="m-status">Active</span></div>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Change VIP Tier</label>
-          <select id="m-tier-select" class="form-select">
-            <option value="newbie">Newbie</option>
-            <option value="M1">M1</option><option value="M2">M2</option><option value="M3">M3</option>
-            <option value="M4">M4</option><option value="M5">M5</option><option value="M6">M6</option><option value="M7">M7</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Account Status</label>
-          <select id="m-freeze-select" class="form-select">
-            <option value="false">Active (Unfrozen)</option>
-            <option value="true">Frozen (Blocked)</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Adjust Balance (Credit/Debit)</label>
-          <div style="display:flex; gap:10px;">
-            <input type="number" id="m-amount" class="form-input" placeholder="Amount">
-            <button class="btn btn-success" onclick="adjustBalance('credit')">Credit</button>
-            <button class="btn btn-danger" onclick="adjustBalance('debit')">Debit</button>
-          </div>
-          <input type="text" id="m-reason" class="form-input" placeholder="Reason (e.g. Bonus, Penalty)" style="margin-top:10px;">
-        </div>
-        <button class="btn btn-primary" style="width:100%; justify-content:center;" onclick="saveUserUpdates()">
-          <i class="fa-solid fa-save"></i> Save Tier & Status Changes
-        </button>
+      <div class="form-group"><label class="form-label">Change VIP Tier</label>
+        <select id="m-tier-select" class="form-select">
+          <option value="newbie">Newbie</option><option value="M1">M1</option><option value="M2">M2</option><option value="M3">M3</option>
+          <option value="M4">M4</option><option value="M5">M5</option><option value="M6">M6</option><option value="M7">M7</option>
+        </select>
       </div>
+      <div class="form-group"><label class="form-label">Account Status</label>
+        <select id="m-freeze-select" class="form-select"><option value="false">Active (Unfrozen)</option><option value="true">Frozen (Blocked)</option></select>
+      </div>
+      <div class="form-group"><label class="form-label">Adjust Balance</label>
+        <div style="display:flex; gap:8px;">
+          <input type="number" id="m-amount" class="form-input" placeholder="Amount">
+          <button class="btn btn-success" onclick="adjustBalance('credit')">Credit</button>
+          <button class="btn btn-danger" onclick="adjustBalance('debit')">Debit</button>
+        </div>
+        <input type="text" id="m-reason" class="form-input" placeholder="Reason (e.g., Bonus)" style="margin-top:8px;">
+      </div>
+      <button class="btn btn-primary" style="width:100%; justify-content:center;" onclick="saveUserUpdates()"><i class="fa-solid fa-save"></i> Save Changes</button>
+    </div>
+  </div>
+
+  <!-- Message Modal -->
+  <div class="modal-overlay" id="message-modal">
+    <div class="modal">
+      <div class="modal-header"><h3 class="modal-title">Send Message</h3><button class="modal-close" onclick="closeModal('message-modal')"><i class="fa-solid fa-xmark"></i></button></div>
+      <input type="hidden" id="msg-user-id">
+      <div class="form-group"><label class="form-label">To: <span id="msg-user-email" style="color: var(--primary);"></span></label></div>
+      <div class="form-group"><label class="form-label">Title</label><input type="text" id="msg-title" class="form-input" placeholder="e.g., Account Update"></div>
+      <div class="form-group"><label class="form-label">Message</label><textarea id="msg-body" class="form-input" rows="4" placeholder="Type your message here..."></textarea></div>
+      <button class="btn btn-primary" style="width:100%; justify-content:center;" onclick="sendMessageToUser()"><i class="fa-solid fa-paper-plane"></i> Send Message</button>
     </div>
   </div>
 
@@ -295,64 +316,55 @@
       if (section === 'deposits') loadDeposits();
       if (section === 'withdrawals') loadWithdrawals();
       if (section === 'users') loadUsers();
+      if (section === 'tiers') loadTiers();
     };
+
+    window.closeModal = (id) => document.getElementById(id).classList.remove('active');
 
     async function loadDashboard() {
       const { count } = await supabase.from('profiles').select('*', { count: 'exact', head: true });
       document.getElementById('stat-users').textContent = count || 0;
-
       const { data: deposits } = await supabase.from('deposits').select('amount, status');
       const { data: withdrawals } = await supabase.from('withdrawals').select('amount, status');
-      
       const totalDeposits = deposits?.filter(d => d.status === 'completed').reduce((sum, d) => sum + Number(d.amount), 0) || 0;
       const totalWithdrawals = withdrawals?.filter(w => w.status === 'completed').reduce((sum, w) => sum + Number(w.amount), 0) || 0;
       const pendingCount = withdrawals?.filter(w => w.status === 'pending').length || 0;
-      
       document.getElementById('stat-deposits').textContent = '₦' + totalDeposits.toLocaleString();
       document.getElementById('stat-withdrawals').textContent = '₦' + totalWithdrawals.toLocaleString();
       document.getElementById('stat-pending').textContent = pendingCount;
     }
 
-    // DEPOSITS (Read-only)
     async function loadDeposits() {
       const status = document.getElementById('deposit-filter').value;
       const token = (await supabase.auth.getSession()).data.session.access_token;
       const res = await fetch(`/api/admin?action=get-deposits&status=${status}`, { headers: { 'Authorization': `Bearer ${token}` } });
       const data = await res.json();
       const tbody = document.getElementById('deposits-table');
-      
       if (!data.deposits || data.deposits.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:40px;color:rgba(255,255,255,0.5);">No deposits found</td></tr>';
-        return;
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:40px;color:rgba(255,255,255,0.5);">No deposits found</td></tr>'; return;
       }
-      
       tbody.innerHTML = data.deposits.map(d => `
         <tr>
-          <td><div style="font-weight:700;">${d.profiles?.full_name || d.profiles?.email || 'User'}</div><div style="font-size:0.8rem;color:rgba(255,255,255,0.6);">${d.profiles?.email}</div></td>
+          <td><div style="font-weight:700;">${d.profiles?.full_name || 'User'}</div><div style="font-size:0.75rem;color:rgba(255,255,255,0.6);">${d.profiles?.email}</div></td>
           <td style="font-weight:800;color:var(--success);">₦${Number(d.amount).toLocaleString()}</td>
           <td>${d.method || 'targetgrowths'}</td>
           <td><span class="status-badge ${d.status}">${d.status}</span></td>
           <td>${new Date(d.created_at).toLocaleDateString()}</td>
-        </tr>
-      `).join('');
+        </tr>`).join('');
     }
 
-    // WITHDRAWALS (Requires approval)
     async function loadWithdrawals() {
       const status = document.getElementById('withdrawal-filter').value;
       const token = (await supabase.auth.getSession()).data.session.access_token;
       const res = await fetch(`/api/admin?action=get-withdrawals&status=${status}`, { headers: { 'Authorization': `Bearer ${token}` } });
       const data = await res.json();
       const tbody = document.getElementById('withdrawals-table');
-      
       if (!data.withdrawals || data.withdrawals.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:40px;color:rgba(255,255,255,0.5);">No withdrawals found</td></tr>';
-        return;
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:40px;color:rgba(255,255,255,0.5);">No withdrawals found</td></tr>'; return;
       }
-      
       tbody.innerHTML = data.withdrawals.map(w => `
         <tr>
-          <td><div style="font-weight:700;">${w.profiles?.full_name || w.profiles?.email || 'User'}</div><div style="font-size:0.8rem;color:rgba(255,255,255,0.6);">${w.profiles?.email}</div></td>
+          <td><div style="font-weight:700;">${w.profiles?.full_name || 'User'}</div><div style="font-size:0.75rem;color:rgba(255,255,255,0.6);">${w.profiles?.email}</div></td>
           <td style="font-weight:800;color:var(--warning);">₦${Number(w.amount).toLocaleString()}</td>
           <td>${w.bank_name}</td>
           <td>${w.account_number}</td>
@@ -361,46 +373,42 @@
             <button class="btn btn-success btn-sm" onclick="processWithdrawal('${w.id}', 'approve')"><i class="fa-solid fa-check"></i> Pay</button>
             <button class="btn btn-danger btn-sm" onclick="processWithdrawal('${w.id}', 'reject')"><i class="fa-solid fa-xmark"></i></button>
           ` : '-'}</td>
-        </tr>
-      `).join('');
+        </tr>`).join('');
     }
 
     window.processWithdrawal = async (id, act) => {
       if (!confirm(`Are you sure you want to ${act} this withdrawal?`)) return;
       const token = (await supabase.auth.getSession()).data.session.access_token;
       const res = await fetch('/api/admin?action=process-withdrawal', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ withdrawal_id: id, act })
       });
       const data = await res.json();
       if (!res.ok) return alert(data.error);
-      alert(`Withdrawal ${act}d!`);
-      loadWithdrawals();
-      loadDashboard();
+      showToast(`Withdrawal ${act}d!`, 'success');
+      loadWithdrawals(); loadDashboard();
     };
 
-    // USERS
     async function loadUsers() {
+      const search = document.getElementById('user-search').value;
       const token = (await supabase.auth.getSession()).data.session.access_token;
-      const res = await fetch('/api/admin?action=get-users', { headers: { 'Authorization': `Bearer ${token}` } });
+      const res = await fetch(`/api/admin?action=get-users&search=${encodeURIComponent(search)}`, { headers: { 'Authorization': `Bearer ${token}` } });
       const data = await res.json();
       const tbody = document.getElementById('users-table');
-      
       if (!data.users || data.users.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:40px;color:rgba(255,255,255,0.5);">No users found</td></tr>';
-        return;
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:40px;color:rgba(255,255,255,0.5);">No users found</td></tr>'; return;
       }
-      
       tbody.innerHTML = data.users.map(u => {
         const isFrozen = u.is_frozen ? '<span class="status-badge frozen">Frozen</span>' : '<span class="status-badge approved">Active</span>';
         return `<tr>
-          <td>${u.email}</td>
-          <td>${u.full_name || '-'}</td>
+          <td>${u.email}</td><td>${u.full_name || '-'}</td>
           <td><span class="status-badge" style="background:rgba(0,212,255,0.2);color:var(--primary);">${u.vip_level || 'newbie'}</span></td>
           <td style="font-weight:700;">₦${Number(u.wallets?.[0]?.balance || 0).toLocaleString()}</td>
           <td>${isFrozen}</td>
-          <td><button class="btn btn-primary btn-sm" onclick="openUserModal('${u.id}', '${u.email}', ${u.wallets?.[0]?.balance || 0}, '${u.vip_level || 'newbie'}', ${u.is_frozen})"><i class="fa-solid fa-user-gear"></i> Manage</button></td>
+          <td style="white-space:nowrap;">
+            <button class="btn btn-primary btn-sm" onclick="openUserModal('${u.id}', '${u.email}', ${u.wallets?.[0]?.balance || 0}, '${u.vip_level || 'newbie'}', ${u.is_frozen})"><i class="fa-solid fa-user-gear"></i> Manage</button>
+            <button class="btn btn-success btn-sm" onclick="openMessageModal('${u.id}', '${u.email}')"><i class="fa-solid fa-envelope"></i></button>
+          </td>
         </tr>`;
       }).join('');
     }
@@ -416,22 +424,14 @@
       document.getElementById('user-modal').classList.add('active');
     };
 
-    window.closeModal = () => document.getElementById('user-modal').classList.remove('active');
-
     window.saveUserUpdates = async () => {
       const token = (await supabase.auth.getSession()).data.session.access_token;
-      const vip_level = document.getElementById('m-tier-select').value;
-      const is_frozen = document.getElementById('m-freeze-select').value === 'true';
       const res = await fetch('/api/admin?action=update-user', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify({ user_id: currentUserId, vip_level, is_frozen })
+        method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ user_id: currentUserId, vip_level: document.getElementById('m-tier-select').value, is_frozen: document.getElementById('m-freeze-select').value === 'true' })
       });
-      const data = await res.json();
-      if (!res.ok) return alert(data.error);
-      alert('User updated successfully!');
-      closeModal();
-      loadUsers();
+      if (res.ok) { showToast('User updated!', 'success'); closeModal('user-modal'); loadUsers(); }
+      else alert((await res.json()).error);
     };
 
     window.adjustBalance = async (type) => {
@@ -440,19 +440,61 @@
       if (!amount) return alert('Enter an amount');
       const token = (await supabase.auth.getSession()).data.session.access_token;
       const res = await fetch('/api/admin?action=adjust-balance', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ user_id: currentUserId, amount, type, reason })
       });
-      const data = await res.json();
-      if (!res.ok) return alert(data.error);
-      alert(`Successfully ${type}ed ₦${amount}!`);
-      document.getElementById('m-amount').value = '';
-      document.getElementById('m-reason').value = '';
-      loadUsers();
+      if (res.ok) { showToast(`Successfully ${type}ed ₦${amount}!`, 'success'); document.getElementById('m-amount').value = ''; document.getElementById('m-reason').value = ''; loadUsers(); }
+      else alert((await res.json()).error);
     };
 
-    // SETTINGS
+    async function loadTiers() {
+      const { data: tiers } = await supabase.from('rms_tiers').select('*').order('upgrade_cost', { ascending: true });
+      document.getElementById('tiers-table').innerHTML = tiers.map(t => `
+        <tr>
+          <td style="font-weight:700;">${t.tier}</td>
+          <td><input type="number" class="form-input" id="cost-${t.tier}" value="${t.upgrade_cost}" style="width:100px; padding:6px;"></td>
+          <td><input type="number" class="form-input" id="boxes-${t.tier}" value="${t.daily_boxes}" style="width:70px; padding:6px;"></td>
+          <td><input type="number" class="form-input" id="earn-${t.tier}" value="${t.daily_earning}" style="width:100px; padding:6px;"></td>
+          <td><button class="btn btn-success btn-sm" onclick="saveTier('${t.tier}')"><i class="fa-solid fa-save"></i></button></td>
+        </tr>`).join('');
+    }
+
+    window.saveTier = async (tier) => {
+      const token = (await supabase.auth.getSession()).data.session.access_token;
+      const res = await fetch('/api/admin?action=update-tier', {
+        method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ tier, upgrade_cost: document.getElementById(`cost-${tier}`).value, daily_boxes: document.getElementById(`boxes-${tier}`).value, daily_earning: document.getElementById(`earn-${tier}`).value })
+      });
+      if (res.ok) showToast('Tier updated!', 'success');
+    };
+
+    window.generateAdminGiftCode = async () => {
+      const token = (await supabase.auth.getSession()).data.session.access_token;
+      const res = await fetch('/api/admin?action=admin-generate-gift-code', {
+        method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ amount: document.getElementById('gc-amount').value, max_uses: document.getElementById('gc-uses').value, expires_in_days: document.getElementById('gc-days').value })
+      });
+      const data = await res.json();
+      if (res.ok) document.getElementById('gc-result').textContent = `Generated: ${data.code}`;
+      else alert(data.error);
+    };
+
+    window.openMessageModal = (userId, email) => {
+      document.getElementById('msg-user-id').value = userId;
+      document.getElementById('msg-user-email').textContent = email;
+      document.getElementById('message-modal').classList.add('active');
+    };
+
+    window.sendMessageToUser = async () => {
+      const token = (await supabase.auth.getSession()).data.session.access_token;
+      const res = await fetch('/api/admin?action=send-message', {
+        method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ user_id: document.getElementById('msg-user-id').value, title: document.getElementById('msg-title').value, body: document.getElementById('msg-body').value })
+      });
+      if (res.ok) { showToast('Message sent!', 'success'); closeModal('message-modal'); document.getElementById('msg-title').value = ''; document.getElementById('msg-body').value = ''; }
+      else alert((await res.json()).error);
+    };
+
     async function loadSettings() {
       const token = (await supabase.auth.getSession()).data.session.access_token;
       const res = await fetch('/api/admin?action=get-settings', { headers: { 'Authorization': `Bearer ${token}` } });
@@ -461,30 +503,20 @@
         document.getElementById('link-telegram').value = data.settings.telegram_link || '';
         document.getElementById('link-whatsapp').value = data.settings.whatsapp_link || '';
         document.getElementById('link-support').value = data.settings.support_link || '';
-        document.getElementById('min-withdraw').value = data.settings.min_withdraw || '1000';
-        document.getElementById('max-withdraw').value = data.settings.max_withdraw || '1000000';
+        document.getElementById('withdrawal-fee').value = data.settings.withdrawal_fee_percentage || '0';
       }
     }
 
     window.saveSupportLinks = async () => {
       const token = (await supabase.auth.getSession()).data.session.access_token;
-      const res = await fetch('/api/admin?action=save-support-links', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify({
-          telegram: document.getElementById('link-telegram').value,
-          whatsapp: document.getElementById('link-whatsapp').value,
-          support: document.getElementById('link-support').value
-        })
-      });
-      if (res.ok) alert('Support links saved!');
+      await fetch('/api/admin?action=save-support-links', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify({ telegram: document.getElementById('link-telegram').value, whatsapp: document.getElementById('link-whatsapp').value, support: document.getElementById('link-support').value }) });
+      showToast('Support links saved!', 'success');
     };
 
-    window.saveWithdrawalSettings = async () => {
+    window.saveWithdrawalFee = async () => {
       const token = (await supabase.auth.getSession()).data.session.access_token;
-      await fetch('/api/admin?action=save-setting', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify({ key: 'min_withdraw', value: document.getElementById('min-withdraw').value }) });
-      await fetch('/api/admin?action=save-setting', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify({ key: 'max_withdraw', value: document.getElementById('max-withdraw').value }) });
-      alert('Withdrawal limits saved!');
+      await fetch('/api/admin?action=save-support-links', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify({ withdrawal_fee_percentage: document.getElementById('withdrawal-fee').value }) });
+      showToast('Withdrawal fee saved!', 'success');
     };
 
     window.logout = async () => { await supabase.auth.signOut(); window.location.href = '/login.html'; };
