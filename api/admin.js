@@ -343,3 +343,78 @@ async function saveSupportLinks(req, res) {
   }
   return res.json({ ok: true });
 }
+// Add to the switch statement
+case 'get-wealth-packages': return await getWealthPackages(req, res);
+case 'create-wealth-package': return await createWealthPackage(req, res);
+case 'update-wealth-package': return await updateWealthPackage(req, res);
+case 'delete-wealth-package': return await deleteWealthPackage(req, res);
+
+// ==========================================
+// WEALTH PACKAGES MANAGEMENT
+// ==========================================
+async function getWealthPackages(req, res) {
+  const { data } = await supabaseAdmin
+    .from('wealth_packages')
+    .select('*')
+    .order('investment_amount', { ascending: true });
+  return res.json({ ok: true, packages: data || [] });
+}
+
+async function createWealthPackage(req, res) {
+  const { name, investment_amount, daily_return, duration_days, total_return } = req.body;
+  
+  if (!name || !investment_amount || !daily_return || !duration_days || !total_return) {
+    return res.status(400).json({ error: 'All fields are required' });
+  }
+
+  const { data, error } = await supabaseAdmin
+    .from('wealth_packages')
+    .insert({
+      name,
+      investment_amount: Number(investment_amount),
+      daily_return: Number(daily_return),
+      duration_days: Number(duration_days),
+      total_return: Number(total_return),
+      is_active: true
+    })
+    .select()
+    .single();
+
+  if (error) return res.status(500).json({ error: error.message });
+  return res.json({ ok: true, package: data });
+}
+
+async function updateWealthPackage(req, res) {
+  const { id, name, investment_amount, daily_return, duration_days, total_return, is_active } = req.body;
+  
+  const updates = {
+    updated_at: new Date().toISOString()
+  };
+  
+  if (name) updates.name = name;
+  if (investment_amount) updates.investment_amount = Number(investment_amount);
+  if (daily_return) updates.daily_return = Number(daily_return);
+  if (duration_days) updates.duration_days = Number(duration_days);
+  if (total_return) updates.total_return = Number(total_return);
+  if (is_active !== undefined) updates.is_active = is_active;
+
+  const { error } = await supabaseAdmin
+    .from('wealth_packages')
+    .update(updates)
+    .eq('id', id);
+
+  if (error) return res.status(500).json({ error: error.message });
+  return res.json({ ok: true });
+}
+
+async function deleteWealthPackage(req, res) {
+  const { id } = req.body;
+  
+  const { error } = await supabaseAdmin
+    .from('wealth_packages')
+    .delete()
+    .eq('id', id);
+
+  if (error) return res.status(500).json({ error: error.message });
+  return res.json({ ok: true });
+}
