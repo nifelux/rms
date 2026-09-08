@@ -6,7 +6,6 @@ export default async function handler(req, res) {
   const action = req.query.action;
   try {
     // 1. ALLOW PUBLIC ACCESS TO GET SETTINGS 
-    // (This allows the regular user dashboard to load Telegram/WhatsApp links without admin rights)
     if (action === 'get-settings') {
       return await getSettings(req, res);
     }
@@ -27,6 +26,12 @@ export default async function handler(req, res) {
       case 'adjust-balance': return await adjustBalance(req, res);
       case 'save-setting': return await saveSetting(req, res);
       case 'save-support-links': return await saveSupportLinks(req, res);
+      
+      // --- NEW FEATURES ---
+      case 'update-tier': return await updateTier(req, res);
+      case 'admin-generate-gift-code': return await adminGenerateGiftCode(req, res);
+      case 'send-message': return await sendMessage(req, res);
+      
       default: return res.status(400).json({ error: 'Invalid action' });
     }
   } catch (err) {
@@ -53,7 +58,7 @@ async function getDeposits(req, res) {
 }
 
 // ==========================================
-// WITHDRAWALS (Requires admin approval)
+// WITHDRAWALS (Requires admin approval + Fee Calculation)
 // ==========================================
 async function getWithdrawals(req, res) {
   const status = req.query.status || 'pending';
@@ -130,6 +135,16 @@ async function processWithdrawal(req, res) {
     const bankId = TG_BANK_CODES[w.bank_name?.toLowerCase()] || w.bank_id;
     if (!bankId) return res.status(400).json({ error: 'Invalid bank code for Target Growth' });
 
+    // 1. Calculate Withdrawal Fee
+    const { data: settings } = await supabaseAdmin
+      .from('site_settings')
+      .select('key, value')
+      .in('key', ['withdrawal_fee_percentage']);
+    
+    const feePercent = Number(settings?.find(s => s.key === 'withdrawal_fee_percentage')?.value || 0);
+    const feeAmount = Number(w.amount) * (feePercent / 100);
+    const netAmount = Number(w.amount) - feeAmount;
+
     const identifier = `TGW${String(w.id).replace(/-/g, '').slice(0, 12)}${Date.now().toString(36).toUpperCase()}`;
     
     await supabaseAdmin
@@ -137,14 +152,17 @@ async function processWithdrawal(req, res) {
       .update({ 
         status: 'approved', 
         provider_identifier: identifier, 
-        provider_status: 'initiating' 
+        provider_status: 'initiating',
+        fee_amount: feeAmount,
+        net_amount: netAmount
       })
       .eq('id', w.id);
 
     try {
+      // 2. Send NET amount to Target Growth
       const provider = await initiateTransfer({
         identifier,
-        amount: w.net_amount || w.amount,
+        amount: netAmount, 
         bankId,
         recipient: w.account_number,
         accountName: w.account_name,
@@ -166,7 +184,7 @@ async function processWithdrawal(req, res) {
         .update({ status: 'approved' })
         .eq('reference', `wd_${w.id}`);
 
-      return res.json({ ok: true, action: 'approved', status: 'provider_pending' });
+      return res.json({ ok: true, action: 'approved', status: 'provider_pending', netAmount });
     } catch (e) {
       await supabaseAdmin
         .from('withdrawals')
@@ -178,14 +196,22 @@ async function processWithdrawal(req, res) {
 }
 
 // ==========================================
-// USERS
+// USERS (With Search)
 // ==========================================
 async function getUsers(req, res) {
-  const { data } = await supabaseAdmin
+  const search = req.query.search || '';
+  let q = supabaseAdmin
     .from('profiles')
     .select('id, email, full_name, vip_level, is_frozen, created_at, wallets!left(balance)')
     .order('created_at', { ascending: false })
     .limit(1000);
+  
+  // Filter by email or full_name if search query exists
+  if (search) {
+    q = q.or(`email.ilike.%${search}%,full_name.ilike.%${search}%`);
+  }
+  
+  const { data } = await q;
   return res.json({ ok: true, users: data || [] });
 }
 
@@ -233,6 +259,65 @@ async function adjustBalance(req, res) {
 }
 
 // ==========================================
+// NEW: VIP TIERS MANAGEMENT
+// ==========================================
+async function updateTier(req, res) {
+  const { tier, upgrade_cost, daily_boxes, daily_earning } = req.body;
+  const { error } = await supabaseAdmin.from('rms_tiers').update({
+    upgrade_cost: Number(upgrade_cost),
+    daily_boxes: Number(daily_boxes),
+    daily_earning: Number(daily_earning)
+  }).eq('tier', tier);
+  
+  if (error) return res.status(500).json({ error: error.message });
+  return res.json({ ok: true });
+}
+
+// ==========================================
+// NEW: ADMIN GIFT CODE GENERATION
+// ==========================================
+async function adminGenerateGiftCode(req, res) {
+  const { amount, max_uses, expires_in_days } = req.body;
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let code = 'ADMIN-';
+  for (let i = 0; i < 8; i++) {
+    code += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+
+  const expiresAt = new Date();
+  expiresAt.setDate(expiresAt.getDate() + Number(expires_in_days || 30));
+
+  const { error } = await supabaseAdmin.from('gift_codes').insert({
+    code, 
+    amount: Number(amount), 
+    max_uses: Number(max_uses), 
+    used_count: 0,
+    is_active: true, 
+    created_by: 'admin', 
+    expires_at: expiresAt.toISOString()
+  });
+
+  if (error) return res.status(500).json({ error: error.message });
+  return res.json({ ok: true, code });
+}
+
+// ==========================================
+// NEW: SEND MESSAGE TO USER
+// ==========================================
+async function sendMessage(req, res) {
+  const { user_id, title, body } = req.body;
+  const { error } = await supabaseAdmin.from('messages').insert({
+    user_id, 
+    title, 
+    body, 
+    is_read: false, 
+    created_at: new Date().toISOString()
+  });
+  if (error) return res.status(500).json({ error: error.message });
+  return res.json({ ok: true });
+}
+
+// ==========================================
 // SETTINGS
 // ==========================================
 async function getSettings(req, res) {
@@ -249,9 +334,12 @@ async function saveSetting(req, res) {
 }
 
 async function saveSupportLinks(req, res) {
-  const { telegram, whatsapp, support } = req.body;
+  const { telegram, whatsapp, support, withdrawal_fee_percentage } = req.body;
   if (telegram) await supabaseAdmin.from('site_settings').upsert({ key: 'telegram_link', value: telegram });
   if (whatsapp) await supabaseAdmin.from('site_settings').upsert({ key: 'whatsapp_link', value: whatsapp });
   if (support) await supabaseAdmin.from('site_settings').upsert({ key: 'support_link', value: support });
+  if (withdrawal_fee_percentage !== undefined) {
+    await supabaseAdmin.from('site_settings').upsert({ key: 'withdrawal_fee_percentage', value: String(withdrawal_fee_percentage) });
+  }
   return res.json({ ok: true });
 }
