@@ -40,16 +40,29 @@ export default async function handler(req, res) {
     }
 
     // 3. CHECK IF PAYMENT IS SUCCESSFUL
-    const apiStatus = verification?.data?.payment_status || 
-                      verification?.data?.status || 
-                      verification?.status || 
-                      '';
-    
-    if (!isSuccessfulStatus(apiStatus)) {
-      console.log('[TG-WEBHOOK] Payment not successful:', apiStatus);
-      return res.status(200).json({ message: 'Payment not successful yet' });
-    }
+// The top-level 'status' is the API response status
+// The nested 'data.payment_status' is the payment state
+const apiResponseStatus = verification?.status || '';
+const paymentStatus = verification?.data?.payment_status || verification?.data?.status || '';
 
+console.log('[TG-WEBHOOK] API Response Status:', apiResponseStatus);
+console.log('[TG-WEBHOOK] Payment Status:', paymentStatus);
+
+// Check if the API verification was successful AND payment is in a successful state
+if (!isSuccessfulStatus(apiResponseStatus)) {
+  console.log('[TG-WEBHOOK] API verification failed:', apiResponseStatus);
+  return res.status(200).json({ message: 'Payment verification failed' });
+}
+
+// If payment_status is 'initiated' but API says 'success', 
+// the payment is still processing - don't credit yet
+if (!isSuccessfulStatus(paymentStatus)) {
+  console.log('[TG-WEBHOOK] Payment not yet successful:', paymentStatus);
+  return res.status(200).json({ message: 'Payment processing' });
+}
+
+console.log('[TG-WEBHOOK] ✅ Payment verified successfully');
+    
     // 4. VERIFY AMOUNT MATCHES
     const apiAmount = Number(verification?.data?.amount || verification?.amount);
     if (apiAmount !== amount) {
