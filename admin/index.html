@@ -189,11 +189,20 @@
       </div></div>
     </section>
 
-    <!-- Users -->
+    <!-- Users (UPDATED WITH SEARCH & RESET BUTTONS) -->
     <section id="users" class="section">
       <h2 class="section-title"><i class="fa-solid fa-users"></i> User Management</h2>
-      <div class="filters">
-        <input type="text" id="user-search" class="form-input" placeholder="Search by email or name..." onkeyup="loadUsers()" style="max-width: 300px;">
+      <div class="filters" style="align-items: flex-end;">
+        <div class="form-group" style="flex: 1; max-width: 400px; margin-bottom: 0;">
+          <label class="form-label">Search Users</label>
+          <input type="text" id="user-search" class="form-input" placeholder="Search by email or name...">
+        </div>
+        <button class="btn btn-primary" onclick="loadUsers()" style="margin-bottom: 0; height: 42px;">
+          <i class="fa-solid fa-magnifying-glass"></i> Search
+        </button>
+        <button class="btn btn-success" onclick="clearSearch()" style="margin-bottom: 0; height: 42px;">
+          <i class="fa-solid fa-rotate-right"></i> Reset
+        </button>
       </div>
       <div class="card"><div class="table-container">
         <table><thead><tr><th>Email</th><th>Name</th><th>Tier</th><th>Balance</th><th>Status</th><th>Actions</th></tr></thead>
@@ -389,6 +398,12 @@
       loadWithdrawals(); loadDashboard();
     };
 
+    // UPDATED: Search and Clear functions
+    window.clearSearch = () => {
+      document.getElementById('user-search').value = '';
+      loadUsers();
+    };
+
     async function loadUsers() {
       const search = document.getElementById('user-search').value;
       const token = (await supabase.auth.getSession()).data.session.access_token;
@@ -412,6 +427,16 @@
         </tr>`;
       }).join('');
     }
+
+    // Add Enter key support for search
+    document.addEventListener('DOMContentLoaded', () => {
+      const searchInput = document.getElementById('user-search');
+      if (searchInput) {
+        searchInput.addEventListener('keypress', (e) => {
+          if (e.key === 'Enter') loadUsers();
+        });
+      }
+    });
 
     window.openUserModal = (id, email, balance, tier, isFrozen) => {
       currentUserId = id;
