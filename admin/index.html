@@ -11,33 +11,24 @@
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
     :root { --primary: #00d4ff; --secondary: #ffd700; --success: #00ff88; --danger: #ff4444; --warning: #ffa500; --dark: #0a0e27; --card: rgba(17,22,58,0.8); }
     body { background: linear-gradient(135deg, #0a0e27 0%, #1a1f4e 100%); min-height: 100vh; color: white; padding-bottom: 40px; }
-    
-    /* Header */
     .admin-header { background: rgba(10,14,39,0.95); border-bottom: 1px solid rgba(255,215,0,0.2); padding: 16px 20px; position: sticky; top: 0; z-index: 100; backdrop-filter: blur(10px); }
     .header-content { max-width: 1400px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
     .logo { display: flex; align-items: center; gap: 10px; font-size: 1.3rem; font-weight: 900; color: var(--secondary); }
     .admin-info { display: flex; align-items: center; gap: 12px; }
     .admin-badge { background: rgba(0,212,255,0.15); color: var(--primary); padding: 6px 12px; border-radius: 20px; font-weight: 700; font-size: 0.8rem; }
     .logout-btn { background: rgba(255,68,68,0.2); border: 1px solid var(--danger); color: var(--danger); padding: 6px 12px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.85rem; }
-    
-    /* Navigation */
     .nav-tabs { background: rgba(10,14,39,0.9); border-bottom: 1px solid rgba(255,255,255,0.1); position: sticky; top: 65px; z-index: 99; overflow-x: auto; -webkit-overflow-scrolling: touch; }
     .nav-tabs::-webkit-scrollbar { display: none; }
     .nav-content { max-width: 1400px; margin: 0 auto; display: flex; gap: 4px; padding: 0 16px; min-width: max-content; }
     .nav-tab { padding: 14px 16px; background: transparent; border: none; color: rgba(255,255,255,0.6); font-weight: 600; cursor: pointer; border-bottom: 3px solid transparent; white-space: nowrap; font-size: 0.9rem; transition: all 0.3s; }
     .nav-tab.active { color: var(--primary); border-bottom-color: var(--primary); }
     .nav-tab i { margin-right: 6px; }
-    
-    /* Layout */
     .admin-container { max-width: 1400px; margin: 0 auto; padding: 24px 16px; }
     .section { display: none; animation: fadeIn 0.3s ease; }
     .section.active { display: block; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-    
     .section-title { font-size: 1.5rem; font-weight: 900; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
     .section-title i { color: var(--secondary); }
-    
-    /* Stats */
     .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 16px; margin-bottom: 24px; }
     .stat-card { background: var(--card); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 20px; backdrop-filter: blur(10px); }
     .stat-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
@@ -48,8 +39,6 @@
     .stat-icon.yellow { background: rgba(255,215,0,0.2); color: var(--secondary); }
     .stat-icon.red { background: rgba(255,68,68,0.2); color: var(--danger); }
     .stat-value { font-size: 1.6rem; font-weight: 900; }
-    
-    /* Cards & Tables */
     .card { background: var(--card); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 20px; backdrop-filter: blur(10px); margin-bottom: 20px; }
     .table-container { overflow-x: auto; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); -webkit-overflow-scrolling: touch; }
     table { width: 100%; border-collapse: collapse; font-size: 0.85rem; min-width: 600px; }
@@ -57,31 +46,24 @@
     th { padding: 12px; text-align: left; font-weight: 700; color: rgba(255,255,255,0.8); border-bottom: 2px solid rgba(255,255,255,0.1); white-space: nowrap; }
     td { padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); vertical-align: middle; }
     tbody tr:hover { background: rgba(255,255,255,0.03); }
-    
-    /* Badges & Buttons */
     .status-badge { padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
     .status-badge::before { content: ''; width: 6px; height: 6px; border-radius: 50%; }
     .status-badge.pending { background: rgba(255,165,0,0.2); color: var(--warning); } .status-badge.pending::before { background: var(--warning); }
     .status-badge.completed, .status-badge.approved { background: rgba(0,255,136,0.2); color: var(--success); } .status-badge.completed::before, .status-badge.approved::before { background: var(--success); }
     .status-badge.rejected, .status-badge.failed { background: rgba(255,68,68,0.2); color: var(--danger); } .status-badge.rejected::before, .status-badge.failed::before { background: var(--danger); }
     .status-badge.frozen { background: rgba(255,68,68,0.2); color: var(--danger); }
-    
     .btn { padding: 8px 14px; border-radius: 8px; border: none; cursor: pointer; font-weight: 700; font-size: 0.8rem; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
     .btn-primary { background: var(--primary); color: var(--dark); }
     .btn-success { background: var(--success); color: var(--dark); }
     .btn-danger { background: var(--danger); color: white; }
     .btn-sm { padding: 6px 10px; font-size: 0.75rem; }
     .btn:hover { transform: translateY(-1px); opacity: 0.9; }
-    
-    /* Forms & Filters */
-    .filters { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
+    .filters { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; align-items: flex-end; }
     .filter-select, .form-input, .form-select { padding: 10px 14px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: white; font-size: 0.9rem; width: 100%; }
     .filter-select { width: auto; min-width: 140px; }
     .form-input:focus, .form-select:focus { outline: none; border-color: var(--primary); }
     .form-group { margin-bottom: 16px; }
     .form-label { display: block; margin-bottom: 6px; font-weight: 600; color: rgba(255,255,255,0.8); font-size: 0.85rem; }
-    
-    /* Modals */
     .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: none; align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(5px); padding: 20px; }
     .modal-overlay.active { display: flex; }
     .modal { background: linear-gradient(135deg, #1a1f4e, #0a0e27); border: 1px solid rgba(255,215,0,0.3); border-radius: 20px; padding: 24px; max-width: 500px; width: 100%; max-height: 90vh; overflow-y: auto; }
@@ -93,11 +75,9 @@
     .user-info-row { display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 0.85rem; }
     .user-info-row span:first-child { color: rgba(255,255,255,0.6); }
     .user-info-row span:last-child { font-weight: 700; }
-
     .loading { text-align: center; padding: 40px; color: rgba(255,255,255,0.5); }
     .loading i { font-size: 2rem; animation: spin 1s linear infinite; color: var(--primary); }
     @keyframes spin { to { transform: rotate(360deg); } }
-
     @media (max-width: 768px) {
       .stats-grid { grid-template-columns: 1fr 1fr; }
       .logo span { display: none; }
@@ -115,7 +95,7 @@
       </div>
     </div>
   </header>
-  
+
   <nav class="nav-tabs">
     <div class="nav-content">
       <button class="nav-tab active" onclick="showSection('dashboard', this)"><i class="fa-solid fa-chart-line"></i> Dashboard</button>
@@ -123,6 +103,7 @@
       <button class="nav-tab" onclick="showSection('withdrawals', this)"><i class="fa-solid fa-arrow-up"></i> Withdrawals</button>
       <button class="nav-tab" onclick="showSection('users', this)"><i class="fa-solid fa-users"></i> Users</button>
       <button class="nav-tab" onclick="showSection('tiers', this)"><i class="fa-solid fa-crown"></i> VIP Tiers</button>
+      <button class="nav-tab" onclick="showSection('wealth', this)"><i class="fa-solid fa-gem"></i> Wealth</button>
       <button class="nav-tab" onclick="showSection('giftcodes', this)"><i class="fa-solid fa-gift"></i> Gift Codes</button>
       <button class="nav-tab" onclick="showSection('settings', this)"><i class="fa-solid fa-gear"></i> Settings</button>
     </div>
@@ -133,18 +114,10 @@
     <section id="dashboard" class="section active">
       <h2 class="section-title"><i class="fa-solid fa-chart-line"></i> Overview</h2>
       <div class="stats-grid">
-        <div class="stat-card">
-          <div class="stat-header"><div><div class="stat-label">Total Users</div><div class="stat-value" id="stat-users">0</div></div><div class="stat-icon blue"><i class="fa-solid fa-users"></i></div></div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-header"><div><div class="stat-label">Total Deposits</div><div class="stat-value" id="stat-deposits">₦0</div></div><div class="stat-icon green"><i class="fa-solid fa-arrow-down"></i></div></div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-header"><div><div class="stat-label">Total Withdrawals</div><div class="stat-value" id="stat-withdrawals">₦0</div></div><div class="stat-icon yellow"><i class="fa-solid fa-arrow-up"></i></div></div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-header"><div><div class="stat-label">Pending Withdrawals</div><div class="stat-value" id="stat-pending">0</div></div><div class="stat-icon red"><i class="fa-solid fa-clock"></i></div></div>
-        </div>
+        <div class="stat-card"><div class="stat-header"><div><div class="stat-label">Total Users</div><div class="stat-value" id="stat-users">0</div></div><div class="stat-icon blue"><i class="fa-solid fa-users"></i></div></div></div>
+        <div class="stat-card"><div class="stat-header"><div><div class="stat-label">Total Deposits</div><div class="stat-value" id="stat-deposits">₦0</div></div><div class="stat-icon green"><i class="fa-solid fa-arrow-down"></i></div></div></div>
+        <div class="stat-card"><div class="stat-header"><div><div class="stat-label">Total Withdrawals</div><div class="stat-value" id="stat-withdrawals">₦0</div></div><div class="stat-icon yellow"><i class="fa-solid fa-arrow-up"></i></div></div></div>
+        <div class="stat-card"><div class="stat-header"><div><div class="stat-label">Pending Withdrawals</div><div class="stat-value" id="stat-pending">0</div></div><div class="stat-icon red"><i class="fa-solid fa-clock"></i></div></div></div>
       </div>
     </section>
 
@@ -156,10 +129,8 @@
       </div>
       <div class="filters">
         <select class="filter-select" id="deposit-filter" onchange="loadDeposits()">
-          <option value="all">All Status</option>
-          <option value="completed">Completed</option>
-          <option value="pending">Pending</option>
-          <option value="rejected">Rejected</option>
+          <option value="all">All Status</option><option value="completed">Completed</option>
+          <option value="pending">Pending</option><option value="rejected">Rejected</option>
         </select>
       </div>
       <div class="card"><div class="table-container">
@@ -176,11 +147,8 @@
       </div>
       <div class="filters">
         <select class="filter-select" id="withdrawal-filter" onchange="loadWithdrawals()">
-          <option value="pending">Pending</option>
-          <option value="approved">Approved</option>
-          <option value="completed">Completed</option>
-          <option value="rejected">Rejected</option>
-          <option value="all">All</option>
+          <option value="pending">Pending</option><option value="approved">Approved</option>
+          <option value="completed">Completed</option><option value="rejected">Rejected</option><option value="all">All</option>
         </select>
       </div>
       <div class="card"><div class="table-container">
@@ -189,20 +157,16 @@
       </div></div>
     </section>
 
-    <!-- Users (UPDATED WITH SEARCH & RESET BUTTONS) -->
+    <!-- Users (SEARCH FIXED) -->
     <section id="users" class="section">
       <h2 class="section-title"><i class="fa-solid fa-users"></i> User Management</h2>
-      <div class="filters" style="align-items: flex-end;">
+      <div class="filters">
         <div class="form-group" style="flex: 1; max-width: 400px; margin-bottom: 0;">
           <label class="form-label">Search Users</label>
           <input type="text" id="user-search" class="form-input" placeholder="Search by email or name...">
         </div>
-        <button class="btn btn-primary" onclick="loadUsers()" style="margin-bottom: 0; height: 42px;">
-          <i class="fa-solid fa-magnifying-glass"></i> Search
-        </button>
-        <button class="btn btn-success" onclick="clearSearch()" style="margin-bottom: 0; height: 42px;">
-          <i class="fa-solid fa-rotate-right"></i> Reset
-        </button>
+        <button class="btn btn-primary" onclick="searchUsers()" style="height: 42px;"><i class="fa-solid fa-magnifying-glass"></i> Search</button>
+        <button class="btn btn-success" onclick="clearSearch()" style="height: 42px;"><i class="fa-solid fa-rotate-right"></i> Reset</button>
       </div>
       <div class="card"><div class="table-container">
         <table><thead><tr><th>Email</th><th>Name</th><th>Tier</th><th>Balance</th><th>Status</th><th>Actions</th></tr></thead>
@@ -217,6 +181,31 @@
         <table><thead><tr><th>Tier</th><th>Upgrade Cost (₦)</th><th>Daily Boxes</th><th>Daily Earning (₦)</th><th>Action</th></tr></thead>
         <tbody id="tiers-table"><tr><td colspan="5" class="loading"><i class="fa-solid fa-circle-notch fa-spin"></i></td></tr></tbody></table>
       </div></div>
+    </section>
+
+    <!-- Wealth Packages -->
+    <section id="wealth" class="section">
+      <h2 class="section-title"><i class="fa-solid fa-gem"></i> Wealth Center Packages</h2>
+      <div class="card">
+        <h3 style="margin-bottom: 16px; color: var(--secondary); font-size: 1.1rem;"><i class="fa-solid fa-plus-circle"></i> Create New Package</h3>
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap:16px;">
+          <div class="form-group"><label class="form-label">Package Name</label><input type="text" id="wp-name" class="form-input" placeholder="e.g., Premium Plan"></div>
+          <div class="form-group"><label class="form-label">Investment (₦)</label><input type="number" id="wp-investment" class="form-input" placeholder="50000"></div>
+          <div class="form-group"><label class="form-label">Daily Return (₦)</label><input type="number" id="wp-daily" class="form-input" placeholder="2500"></div>
+          <div class="form-group"><label class="form-label">Duration (Days)</label><input type="number" id="wp-duration" class="form-input" placeholder="30"></div>
+          <div class="form-group"><label class="form-label">Total Return (₦)</label><input type="number" id="wp-total" class="form-input" placeholder="75000"></div>
+          <div class="form-group"><label class="form-label">Start Date (optional)</label><input type="date" id="wp-start" class="form-input"></div>
+          <div class="form-group"><label class="form-label">End Date (optional)</label><input type="date" id="wp-end" class="form-input"></div>
+        </div>
+        <button class="btn btn-primary" onclick="createWealthPackage()"><i class="fa-solid fa-plus"></i> Create Package</button>
+      </div>
+      <div class="card">
+        <h3 style="margin-bottom: 16px; color: var(--secondary); font-size: 1.1rem;"><i class="fa-solid fa-list"></i> All Packages</h3>
+        <div class="table-container">
+          <table><thead><tr><th>Name</th><th>Investment</th><th>Daily</th><th>Days</th><th>Total</th><th>Availability</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody id="wealth-packages-table"><tr><td colspan="8" class="loading"><i class="fa-solid fa-circle-notch fa-spin"></i></td></tr></tbody></table>
+        </div>
+      </div>
     </section>
 
     <!-- Gift Codes -->
@@ -236,16 +225,11 @@
     <!-- Settings -->
     <section id="settings" class="section">
       <h2 class="section-title"><i class="fa-solid fa-gear"></i> Site Settings</h2>
-      
       <div class="card">
         <h3 style="margin-bottom: 16px; color: var(--secondary); font-size: 1.1rem;"><i class="fa-solid fa-percent"></i> Withdrawal Fee</h3>
-        <div class="form-group" style="max-width: 300px;">
-          <label class="form-label">Fee Percentage (%)</label>
-          <input type="number" id="withdrawal-fee" class="form-input" placeholder="e.g., 10 for 10%">
-        </div>
+        <div class="form-group" style="max-width: 300px;"><label class="form-label">Fee Percentage (%)</label><input type="number" id="withdrawal-fee" class="form-input" placeholder="e.g., 10 for 10%"></div>
         <button class="btn btn-primary" onclick="saveWithdrawalFee()"><i class="fa-solid fa-save"></i> Save Fee</button>
       </div>
-
       <div class="card">
         <h3 style="margin-bottom: 16px; color: var(--secondary); font-size: 1.1rem;"><i class="fa-solid fa-headset"></i> Support Links</h3>
         <div class="form-group"><label class="form-label">Telegram Link</label><input type="text" id="link-telegram" class="form-input" placeholder="https://t.me/yourchannel"></div>
@@ -256,7 +240,7 @@
     </section>
   </div>
 
-  <!-- User Management Modal -->
+  <!-- User Modal -->
   <div class="modal-overlay" id="user-modal">
     <div class="modal">
       <div class="modal-header"><h3 class="modal-title">Manage User</h3><button class="modal-close" onclick="closeModal('user-modal')"><i class="fa-solid fa-xmark"></i></button></div>
@@ -267,10 +251,7 @@
         <div class="user-info-row"><span>Status:</span><span id="m-status">Active</span></div>
       </div>
       <div class="form-group"><label class="form-label">Change VIP Tier</label>
-        <select id="m-tier-select" class="form-select">
-          <option value="newbie">Newbie</option><option value="M1">M1</option><option value="M2">M2</option><option value="M3">M3</option>
-          <option value="M4">M4</option><option value="M5">M5</option><option value="M6">M6</option><option value="M7">M7</option>
-        </select>
+        <select id="m-tier-select" class="form-select"><option value="newbie">Newbie</option><option value="M1">M1</option><option value="M2">M2</option><option value="M3">M3</option><option value="M4">M4</option><option value="M5">M5</option><option value="M6">M6</option><option value="M7">M7</option></select>
       </div>
       <div class="form-group"><label class="form-label">Account Status</label>
         <select id="m-freeze-select" class="form-select"><option value="false">Active (Unfrozen)</option><option value="true">Frozen (Blocked)</option></select>
@@ -299,6 +280,25 @@
     </div>
   </div>
 
+  <!-- Wealth Edit Modal -->
+  <div class="modal-overlay" id="wealth-modal">
+    <div class="modal">
+      <div class="modal-header"><h3 class="modal-title">Edit Package</h3><button class="modal-close" onclick="closeModal('wealth-modal')"><i class="fa-solid fa-xmark"></i></button></div>
+      <input type="hidden" id="w-edit-id">
+      <div class="form-group"><label class="form-label">Package Name</label><input type="text" id="w-edit-name" class="form-input"></div>
+      <div class="form-group"><label class="form-label">Investment (₦)</label><input type="number" id="w-edit-investment" class="form-input"></div>
+      <div class="form-group"><label class="form-label">Daily Return (₦)</label><input type="number" id="w-edit-daily" class="form-input"></div>
+      <div class="form-group"><label class="form-label">Duration (Days)</label><input type="number" id="w-edit-duration" class="form-input"></div>
+      <div class="form-group"><label class="form-label">Total Return (₦)</label><input type="number" id="w-edit-total" class="form-input"></div>
+      <div class="form-group"><label class="form-label">Start Date</label><input type="date" id="w-edit-start" class="form-input"></div>
+      <div class="form-group"><label class="form-label">End Date</label><input type="date" id="w-edit-end" class="form-input"></div>
+      <div class="form-group"><label class="form-label">Status</label>
+        <select id="w-edit-active" class="form-select"><option value="true">Active</option><option value="false">Inactive</option></select>
+      </div>
+      <button class="btn btn-primary" style="width:100%; justify-content:center;" onclick="saveWealthEdit()"><i class="fa-solid fa-save"></i> Save Changes</button>
+    </div>
+  </div>
+
   <script src="/assets/js/notifications.js"></script>
   <script type="module">
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
@@ -306,6 +306,11 @@
     window.supabase = supabase;
 
     let currentUserId = null;
+    let wealthPackages = [];
+
+    async function getToken() {
+      return (await supabase.auth.getSession()).data.session.access_token;
+    }
 
     async function checkAuth() {
       const { data: { user } } = await supabase.auth.getUser();
@@ -326,32 +331,30 @@
       if (section === 'withdrawals') loadWithdrawals();
       if (section === 'users') loadUsers();
       if (section === 'tiers') loadTiers();
+      if (section === 'wealth') loadWealthPackages();
     };
 
     window.closeModal = (id) => document.getElementById(id).classList.remove('active');
+    window.logout = async () => { await supabase.auth.signOut(); window.location.href = '/login.html'; };
 
     async function loadDashboard() {
       const { count } = await supabase.from('profiles').select('*', { count: 'exact', head: true });
       document.getElementById('stat-users').textContent = count || 0;
       const { data: deposits } = await supabase.from('deposits').select('amount, status');
       const { data: withdrawals } = await supabase.from('withdrawals').select('amount, status');
-      const totalDeposits = deposits?.filter(d => d.status === 'completed').reduce((sum, d) => sum + Number(d.amount), 0) || 0;
-      const totalWithdrawals = withdrawals?.filter(w => w.status === 'completed').reduce((sum, w) => sum + Number(w.amount), 0) || 0;
-      const pendingCount = withdrawals?.filter(w => w.status === 'pending').length || 0;
+      const totalDeposits = deposits?.filter(d => d.status === 'completed').reduce((s, d) => s + Number(d.amount), 0) || 0;
+      const totalWithdrawals = withdrawals?.filter(w => w.status === 'completed').reduce((s, w) => s + Number(w.amount), 0) || 0;
       document.getElementById('stat-deposits').textContent = '₦' + totalDeposits.toLocaleString();
       document.getElementById('stat-withdrawals').textContent = '₦' + totalWithdrawals.toLocaleString();
-      document.getElementById('stat-pending').textContent = pendingCount;
+      document.getElementById('stat-pending').textContent = withdrawals?.filter(w => w.status === 'pending').length || 0;
     }
 
-    async function loadDeposits() {
+    window.loadDeposits = async function () {
       const status = document.getElementById('deposit-filter').value;
-      const token = (await supabase.auth.getSession()).data.session.access_token;
-      const res = await fetch(`/api/admin?action=get-deposits&status=${status}`, { headers: { 'Authorization': `Bearer ${token}` } });
+      const res = await fetch(`/api/admin?action=get-deposits&status=${status}`, { headers: { 'Authorization': `Bearer ${await getToken()}` } });
       const data = await res.json();
       const tbody = document.getElementById('deposits-table');
-      if (!data.deposits || data.deposits.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:40px;color:rgba(255,255,255,0.5);">No deposits found</td></tr>'; return;
-      }
+      if (!data.deposits || !data.deposits.length) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:40px;color:rgba(255,255,255,0.5);">No deposits found</td></tr>'; return; }
       tbody.innerHTML = data.deposits.map(d => `
         <tr>
           <td><div style="font-weight:700;">${d.profiles?.full_name || 'User'}</div><div style="font-size:0.75rem;color:rgba(255,255,255,0.6);">${d.profiles?.email}</div></td>
@@ -360,58 +363,49 @@
           <td><span class="status-badge ${d.status}">${d.status}</span></td>
           <td>${new Date(d.created_at).toLocaleDateString()}</td>
         </tr>`).join('');
-    }
+    };
 
-    async function loadWithdrawals() {
+    window.loadWithdrawals = async function () {
       const status = document.getElementById('withdrawal-filter').value;
-      const token = (await supabase.auth.getSession()).data.session.access_token;
-      const res = await fetch(`/api/admin?action=get-withdrawals&status=${status}`, { headers: { 'Authorization': `Bearer ${token}` } });
+      const res = await fetch(`/api/admin?action=get-withdrawals&status=${status}`, { headers: { 'Authorization': `Bearer ${await getToken()}` } });
       const data = await res.json();
       const tbody = document.getElementById('withdrawals-table');
-      if (!data.withdrawals || data.withdrawals.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:40px;color:rgba(255,255,255,0.5);">No withdrawals found</td></tr>'; return;
-      }
+      if (!data.withdrawals || !data.withdrawals.length) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:40px;color:rgba(255,255,255,0.5);">No withdrawals found</td></tr>'; return; }
       tbody.innerHTML = data.withdrawals.map(w => `
         <tr>
           <td><div style="font-weight:700;">${w.profiles?.full_name || 'User'}</div><div style="font-size:0.75rem;color:rgba(255,255,255,0.6);">${w.profiles?.email}</div></td>
           <td style="font-weight:800;color:var(--warning);">₦${Number(w.amount).toLocaleString()}</td>
-          <td>${w.bank_name}</td>
-          <td>${w.account_number}</td>
+          <td>${w.bank_name}</td><td>${w.account_number}</td>
           <td><span class="status-badge ${w.status}">${w.status}</span></td>
           <td>${w.status === 'pending' ? `
             <button class="btn btn-success btn-sm" onclick="processWithdrawal('${w.id}', 'approve')"><i class="fa-solid fa-check"></i> Pay</button>
             <button class="btn btn-danger btn-sm" onclick="processWithdrawal('${w.id}', 'reject')"><i class="fa-solid fa-xmark"></i></button>
           ` : '-'}</td>
         </tr>`).join('');
-    }
+    };
 
     window.processWithdrawal = async (id, act) => {
       if (!confirm(`Are you sure you want to ${act} this withdrawal?`)) return;
-      const token = (await supabase.auth.getSession()).data.session.access_token;
       const res = await fetch('/api/admin?action=process-withdrawal', {
-        method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${await getToken()}` },
         body: JSON.stringify({ withdrawal_id: id, act })
       });
       const data = await res.json();
       if (!res.ok) return alert(data.error);
-      showToast(`Withdrawal ${act}d!`, 'success');
+      showToast(`Withdrawal ${act}d! (Net sent: ₦${Number(data.netAmount || 0).toLocaleString()})`, 'success');
       loadWithdrawals(); loadDashboard();
     };
 
-    // UPDATED: Search and Clear functions
-    window.clearSearch = () => {
-      document.getElementById('user-search').value = '';
-      loadUsers();
-    };
-
-    async function loadUsers() {
-      const search = document.getElementById('user-search').value;
-      const token = (await supabase.auth.getSession()).data.session.access_token;
-      const res = await fetch(`/api/admin?action=get-users&search=${encodeURIComponent(search)}`, { headers: { 'Authorization': `Bearer ${token}` } });
-      const data = await res.json();
+    // ===== USERS + FIXED SEARCH =====
+    window.loadUsers = async function () {
+      const search = (document.getElementById('user-search').value || '').trim();
       const tbody = document.getElementById('users-table');
-      if (!data.users || data.users.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:40px;color:rgba(255,255,255,0.5);">No users found</td></tr>'; return;
+      tbody.innerHTML = '<tr><td colspan="6" class="loading"><i class="fa-solid fa-circle-notch fa-spin"></i></td></tr>';
+      const res = await fetch(`/api/admin?action=get-users&search=${encodeURIComponent(search)}`, { headers: { 'Authorization': `Bearer ${await getToken()}` } });
+      const data = await res.json();
+      if (!data.users || !data.users.length) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:40px;color:rgba(255,255,255,0.5);">No users found${search ? ` matching "${search}"` : ''}</td></tr>`;
+        return;
       }
       tbody.innerHTML = data.users.map(u => {
         const isFrozen = u.is_frozen ? '<span class="status-badge frozen">Frozen</span>' : '<span class="status-badge approved">Active</span>';
@@ -426,16 +420,14 @@
           </td>
         </tr>`;
       }).join('');
-    }
+    };
 
-    // Add Enter key support for search
-    document.addEventListener('DOMContentLoaded', () => {
-      const searchInput = document.getElementById('user-search');
-      if (searchInput) {
-        searchInput.addEventListener('keypress', (e) => {
-          if (e.key === 'Enter') loadUsers();
-        });
-      }
+    window.searchUsers = () => loadUsers();
+    window.clearSearch = () => { document.getElementById('user-search').value = ''; loadUsers(); };
+
+    // Enter key triggers search
+    document.getElementById('user-search').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') loadUsers();
     });
 
     window.openUserModal = (id, email, balance, tier, isFrozen) => {
@@ -450,9 +442,8 @@
     };
 
     window.saveUserUpdates = async () => {
-      const token = (await supabase.auth.getSession()).data.session.access_token;
       const res = await fetch('/api/admin?action=update-user', {
-        method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${await getToken()}` },
         body: JSON.stringify({ user_id: currentUserId, vip_level: document.getElementById('m-tier-select').value, is_frozen: document.getElementById('m-freeze-select').value === 'true' })
       });
       if (res.ok) { showToast('User updated!', 'success'); closeModal('user-modal'); loadUsers(); }
@@ -463,16 +454,16 @@
       const amount = document.getElementById('m-amount').value;
       const reason = document.getElementById('m-reason').value;
       if (!amount) return alert('Enter an amount');
-      const token = (await supabase.auth.getSession()).data.session.access_token;
       const res = await fetch('/api/admin?action=adjust-balance', {
-        method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${await getToken()}` },
         body: JSON.stringify({ user_id: currentUserId, amount, type, reason })
       });
       if (res.ok) { showToast(`Successfully ${type}ed ₦${amount}!`, 'success'); document.getElementById('m-amount').value = ''; document.getElementById('m-reason').value = ''; loadUsers(); }
       else alert((await res.json()).error);
     };
 
-    async function loadTiers() {
+    // ===== TIERS =====
+    window.loadTiers = async function () {
       const { data: tiers } = await supabase.from('rms_tiers').select('*').order('upgrade_cost', { ascending: true });
       document.getElementById('tiers-table').innerHTML = tiers.map(t => `
         <tr>
@@ -482,21 +473,114 @@
           <td><input type="number" class="form-input" id="earn-${t.tier}" value="${t.daily_earning}" style="width:100px; padding:6px;"></td>
           <td><button class="btn btn-success btn-sm" onclick="saveTier('${t.tier}')"><i class="fa-solid fa-save"></i></button></td>
         </tr>`).join('');
-    }
+    };
 
     window.saveTier = async (tier) => {
-      const token = (await supabase.auth.getSession()).data.session.access_token;
       const res = await fetch('/api/admin?action=update-tier', {
-        method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${await getToken()}` },
         body: JSON.stringify({ tier, upgrade_cost: document.getElementById(`cost-${tier}`).value, daily_boxes: document.getElementById(`boxes-${tier}`).value, daily_earning: document.getElementById(`earn-${tier}`).value })
       });
       if (res.ok) showToast('Tier updated!', 'success');
     };
 
+    // ===== WEALTH PACKAGES =====
+    window.loadWealthPackages = async function () {
+      const tbody = document.getElementById('wealth-packages-table');
+      tbody.innerHTML = '<tr><td colspan="8" class="loading"><i class="fa-solid fa-circle-notch fa-spin"></i></td></tr>';
+      const res = await fetch('/api/admin?action=get-wealth-packages', { headers: { 'Authorization': `Bearer ${await getToken()}` } });
+      const data = await res.json();
+      wealthPackages = data.packages || [];
+      if (!wealthPackages.length) { tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:40px;color:rgba(255,255,255,0.5);">No packages yet</td></tr>'; return; }
+      tbody.innerHTML = wealthPackages.map(p => {
+        const avail = (p.start_date || p.end_date) ? `${p.start_date ? p.start_date.slice(0,10) : 'Any'} → ${p.end_date ? p.end_date.slice(0,10) : 'Any'}` : 'Always';
+        return `<tr>
+          <td style="font-weight:700;">${p.name}</td>
+          <td style="color:var(--warning);">₦${Number(p.investment_amount).toLocaleString()}</td>
+          <td style="color:var(--success);">₦${Number(p.daily_return).toLocaleString()}</td>
+          <td>${p.duration_days}</td>
+          <td style="color:var(--primary);">₦${Number(p.total_return).toLocaleString()}</td>
+          <td style="font-size:0.75rem;">${avail}</td>
+          <td><span class="status-badge ${p.is_active ? 'approved' : 'rejected'}">${p.is_active ? 'Active' : 'Inactive'}</span></td>
+          <td style="white-space:nowrap;">
+            <button class="btn btn-primary btn-sm" onclick="openWealthEdit('${p.id}')"><i class="fa-solid fa-edit"></i></button>
+            <button class="btn btn-danger btn-sm" onclick="deleteWealthPackage('${p.id}')"><i class="fa-solid fa-trash"></i></button>
+          </td>
+        </tr>`;
+      }).join('');
+    };
+
+    window.createWealthPackage = async () => {
+      const payload = {
+        name: document.getElementById('wp-name').value,
+        investment_amount: document.getElementById('wp-investment').value,
+        daily_return: document.getElementById('wp-daily').value,
+        duration_days: document.getElementById('wp-duration').value,
+        total_return: document.getElementById('wp-total').value,
+        start_date: document.getElementById('wp-start').value || null,
+        end_date: document.getElementById('wp-end').value || null
+      };
+      if (!payload.name || !payload.investment_amount || !payload.daily_return || !payload.duration_days || !payload.total_return) {
+        return alert('Please fill all required fields');
+      }
+      const res = await fetch('/api/admin?action=create-wealth-package', {
+        method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${await getToken()}` },
+        body: JSON.stringify(payload)
+      });
+      if (res.ok) {
+        showToast('Package created!', 'success');
+        ['wp-name','wp-investment','wp-daily','wp-duration','wp-total','wp-start','wp-end'].forEach(id => document.getElementById(id).value = '');
+        loadWealthPackages();
+      } else alert((await res.json()).error);
+    };
+
+    window.openWealthEdit = (id) => {
+      const p = wealthPackages.find(x => x.id === id);
+      if (!p) return;
+      document.getElementById('w-edit-id').value = p.id;
+      document.getElementById('w-edit-name').value = p.name;
+      document.getElementById('w-edit-investment').value = p.investment_amount;
+      document.getElementById('w-edit-daily').value = p.daily_return;
+      document.getElementById('w-edit-duration').value = p.duration_days;
+      document.getElementById('w-edit-total').value = p.total_return;
+      document.getElementById('w-edit-start').value = p.start_date ? p.start_date.slice(0,10) : '';
+      document.getElementById('w-edit-end').value = p.end_date ? p.end_date.slice(0,10) : '';
+      document.getElementById('w-edit-active').value = p.is_active ? 'true' : 'false';
+      document.getElementById('wealth-modal').classList.add('active');
+    };
+
+    window.saveWealthEdit = async () => {
+      const res = await fetch('/api/admin?action=update-wealth-package', {
+        method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${await getToken()}` },
+        body: JSON.stringify({
+          id: document.getElementById('w-edit-id').value,
+          name: document.getElementById('w-edit-name').value,
+          investment_amount: document.getElementById('w-edit-investment').value,
+          daily_return: document.getElementById('w-edit-daily').value,
+          duration_days: document.getElementById('w-edit-duration').value,
+          total_return: document.getElementById('w-edit-total').value,
+          start_date: document.getElementById('w-edit-start').value || null,
+          end_date: document.getElementById('w-edit-end').value || null,
+          is_active: document.getElementById('w-edit-active').value === 'true'
+        })
+      });
+      if (res.ok) { showToast('Package updated!', 'success'); closeModal('wealth-modal'); loadWealthPackages(); }
+      else alert((await res.json()).error);
+    };
+
+    window.deleteWealthPackage = async (id) => {
+      if (!confirm('Delete this package permanently?')) return;
+      const res = await fetch('/api/admin?action=delete-wealth-package', {
+        method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${await getToken()}` },
+        body: JSON.stringify({ id })
+      });
+      if (res.ok) { showToast('Package deleted!', 'success'); loadWealthPackages(); }
+      else alert((await res.json()).error);
+    };
+
+    // ===== GIFT CODES =====
     window.generateAdminGiftCode = async () => {
-      const token = (await supabase.auth.getSession()).data.session.access_token;
       const res = await fetch('/api/admin?action=admin-generate-gift-code', {
-        method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${await getToken()}` },
         body: JSON.stringify({ amount: document.getElementById('gc-amount').value, max_uses: document.getElementById('gc-uses').value, expires_in_days: document.getElementById('gc-days').value })
       });
       const data = await res.json();
@@ -504,6 +588,7 @@
       else alert(data.error);
     };
 
+    // ===== MESSAGES =====
     window.openMessageModal = (userId, email) => {
       document.getElementById('msg-user-id').value = userId;
       document.getElementById('msg-user-email').textContent = email;
@@ -511,18 +596,17 @@
     };
 
     window.sendMessageToUser = async () => {
-      const token = (await supabase.auth.getSession()).data.session.access_token;
       const res = await fetch('/api/admin?action=send-message', {
-        method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${await getToken()}` },
         body: JSON.stringify({ user_id: document.getElementById('msg-user-id').value, title: document.getElementById('msg-title').value, body: document.getElementById('msg-body').value })
       });
       if (res.ok) { showToast('Message sent!', 'success'); closeModal('message-modal'); document.getElementById('msg-title').value = ''; document.getElementById('msg-body').value = ''; }
       else alert((await res.json()).error);
     };
 
+    // ===== SETTINGS =====
     async function loadSettings() {
-      const token = (await supabase.auth.getSession()).data.session.access_token;
-      const res = await fetch('/api/admin?action=get-settings', { headers: { 'Authorization': `Bearer ${token}` } });
+      const res = await fetch('/api/admin?action=get-settings', { headers: { 'Authorization': `Bearer ${await getToken()}` } });
       const data = await res.json();
       if (data.settings) {
         document.getElementById('link-telegram').value = data.settings.telegram_link || '';
@@ -533,18 +617,15 @@
     }
 
     window.saveSupportLinks = async () => {
-      const token = (await supabase.auth.getSession()).data.session.access_token;
-      await fetch('/api/admin?action=save-support-links', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify({ telegram: document.getElementById('link-telegram').value, whatsapp: document.getElementById('link-whatsapp').value, support: document.getElementById('link-support').value }) });
+      await fetch('/api/admin?action=save-support-links', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${await getToken()}` }, body: JSON.stringify({ telegram: document.getElementById('link-telegram').value, whatsapp: document.getElementById('link-whatsapp').value, support: document.getElementById('link-support').value }) });
       showToast('Support links saved!', 'success');
     };
 
     window.saveWithdrawalFee = async () => {
-      const token = (await supabase.auth.getSession()).data.session.access_token;
-      await fetch('/api/admin?action=save-support-links', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify({ withdrawal_fee_percentage: document.getElementById('withdrawal-fee').value }) });
+      await fetch('/api/admin?action=save-support-links', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${await getToken()}` }, body: JSON.stringify({ withdrawal_fee_percentage: document.getElementById('withdrawal-fee').value }) });
       showToast('Withdrawal fee saved!', 'success');
     };
 
-    window.logout = async () => { await supabase.auth.signOut(); window.location.href = '/login.html'; };
     checkAuth();
   </script>
 </body>
