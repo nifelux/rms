@@ -40,29 +40,51 @@ export default async function handler(req, res) {
     }
 
     // 3. CHECK IF PAYMENT IS SUCCESSFUL
-// The top-level 'status' is the API response status
-// The nested 'data.payment_status' is the payment state
 const apiResponseStatus = verification?.status || '';
 const paymentStatus = verification?.data?.payment_status || verification?.data?.status || '';
 
 console.log('[TG-WEBHOOK] API Response Status:', apiResponseStatus);
 console.log('[TG-WEBHOOK] Payment Status:', paymentStatus);
 
-// Check if the API verification was successful AND payment is in a successful state
+// If API verification fails, reject
 if (!isSuccessfulStatus(apiResponseStatus)) {
   console.log('[TG-WEBHOOK] API verification failed:', apiResponseStatus);
   return res.status(200).json({ message: 'Payment verification failed' });
 }
 
-// If payment_status is 'initiated' but API says 'success', 
-// the payment is still processing - don't credit yet
-if (!isSuccessfulStatus(paymentStatus)) {
-  console.log('[TG-WEBHOOK] Payment not yet successful:', paymentStatus);
-  return res.status(200).json({ message: 'Payment processing' });
-}
-
-console.log('[TG-WEBHOOK] ✅ Payment verified successfully');
-    
+// Handle different payment states
+if (isSuccessfulStatus(paymentStatus)) {
+  console.log('[TG-WEBHOOK] ✅ Payment is successful, proceeding to credit');
+  // Continue to credit the user
+} else if (paymentStatus === 'initiated' || paymentStatus === 'pending') {
+  // Payment is processing - update DB but don't credit yet
+  console.log('[TG-WEBHOOK] ⏳ Payment is processing:', paymentStatus);
+  
+  // Update deposit status to processing
+  await supabaseAdmin.from('deposits').update({
+    status: 'pending',
+    provider_status: paymentStatus,
+    provider_response: verification,
+    updated_at: new Date().toISOString()
+  }).eq('id', deposit.id).eq('status', 'pending');
+  
+  // Return success so gateway doesn't show "Fail"
+  return res.status(200).json({ 
+    message: 'Payment processing, will be credited when confirmed',
+    status: paymentStatus 
+  });
+} else {
+  // Payment failed or cancelled
+  console.log('[TG-WEBHOOK] Payment failed:', paymentStatus);
+  await supabaseAdmin.from('deposits').update({
+    status: 'rejected',
+    provider_status: paymentStatus,
+    provider_response: verification,
+    updated_at: new Date().toISOString()
+  }).eq('id', deposit.id).eq('status', 'pending');
+  
+  return res.status(200).json({ message: 'Payment failed' });
+}    
     // 4. VERIFY AMOUNT MATCHES
     const apiAmount = Number(verification?.data?.amount || verification?.amount);
     if (apiAmount !== amount) {
