@@ -346,19 +346,64 @@ async function upgradeVip(req, res) {
   const { tier, amount } = req.body;
   if (!tier || !amount) return res.status(400).json({ error: 'Missing tier or amount' });
 
-  const { data: wallet } = await supabaseAdmin.from('wallets').select('balance').eq('user_id', user.id).single();
+  // 1. Get current profile to check previous tier and referrer
+  const { data: currentProfile } = await supabaseAdmin
+    .from('profiles')
+    .select('vip_level, referred_by')
+    .eq('id', user.id)
+    .single();
+
+  const previousTier = currentProfile?.vip_level || 'newbie';
+  const referrerId = currentProfile?.referred_by;
+
+  // 2. Check Balance
+  const { data: wallet } = await supabaseAdmin
+    .from('wallets')
+    .select('balance')
+    .eq('user_id', user.id)
+    .single();
+
   if (!wallet) return res.status(400).json({ error: 'Wallet not found.' });
   if (Number(wallet.balance) < Number(amount)) {
     return res.status(400).json({ error: 'Insufficient balance for this upgrade.' });
   }
 
-  // Deduct balance
-  await supabaseAdmin.from('wallets').update({ balance: Number(wallet.balance) - Number(amount), updated_at: new Date().toISOString() }).eq('user_id', user.id);
-  
-  // Update profile tier
-  await supabaseAdmin.from('profiles').update({ vip_level: tier }).eq('id', user.id);
+  // 3. Deduct Balance
+  await supabaseAdmin
+    .from('wallets')
+    .update({ balance: Number(wallet.balance) - Number(amount), updated_at: new Date().toISOString() })
+    .eq('user_id', user.id);
 
-  // Record transaction
+  // 4. Update Profile Tier
+  await supabaseAdmin
+    .from('profiles')
+    .update({ vip_level: tier })
+    .eq('id', user.id);
+
+  // 5. Reward Referrer if crossing M1 -> M2+
+  const tierOrder = ['newbie', 'M0', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7'];
+  const prevIndex = tierOrder.indexOf(previousTier);
+  const newIndex = tierOrder.indexOf(tier);
+
+  // If they just crossed into M2 or higher (index 3), and have a referrer
+  if (newIndex >= 3 && prevIndex < 3 && referrerId) {
+    const { data: referrerProfile } = await supabaseAdmin
+      .from('profiles')
+      .select('gift_code_generations_available')
+      .eq('id', referrerId)
+      .single();
+
+    const currentGens = referrerProfile?.gift_code_generations_available || 0;
+    
+    await supabaseAdmin
+      .from('profiles')
+      .update({ gift_code_generations_available: currentGens + 1 })
+      .eq('id', referrerId);
+      
+    console.log(`Referrer ${referrerId} awarded +1 gift code generation for downline ${user.id} reaching ${tier}`);
+  }
+
+  // 6. Record Transaction
   await supabaseAdmin.from('transactions').insert({
     user_id: user.id,
     type: 'vip_upgrade',
@@ -370,7 +415,6 @@ async function upgradeVip(req, res) {
 
   return res.status(200).json({ ok: true, message: `Successfully upgraded to ${tier}!` });
 }
-
 // ==========================================
 // GIFT CODES
 // ==========================================
