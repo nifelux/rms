@@ -9,6 +9,23 @@
  * to point here instead, e.g.:
  *   https://api.telegram.org/bot<TOKEN>/setWebhook?url=https://<your-domain>/api/notification?action=telegramWebhook
  * Telegram will keep POSTing to the old URL (now 404) until this is updated.
+ *
+ * FIX (deposit status bug): approve_deposit / reject_deposit now go through
+ * the same atomic, status-guarded RPCs the payment webhook uses
+ * (complete_deposit_and_credit / reject_deposit_safe — see
+ * deposit-diagnostics-and-fixes.sql), instead of writing directly to
+ * deposits.status with no check on the current status. Previously:
+ *   - approve_deposit wrote status:'approved', a different string than the
+ *     webhook's status:'completed', so the webhook's idempotency check never
+ *     recognized a Telegram-approved deposit as handled, and approve_deposit
+ *     never credited the wallet at all (only logged a transaction row).
+ *   - reject_deposit had no guard on the deposit's current status, so
+ *     clicking Reject on a stale Telegram message (a deposit the webhook had
+ *     already auto-completed) silently overwrote completed -> rejected with
+ *     no wallet reversal and no error.
+ * Both are fixed below by checking/branching on current status first and by
+ * using the shared atomic RPCs, so there is exactly one definition of
+ * "this deposit succeeded" across the whole codebase.
  */
 import supabaseAdmin from '../lib/supabase.js';
 import { verifyUser, verifyAdmin } from '../lib/auth.js';
@@ -187,27 +204,69 @@ async function handleCallbackQuery(callbackQuery, res) {
   
   // RMS FIX: Implement Core functions directly instead of importing
   const actions = {
+    // FIXED: routes through the same atomic RPC the payment webhook uses.
+    // Refuses (instead of silently double-crediting) if this deposit was
+    // already resolved by the webhook or another admin action.
     approve_deposit: async () => {
-      const { error } = await supabaseAdmin.from('deposits').update({ status: 'approved', updated_at: new Date() }).eq('id', id);
-      if (error) return { ok: false, error: error.message };
-      
-      // Create transaction
-      const { data: deposit } = await supabaseAdmin.from('deposits').select('*').eq('id', id).single();
-      if (deposit) {
-        await supabaseAdmin.from('transactions').insert({
-          user_id: deposit.user_id,
-          type: 'deposit',
-          amount: deposit.amount,
-          status: 'approved',
-          reference: `dep_${deposit.id}`,
-          description: 'Deposit approved via Telegram'
-        });
+      const { data: deposit } = await supabaseAdmin
+        .from('deposits')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+      if (!deposit) return { ok: false, error: 'Deposit not found' };
+
+      if (deposit.status === 'completed') {
+        return { ok: false, error: 'Already completed (most likely by the payment webhook) — no action taken' };
       }
-      return { ok: true, message: 'Deposit approved' };
+      if (deposit.status === 'rejected') {
+        return { ok: false, error: 'Already rejected — no action taken' };
+      }
+
+      const { data: result, error: creditErr } = await supabaseAdmin.rpc('complete_deposit_and_credit', {
+        p_deposit_id: deposit.id,
+        p_user_id: deposit.user_id,
+        p_amount: Number(deposit.amount),
+        p_reference: deposit.reference,
+        p_identifier: deposit.provider_identifier || `manual_${deposit.id}`,
+        p_provider_response: { source: 'telegram_admin_approve' }
+      });
+
+      if (creditErr) return { ok: false, error: creditErr.message };
+
+      const row = Array.isArray(result) ? result[0] : result;
+      if (!row?.applied) {
+        return { ok: false, error: 'Deposit was resolved by another request just now — no action taken' };
+      }
+
+      return { ok: true, message: `Deposit approved and wallet credited (new balance: ₦${row.new_balance})` };
     },
+    // FIXED: refuses to overwrite a deposit that's already completed — this
+    // is what previously let a stale Telegram message silently flip an
+    // already-credited deposit back to "rejected" with no wallet reversal.
     reject_deposit: async () => {
-      const { error } = await supabaseAdmin.from('deposits').update({ status: 'rejected', updated_at: new Date() }).eq('id', id);
-      return error ? { ok: false, error: error.message } : { ok: true, message: 'Deposit rejected' };
+      const { data: deposit } = await supabaseAdmin
+        .from('deposits')
+        .select('id, status')
+        .eq('id', id)
+        .single();
+
+      if (!deposit) return { ok: false, error: 'Deposit not found' };
+
+      if (deposit.status === 'completed') {
+        return { ok: false, error: 'This deposit was already completed (wallet already credited) — cannot reject here. If this is a genuine chargeback/reversal, use the admin panel refund flow instead.' };
+      }
+
+      const { data: rejected, error: rejectErr } = await supabaseAdmin.rpc('reject_deposit_safe', {
+        p_deposit_id: deposit.id,
+        p_provider_status: 'rejected_by_admin',
+        p_provider_response: { source: 'telegram_admin_reject' }
+      });
+
+      if (rejectErr) return { ok: false, error: rejectErr.message };
+      if (!rejected) return { ok: false, error: 'Deposit was already resolved by another request just now — no action taken' };
+
+      return { ok: true, message: 'Deposit rejected' };
     },
     approve_withdrawal: async () => {
       const { error } = await supabaseAdmin.from('withdrawals').update({ status: 'approved', updated_at: new Date() }).eq('id', id);
@@ -532,7 +591,13 @@ async function handleNotifications(chatId, res) {
 async function handleStats(chatId, res) {
   const [users, deposits, withdrawals] = await Promise.all([
     supabaseAdmin.from('profiles').select('id', { count: 'exact' }),
-    supabaseAdmin.from('deposits').select('amount').eq('status', 'approved'),
+    // FIXED: the payment webhook marks successful deposits 'completed', not
+    // 'approved' — this was undercounting real deposits, since Telegram's
+    // old approve_deposit action was the only writer that ever used
+    // 'approved'. Now that approve_deposit routes through the same
+    // 'completed' status (see handleCallbackQuery above), this query
+    // matches reality.
+    supabaseAdmin.from('deposits').select('amount').eq('status', 'completed'),
     supabaseAdmin.from('withdrawals').select('amount').eq('status', 'approved')
   ]);
   const totalDep = (deposits.data || []).reduce((s, d) => s + Number(d.amount), 0);
