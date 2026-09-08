@@ -41,6 +41,13 @@
       height: 3px;
       background: linear-gradient(90deg, #0066ff, #00d4ff, #0066ff);
     }
+    .plan-card.unavailable {
+      opacity: 0.6;
+      border-color: rgba(255,255,255,0.1);
+    }
+    .plan-card.unavailable::before {
+      background: linear-gradient(90deg, #666, #999, #666);
+    }
     .plan-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
     .plan-name { font-size: 1.3rem; font-weight: 800; color: white; }
     .plan-price { font-size: 1.2rem; font-weight: 900; color: #ffd700; }
@@ -49,6 +56,28 @@
     .plan-detail { background: rgba(0,0,0,0.3); padding: 12px; border-radius: 12px; text-align: center; }
     .plan-detail-val { font-size: 1.1rem; font-weight: 800; color: white; margin-bottom: 4px; }
     .plan-detail-lbl { font-size: 0.7rem; color: rgba(255,255,255,0.6); text-transform: uppercase; font-weight: 600; }
+
+    .plan-availability {
+      background: rgba(0,212,255,0.1);
+      border: 1px solid rgba(0,212,255,0.3);
+      border-radius: 10px;
+      padding: 10px;
+      margin-bottom: 16px;
+      font-size: 0.8rem;
+      color: #00d4ff;
+      text-align: center;
+      font-weight: 600;
+    }
+    .plan-availability.expired {
+      background: rgba(255,68,68,0.1);
+      border-color: rgba(255,68,68,0.3);
+      color: #ff4444;
+    }
+    .plan-availability.upcoming {
+      background: rgba(255,165,0,0.1);
+      border-color: rgba(255,165,0,0.3);
+      color: #ffa500;
+    }
 
     .invest-btn { 
       width: 100%; 
@@ -149,12 +178,28 @@
     const supabase = createClient('https://ofysznsajwxnjqaumwch.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9meXN6bnNhand4bmpxYXVtd2NoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgyMzM4NDgsImV4cCI6MjEwMzgwOTg0OH0.XaHkP5WZ2nJVJXVdbG-D13rrD63g_09HxmJoZn7ZoWA');
     window.supabase = supabase;
 
+    function checkPlanAvailability(plan) {
+      const now = new Date();
+      const startDate = plan.start_date ? new Date(plan.start_date) : null;
+      const endDate = plan.end_date ? new Date(plan.end_date + 'T23:59:59') : null;
+      
+      if (!startDate && !endDate) return { available: true, message: 'Always Available' };
+      if (startDate && now < startDate) return { available: false, message: `Starts: ${startDate.toLocaleDateString()}`, type: 'upcoming' };
+      if (endDate && now > endDate) return { available: false, message: `Ended: ${endDate.toLocaleDateString()}`, type: 'expired' };
+      
+      let message = 'Available Now';
+      if (startDate && endDate) message = `Available: ${startDate.toLocaleDateString()} - ${endDate.toLocaleDateString()}`;
+      else if (endDate) message = `Available until: ${endDate.toLocaleDateString()}`;
+      else if (startDate) message = `Started: ${startDate.toLocaleDateString()}`;
+      
+      return { available: true, message };
+    }
+
     async function loadWealthPage() {
       try {
         const { data: { session } } = await supabase.auth.getSession();
         if (!session) return window.location.href = '/login.html';
 
-        // Check VIP level - Block M0
         const { data: profile } = await supabase
           .from('profiles')
           .select('vip_level')
@@ -165,7 +210,7 @@
           document.body.innerHTML = `
             <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#0a0e27,#1a1f4e);color:white;padding:20px;">
               <div style="max-width:400px;text-align:center;">
-                <div style="font-size:5rem;margin-bottom:20px;"></div>
+                <div style="font-size:5rem;margin-bottom:20px;">🔒</div>
                 <h2 style="margin-bottom:16px;font-size:1.8rem;font-weight:900;">VIP Access Required</h2>
                 <p style="color:rgba(255,255,255,0.7);margin-bottom:24px;font-size:1rem;line-height:1.6;">
                   Wealth Center is only available for <strong style="color:#ffd700;">M1 and above</strong>. 
@@ -208,8 +253,7 @@
             const now = new Date();
             const isMatured = now >= maturityDate && inv.status === 'active';
             const isCompleted = inv.status === 'completed';
-            const durationMins = Math.round(inv.duration_days * 1440);
-            const durationText = durationMins >= 1440 ? `${durationMins/1440} Days` : `${durationMins} Mins`;
+            const durationText = `${inv.duration_days} Days`;
 
             let actionHtml = '';
             if (isCompleted) {
@@ -224,12 +268,12 @@
               <div class="investment-item">
                 <div class="inv-info" style="flex: 1;">
                   <h4>${inv.plan_name}</h4>
-                  <p>Invested: ${new Date(inv.created_at).toLocaleTimeString()}</p>
+                  <p>Invested: ${new Date(inv.created_at).toLocaleDateString()}</p>
                   ${actionHtml}
                 </div>
                 <div style="text-align: right; margin-left: 12px;">
-                  <div class="inv-amount">${Number(inv.amount).toLocaleString()}</div>
-                  <div class="inv-return">Return: ${Number(inv.return_amount).toLocaleString()}</div>
+                  <div class="inv-amount">₦${Number(inv.amount).toLocaleString()}</div>
+                  <div class="inv-return">Return: ₦${Number(inv.return_amount).toLocaleString()}</div>
                 </div>
               </div>
             `;
@@ -241,36 +285,61 @@
         document.getElementById('total-invested').textContent = totalInvested.toLocaleString();
         document.getElementById('total-earnings').textContent = totalEarnings.toLocaleString();
 
-        // 2. Load Plans
-        const { data: plans } = await supabase.from('wealth_plans').select('*').eq('is_active', true).order('invest_amount', { ascending: true });
-        const { data: wallet } = await supabase.from('wallets').select('balance').eq('user_id', session.user.id).single();
+        // 2. Load Packages from wealth_packages table
+        const { data: packages } = await supabase
+          .from('wealth_packages')
+          .select('*')
+          .eq('is_active', true)
+          .order('investment_amount', { ascending: true });
+          
+        const { data: wallet } = await supabase
+          .from('wallets')
+          .select('balance')
+          .eq('user_id', session.user.id)
+          .single();
         const balance = wallet?.balance || 0;
 
         const plansList = document.getElementById('plans-list');
-        if (plans && plans.length > 0) {
-          plansList.innerHTML = plans.map(plan => {
-            const canAfford = Number(balance) >= Number(plan.invest_amount);
-            const planMins = Math.round(plan.duration_days * 1440);
-            const planDurationText = planMins >= 1440 ? `${planMins/1440} Days` : `${planMins} Mins`;
+        if (packages && packages.length > 0) {
+          plansList.innerHTML = packages.map(pkg => {
+            const canAfford = Number(balance) >= Number(pkg.investment_amount);
+            const availability = checkPlanAvailability(pkg);
+            const durationText = `${pkg.duration_days} Days`;
+            const totalReturn = pkg.total_return || (pkg.daily_return * pkg.duration_days);
             
             return `
-              <div class="plan-card">
+              <div class="plan-card ${!availability.available ? 'unavailable' : ''}">
                 <div class="plan-header">
-                  <div class="plan-name">${plan.name}</div>
-                  <div class="plan-price">₦${Number(plan.invest_amount).toLocaleString()}</div>
+                  <div class="plan-name">${pkg.name}</div>
+                  <div class="plan-price">₦${Number(pkg.investment_amount).toLocaleString()}</div>
                 </div>
+                ${availability.message ? `
+                  <div class="plan-availability ${availability.type || ''}">
+                    <i class="fa-solid fa-${availability.available ? 'check-circle' : availability.type === 'expired' ? 'times-circle' : 'clock'}"></i>
+                    ${availability.message}
+                  </div>
+                ` : ''}
                 <div class="plan-details">
                   <div class="plan-detail">
-                    <div class="plan-detail-val" style="color:#ffd700;">₦${Number(plan.return_amount).toLocaleString()}</div>
+                    <div class="plan-detail-val" style="color:#ffd700;">₦${Number(totalReturn).toLocaleString()}</div>
                     <div class="plan-detail-lbl">Total Return</div>
                   </div>
                   <div class="plan-detail">
-                    <div class="plan-detail-val">${planDurationText}</div>
+                    <div class="plan-detail-val">${durationText}</div>
                     <div class="plan-detail-lbl">Duration</div>
                   </div>
+                  <div class="plan-detail">
+                    <div class="plan-detail-val" style="color:#00ff88;">₦${Number(pkg.daily_return).toLocaleString()}</div>
+                    <div class="plan-detail-lbl">Daily Return</div>
+                  </div>
+                  <div class="plan-detail">
+                    <div class="plan-detail-val">${((totalReturn / pkg.investment_amount - 1) * 100).toFixed(1)}%</div>
+                    <div class="plan-detail-lbl">ROI</div>
+                  </div>
                 </div>
-                <button class="invest-btn" onclick="investInPlan('${plan.id}', '${plan.name}', ${plan.invest_amount})" ${!canAfford ? 'disabled' : ''}>
-                  ${canAfford ? '<i class="fa-solid fa-bolt"></i> Invest Now' : '<i class="fa-solid fa-lock"></i> Insufficient Balance'}
+                <button class="invest-btn" onclick="investInPlan('${pkg.id}', '${pkg.name}', ${pkg.investment_amount}, ${pkg.daily_return}, ${pkg.duration_days}, ${totalReturn})" ${!canAfford || !availability.available ? 'disabled' : ''}>
+                  ${!availability.available ? '<i class="fa-solid fa-clock"></i> ' + (availability.type === 'upcoming' ? 'Coming Soon' : 'Expired') : 
+                    canAfford ? '<i class="fa-solid fa-bolt"></i> Invest Now' : '<i class="fa-solid fa-lock"></i> Insufficient Balance'}
                 </button>
               </div>
             `;
@@ -285,18 +354,25 @@
       }
     }
 
-    window.investInPlan = async (planId, planName, amount) => {
-      showConfirm(`Invest ₦${Number(amount).toLocaleString()} in ${planName}?`, async () => {
+    window.investInPlan = async (packageId, packageName, amount, dailyReturn, durationDays, totalReturn) => {
+      showConfirm(`Invest ₦${Number(amount).toLocaleString()} in ${packageName}? You'll earn ₦${Number(dailyReturn).toLocaleString()} daily for ${durationDays} days.`, async () => {
         try {
           const token = (await supabase.auth.getSession()).data.session.access_token;
           const res = await fetch('/api/wealth?action=invest', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-            body: JSON.stringify({ plan_id: planId, amount: amount })
+            body: JSON.stringify({ 
+              package_id: packageId, 
+              amount: amount,
+              plan_name: packageName,
+              daily_return: dailyReturn,
+              duration_days: durationDays,
+              return_amount: totalReturn
+            })
           });
           const data = await res.json();
           if (!res.ok) throw new Error(data.error || 'Investment failed');
-          showToast(`Successfully invested in ${planName}!`, 'success');
+          showToast(`Successfully invested in ${packageName}!`, 'success');
           setTimeout(() => loadWealthPage(), 1500);
         } catch (err) {
           showToast(err.message, 'error');
