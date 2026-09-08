@@ -13,15 +13,15 @@
     /* Filter Tabs */
     .filter-tabs { display: flex; gap: 10px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 5px; }
     .filter-tab { 
-      background: var(--rms-bg-card); border: 1px solid var(--rms-border); color: var(--rms-text-muted);
-      padding: 8px 16px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; cursor: pointer; white-space: nowrap;
+      background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: rgba(255,255,255,0.6);
+      padding: 8px 16px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; cursor: pointer; white-space: nowrap; transition: all 0.3s;
     }
-    .filter-tab.active { background: var(--rms-yellow); color: #0a0e27; border-color: var(--rms-yellow); }
+    .filter-tab.active { background: #ffd700; color: #0a0e27; border-color: #ffd700; }
 
     /* Transaction List */
     .txn-list { display: flex; flex-direction: column; gap: 12px; }
     .txn-card { 
-      background: var(--rms-bg-card); border: 1px solid var(--rms-border); border-radius: 12px; 
+      background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; 
       padding: 14px 16px; display: flex; justify-content: space-between; align-items: center;
     }
     .txn-left { display: flex; align-items: center; gap: 12px; flex: 1; }
@@ -29,32 +29,35 @@
       width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
       font-size: 1rem; flex-shrink: 0;
     }
-    .icon-in { background: rgba(255,215,0,0.1); color: var(--rms-yellow); }
-    .icon-out { background: rgba(255,26,26,0.1); color: var(--rms-vivid-red); }
-    .icon-pending { background: rgba(255,255,255,0.05); color: var(--rms-text-muted); }
+    /* ✅ UPDATED: Green for Income, Red for Expense */
+    .icon-in { background: rgba(0, 255, 136, 0.15); color: #00ff88; }
+    .icon-out { background: rgba(255, 68, 68, 0.15); color: #ff4444; }
+    .icon-pending { background: rgba(255, 215, 0, 0.15); color: #ffd700; }
     
     .txn-info { flex: 1; }
-    .txn-title { font-weight: 600; font-size: 0.9rem; color: var(--rms-white); margin-bottom: 2px; }
-    .txn-date { font-size: 0.75rem; color: var(--rms-text-muted); }
+    .txn-title { font-weight: 600; font-size: 0.9rem; color: white; margin-bottom: 2px; }
+    .txn-date { font-size: 0.75rem; color: rgba(255,255,255,0.5); }
     
     .txn-right { text-align: right; }
     .txn-amount { font-weight: 700; font-size: 0.95rem; margin-bottom: 4px; }
-    .amt-in { color: var(--rms-yellow); }
-    .amt-out { color: var(--rms-vivid-red); }
+    /* ✅ UPDATED: Green for Income, Red for Expense */
+    .amt-in { color: #00ff88; }
+    .amt-out { color: #ff4444; }
+    
     .status-badge { font-size: 0.65rem; padding: 3px 8px; border-radius: 10px; font-weight: 700; text-transform: uppercase; }
-    .status-completed { background: rgba(46,204,113,0.15); color: #2ecc71; }
-    .status-pending { background: rgba(255,215,0,0.15); color: var(--rms-yellow); }
-    .status-rejected { background: rgba(255,26,26,0.15); color: var(--rms-vivid-red); }
+    .status-completed, .status-approved { background: rgba(0, 255, 136, 0.15); color: #00ff88; }
+    .status-pending { background: rgba(255, 215, 0, 0.15); color: #ffd700; }
+    .status-rejected, .status-failed { background: rgba(255, 68, 68, 0.15); color: #ff4444; }
 
-    .empty-state { text-align: center; padding: 40px 20px; color: var(--rms-text-muted); }
+    .empty-state { text-align: center; padding: 40px 20px; color: rgba(255,255,255,0.5); }
   </style>
 </head>
 <body class="rv-shell">
   <div id="header-container"></div>
 
   <div class="history-container">
-    <h2 style="margin-bottom: 5px;">Transaction History</h2>
-    <p class="text-muted" style="margin-bottom: 20px;">Track all your financial activities.</p>
+    <h2 style="margin-bottom: 5px; color: white;">Transaction History</h2>
+    <p style="color: rgba(255,255,255,0.6); margin-bottom: 20px; font-size: 0.9rem;">Track all your financial activities.</p>
 
     <div class="filter-tabs">
       <div class="filter-tab active" onclick="filterTxns('all', this)">All</div>
@@ -76,18 +79,24 @@
 
     let allTxns = [];
 
-    // Define transaction types for UI mapping
+    // Define transaction types for UI mapping (Expanded to cover all possible types)
     const txnConfig = {
       'deposit': { title: 'Wallet Deposit', icon: 'fa-arrow-down', type: 'in' },
       'withdrawal': { title: 'Withdrawal', icon: 'fa-arrow-up', type: 'out' },
+      'withdraw': { title: 'Withdrawal', icon: 'fa-arrow-up', type: 'out' },
       'tier_upgrade': { title: 'VIP Tier Upgrade', icon: 'fa-crown', type: 'out' },
+      'vip_upgrade': { title: 'VIP Tier Upgrade', icon: 'fa-crown', type: 'out' },
       'task_earning': { title: 'Mystery Box Reward', icon: 'fa-box-open', type: 'in' },
       'wealth_invest': { title: 'Wealth Investment', icon: 'fa-gem', type: 'out' },
       'wealth_claim': { title: 'Wealth Claim', icon: 'fa-hand-holding-dollar', type: 'in' },
       'referral': { title: 'Referral Bonus', icon: 'fa-users', type: 'in' },
+      'referral_commission': { title: 'Referral Commission', icon: 'fa-users', type: 'in' },
       'wheel_win': { title: 'Lucky Wheel Win', icon: 'fa-dharmachakra', type: 'in' },
       'admin_credit': { title: 'Admin Credit', icon: 'fa-shield-halved', type: 'in' },
-      'admin_debit': { title: 'Admin Debit', icon: 'fa-shield-halved', type: 'out' }
+      'admin_debit': { title: 'Admin Debit', icon: 'fa-shield-halved', type: 'out' },
+      'gift_code': { title: 'Gift Code Reward', icon: 'fa-gift', type: 'in' },
+      'bonus': { title: 'Bonus', icon: 'fa-gift', type: 'in' },
+      'fee': { title: 'Service Fee', icon: 'fa-receipt', type: 'out' }
     };
 
     async function loadHistory() {
@@ -112,7 +121,7 @@
       }
 
       list.innerHTML = filtered.map(t => {
-        const config = txnConfig[t.type] || { title: t.type, icon: 'fa-circle', type: 'out' };
+        const config = txnConfig[t.type] || { title: t.type.replace('_', ' ').toUpperCase(), icon: 'fa-circle', type: 'out' };
         const date = new Date(t.created_at).toLocaleDateString('en-NG', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' });
         const sign = config.type === 'in' ? '+' : '-';
         const amtClass = config.type === 'in' ? 'amt-in' : 'amt-out';
@@ -128,7 +137,7 @@
               </div>
             </div>
             <div class="txn-right">
-              <div class="txn-amount ${amtClass}">${sign}${Number(t.amount).toLocaleString()}</div>
+              <div class="txn-amount ${amtClass}">${sign}₦${Number(t.amount).toLocaleString()}</div>
               <div class="status-badge status-${t.status}">${t.status}</div>
             </div>
           </div>
