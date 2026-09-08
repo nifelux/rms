@@ -115,22 +115,22 @@
       </a>
 
       <!-- Row 2 -->
-<a id="dash-telegram" href="#" target="_blank" class="action-item" style="display: none;">
-  <div class="action-icon blue"><i class="fa-brands fa-telegram"></i></div>
-  <div class="action-label">Telegram</div>
-</a>
-<a id="dash-whatsapp" href="#" target="_blank" class="action-item" style="display: none;">
-  <div class="action-icon green"><i class="fa-brands fa-whatsapp"></i></div>
-  <div class="action-label">WhatsApp</div>
-</a>
-<a id="dash-support" href="/support.html" class="action-item">
-  <div class="action-icon gold"><i class="fa-solid fa-headset"></i></div>
-  <div class="action-label">Support</div>
-</a>
-<a href="/withdraw.html" class="action-item">
-  <div class="action-icon red"><i class="fa-solid fa-building-columns"></i></div>
-  <div class="action-label">Bank</div>
-</a>
+      <a id="dash-telegram" href="#" target="_blank" class="action-item" style="display: none;">
+        <div class="action-icon blue"><i class="fa-brands fa-telegram"></i></div>
+        <div class="action-label">Telegram</div>
+      </a>
+      <a id="dash-whatsapp" href="#" target="_blank" class="action-item" style="display: none;">
+        <div class="action-icon green"><i class="fa-brands fa-whatsapp"></i></div>
+        <div class="action-label">WhatsApp</div>
+      </a>
+      <a id="dash-support" href="/support.html" class="action-item">
+        <div class="action-icon gold"><i class="fa-solid fa-headset"></i></div>
+        <div class="action-label">Support</div>
+      </a>
+      <a href="/withdraw.html" class="action-item">
+        <div class="action-icon red"><i class="fa-solid fa-building-columns"></i></div>
+        <div class="action-label">Bank</div>
+      </a>
     </div>
 
     <div class="stats-row">
@@ -180,85 +180,82 @@
     const supabase = createClient('https://ofysznsajwxnjqaumwch.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9meXN6bnNhand4bmpxYXVtd2NoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgyMzM4NDgsImV4cCI6MjEwMzgwOTg0OH0.XaHkP5WZ2nJVJXVdbG-D13rrD63g_09HxmJoZn7ZoWA');
     window.supabase = supabase;
 
-    const INCOME_TYPES = ['deposit', 'referral_commission', 'task_earning', 'wealth_claim', 'wheel_win', 'admin_credit', 'bonus', 'gift_code'];
-    const EXPENSE_TYPES = ['withdraw', 'wealth_invest', 'vip_upgrade', 'fee', 'purchase'];
+    // Transaction type configuration
+    const txnConfig = {
+      'deposit': { title: 'Deposit', icon: 'fa-arrow-down', type: 'in' },
+      'withdraw': { title: 'Withdrawal', icon: 'fa-arrow-up', type: 'out' },
+      'withdrawal': { title: 'Withdrawal', icon: 'fa-arrow-up', type: 'out' },
+      'referral_commission': { title: 'Referral Commission', icon: 'fa-users', type: 'in' },
+      'task_earning': { title: 'Mystery Box Reward', icon: 'fa-box-open', type: 'in' },
+      'wealth_claim': { title: 'Wealth Return', icon: 'fa-gem', type: 'in' },
+      'wealth_invest': { title: 'Wealth Investment', icon: 'fa-gem', type: 'out' },
+      'wheel_win': { title: 'Wheel Prize', icon: 'fa-dharmachakra', type: 'in' },
+      'vip_upgrade': { title: 'VIP Upgrade', icon: 'fa-crown', type: 'out' },
+      'admin_credit': { title: 'Admin Credit', icon: 'fa-shield-halved', type: 'in' },
+      'admin_debit': { title: 'Admin Debit', icon: 'fa-shield-halved', type: 'out' },
+      'bonus': { title: 'Bonus', icon: 'fa-gift', type: 'in' },
+      'gift_code': { title: 'Gift Code Reward', icon: 'fa-gift', type: 'in' },
+      'fee': { title: 'Fee', icon: 'fa-receipt', type: 'out' }
+    };
 
     // Load dynamic support links from admin settings
-async function loadDashboardSupportLinks() {
-  try {
-    console.log('Loading support links...');
-    const res = await fetch('/api/admin?action=get-settings');
-    const data = await res.json();
-    console.log('Settings data:', data);
-    
-    if (!data.ok) {
-      console.error('Failed to fetch settings');
-      return;
-    }
-    
-    const settings = data.settings || {};
-    
-    // Telegram
-    const telegramBtn = document.getElementById('dash-telegram');
-    if (telegramBtn) {
-      if (settings.telegram_link) {
-        telegramBtn.href = settings.telegram_link;
-        telegramBtn.style.display = 'flex';
-        console.log('Telegram link loaded:', settings.telegram_link);
-      } else {
-        console.log('No Telegram link set');
-        telegramBtn.style.display = 'none';
+    async function loadDashboardSupportLinks() {
+      try {
+        const res = await fetch('/api/admin?action=get-settings');
+        const data = await res.json();
+        
+        if (!data.ok) {
+          console.error('Failed to fetch settings');
+          return;
+        }
+        
+        const settings = data.settings || {};
+        
+        // Telegram
+        const telegramBtn = document.getElementById('dash-telegram');
+        if (telegramBtn) {
+          if (settings.telegram_link) {
+            telegramBtn.href = settings.telegram_link;
+            telegramBtn.style.display = 'flex';
+          } else {
+            telegramBtn.style.display = 'none';
+          }
+        }
+        
+        // WhatsApp
+        const whatsappBtn = document.getElementById('dash-whatsapp');
+        if (whatsappBtn) {
+          if (settings.whatsapp_link) {
+            whatsappBtn.href = settings.whatsapp_link;
+            whatsappBtn.style.display = 'flex';
+          } else {
+            whatsappBtn.style.display = 'none';
+          }
+        }
+        
+        // Support page/email
+        const supportBtn = document.getElementById('dash-support');
+        if (supportBtn && settings.support_link) {
+          if (settings.support_link.includes('@')) {
+            supportBtn.href = `mailto:${settings.support_link}`;
+          } else {
+            supportBtn.href = settings.support_link;
+          }
+        }
+        
+      } catch (err) {
+        console.error('Error loading support links:', err);
       }
     }
-    
-    // WhatsApp
-    const whatsappBtn = document.getElementById('dash-whatsapp');
-    if (whatsappBtn) {
-      if (settings.whatsapp_link) {
-        whatsappBtn.href = settings.whatsapp_link;
-        whatsappBtn.style.display = 'flex';
-        console.log('WhatsApp link loaded:', settings.whatsapp_link);
-      } else {
-        console.log('No WhatsApp link set');
-        whatsappBtn.style.display = 'none';
-      }
-    }
-    
-    // Support page/email
-    const supportBtn = document.getElementById('dash-support');
-    if (supportBtn && settings.support_link) {
-      if (settings.support_link.includes('@')) {
-        supportBtn.href = `mailto:${settings.support_link}`;
-      } else {
-        supportBtn.href = settings.support_link;
-      }
-      console.log('Support link loaded:', settings.support_link);
-    }
-    
-  } catch (err) {
-    console.error('Error loading support links:', err);
-  }
-}
 
-// Call this when page loads
-document.addEventListener('DOMContentLoaded', loadDashboardSupportLinks);
-// Also call it immediately in case DOM is already loaded
-loadDashboardSupportLinks();
-    
     function getTransactionType(txn) {
-      if (INCOME_TYPES.includes(txn.type)) return 'income';
-      if (EXPENSE_TYPES.includes(txn.type)) return 'expense';
-      return 'income';
+      const config = txnConfig[txn.type];
+      return config ? config.type : 'income';
     }
 
     function formatTransactionTitle(txn) {
-      const titles = {
-        'deposit': 'Deposit', 'withdraw': 'Withdrawal', 'referral_commission': 'Referral Commission',
-        'task_earning': 'Mystery Box Reward', 'wealth_claim': 'Wealth Return', 'wealth_invest': 'Wealth Investment',
-        'wheel_win': 'Wheel Prize', 'vip_upgrade': 'VIP Upgrade', 'admin_credit': 'Admin Credit',
-        'bonus': 'Bonus', 'gift_code': 'Gift Code Reward', 'fee': 'Fee'
-      };
-      return titles[txn.type] || txn.description || txn.type.replace('_', ' ').toUpperCase();
+      const config = txnConfig[txn.type];
+      return config ? config.title : (txn.description || txn.type.replace('_', ' ').toUpperCase());
     }
 
     async function loadDashboard() {
@@ -293,27 +290,28 @@ loadDashboardSupportLinks();
           transactions.forEach(txn => {
             const type = getTransactionType(txn);
             const amount = Number(txn.amount);
-            if (type === 'income') totalEarnings += amount;
+            if (type === 'in') totalEarnings += amount;
             if (txn.type === 'referral_commission') referralIncome += amount;
           });
 
           txnList.innerHTML = transactions.map(txn => {
-            const type = getTransactionType(txn);
-            const iconClass = type === 'income' ? 'fa-arrow-down' : 'fa-arrow-up';
-            const sign = type === 'income' ? '+' : '-';
+            const config = txnConfig[txn.type] || { title: txn.type, icon: 'fa-circle', type: 'out' };
+            const type = config.type;
+            const iconClass = type === 'in' ? 'fa-arrow-down' : 'fa-arrow-up';
+            const sign = type === 'in' ? '+' : '-';
             const title = formatTransactionTitle(txn);
             const date = new Date(txn.created_at).toLocaleDateString('en-NG', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
             
             return `
               <div class="txn-row">
                 <div class="txn-left">
-                  <div class="txn-icon ${type}"><i class="fa-solid ${iconClass}"></i></div>
+                  <div class="txn-icon ${type === 'in' ? 'income' : 'expense'}"><i class="fa-solid ${iconClass}"></i></div>
                   <div class="txn-body">
                     <div class="txn-title">${title}</div>
                     <div class="txn-date">${date} · ${txn.status}</div>
                   </div>
                 </div>
-                <div class="txn-amount ${type}">${sign}₦${Number(txn.amount).toLocaleString()}</div>
+                <div class="txn-amount ${type === 'in' ? 'income' : 'expense'}">${sign}₦${Number(txn.amount).toLocaleString()}</div>
               </div>
             `;
           }).join('');
@@ -365,9 +363,12 @@ loadDashboardSupportLinks();
       }
     }
 
-    loadDashboard();
-
+    // Call this when page loads
+    document.addEventListener('DOMContentLoaded', loadDashboardSupportLinks);
+    // Also call it immediately in case DOM is already loaded
+    loadDashboardSupportLinks();
     
+    loadDashboard();
   </script>
 </body>
 </html>
