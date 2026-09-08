@@ -58,7 +58,6 @@ async function getTaskStatus(req, res) {
       const newbieBoxesClaimed = profile?.newbie_boxes_claimed || 0;
       const newbieStartDate = profile?.newbie_start_date ? new Date(profile.newbie_start_date) : null;
       
-      // Check if 3 days have passed since first claim
       let canClaimMore = true;
       let daysRemaining = 3;
       
@@ -71,8 +70,8 @@ async function getTaskStatus(req, res) {
         }
       }
 
-      const maxBoxesToday = 1; // NEWBIE gets 1 box per day
-      const totalMaxBoxes = 3; // NEWBIE gets 3 boxes total (over 3 days)
+      const maxBoxesToday = 1;
+      const totalMaxBoxes = 3;
       
       return res.status(200).json({
         tier: 'NEWBIE',
@@ -151,7 +150,6 @@ async function openMysteryBox(req, res) {
       const newbieBoxesClaimed = profile.newbie_boxes_claimed || 0;
       const newbieStartDate = profile.newbie_start_date ? new Date(profile.newbie_start_date) : null;
       
-      // Check eligibility
       if (newbieStartDate) {
         const daysSinceStart = Math.floor((now - newbieStartDate) / (1000 * 60 * 60 * 24));
         if (daysSinceStart >= 3) {
@@ -167,11 +165,9 @@ async function openMysteryBox(req, res) {
         return res.status(400).json({ error: 'You have already claimed your box for today. Come back tomorrow!' });
       }
 
-      // NEWBIE: Fixed ₦50 per box
       const boxAmount = 50;
       const reference = `newbie_box_${user.id.slice(0, 8)}_${Date.now()}`;
       
-      // Record transaction
       const { error: txnErr } = await supabaseAdmin.from('transactions').insert({
         user_id: user.id, 
         type: 'task_earning', 
@@ -183,22 +179,21 @@ async function openMysteryBox(req, res) {
 
       if (txnErr) return res.status(500).json({ error: txnErr.message });
 
-      // Credit Wallet
+      // ✅ FIXED: Use .update().eq() instead of .upsert()
       const { data: wallet } = await supabaseAdmin.from('wallets').select('balance').eq('user_id', user.id).single();
       const newBalance = (wallet?.balance || 0) + boxAmount;
       
-      await supabaseAdmin.from('wallets').upsert({
-        user_id: user.id, balance: newBalance, updated_at: new Date()
-      });
+      await supabaseAdmin.from('wallets').update({ 
+        balance: newBalance, 
+        updated_at: new Date().toISOString() 
+      }).eq('user_id', user.id);
 
-      // Update Profile: Increment daily counter and total newbie counter
       const updates = { 
         boxes_opened_today: boxesOpenedToday + 1, 
         last_task_reset_date: now.toISOString(),
         newbie_boxes_claimed: newbieBoxesClaimed + 1
       };
       
-      // Set start date on first claim
       if (!newbieStartDate) {
         updates.newbie_start_date = now.toISOString();
       }
@@ -235,7 +230,6 @@ async function openMysteryBox(req, res) {
       return res.status(400).json({ error: 'Daily limit reached.' });
     }
 
-    // SMART RANDOMIZATION LOGIC FOR VIP TIERS
     const { data: todayTxns } = await supabaseAdmin
       .from('transactions')
       .select('amount')
@@ -278,12 +272,14 @@ async function openMysteryBox(req, res) {
 
     if (txnErr) return res.status(500).json({ error: txnErr.message });
 
+    // ✅ FIXED: Use .update().eq() instead of .upsert()
     const { data: wallet } = await supabaseAdmin.from('wallets').select('balance').eq('user_id', user.id).single();
     const newBalance = (wallet?.balance || 0) + boxAmount;
     
-    await supabaseAdmin.from('wallets').upsert({
-      user_id: user.id, balance: newBalance, updated_at: new Date()
-    });
+    await supabaseAdmin.from('wallets').update({ 
+      balance: newBalance, 
+      updated_at: new Date().toISOString() 
+    }).eq('user_id', user.id);
 
     await supabaseAdmin.from('profiles').update({ 
       boxes_opened_today: boxesOpened + 1, 
