@@ -423,55 +423,88 @@ async function generateGiftCodes(req, res) {
   const user = await verifyUser(req);
   if (!user) return res.status(401).json({ error: 'Unauthorized' });
 
-  const { data: profile } = await supabaseAdmin.from('profiles').select('gift_code_generations_available').eq('id', user.id).single();
-  const availableGenerations = profile?.gift_code_generations_available || 0;
-  if (availableGenerations <= 0) return res.status(400).json({ error: 'No generations available. Wait for your referrals to upgrade to M2+ to unlock more!' });
+  try {
+    // 1. Check available generations
+    const { data: profile } = await supabaseAdmin
+      .from('profiles')
+      .select('gift_code_generations_available')
+      .eq('id', user.id)
+      .single();
+      
+    const availableGenerations = profile?.gift_code_generations_available || 0;
+    if (availableGenerations <= 0) {
+      return res.status(400).json({ error: 'No generations available. Wait for your referrals to upgrade to M2+ to unlock more!' });
+    }
 
-  const { data: referrals } = await supabaseAdmin.from('profiles').select('id, vip_level, email, full_name').eq('referred_by', user.id).in('vip_level', ['M2', 'M3', 'M4', 'M5', 'M6', 'M7']);
-  if (!referrals || referrals.length === 0) return res.status(400).json({ error: 'No eligible M2+ referrals found' });
+    // 2. Fetch eligible M2+ referrals
+    const { data: referrals, error: refError } = await supabaseAdmin
+      .from('profiles')
+      .select('id, vip_level, email, full_name')
+      .eq('referred_by', user.id)
+      .in('vip_level', ['M2', 'M3', 'M4', 'M5', 'M6', 'M7']);
 
-  const generatedCodes = [];
-  for (const ref of referrals) {
-    const randomAmount = Math.floor(Math.random() * 451) + 50;
-    const code = generateGiftCode();
+    if (refError) {
+      console.error('Error fetching referrals:', refError);
+      return res.status(500).json({ error: 'Failed to fetch referrals' });
+    }
 
-    await supabaseAdmin.from('gift_codes').insert({
-      code, amount: randomAmount, max_uses: 1, used_count: 0, is_active: true, created_by: user.id, expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+    if (!referrals || referrals.length === 0) {
+      return res.status(400).json({ error: 'No eligible M2+ referrals found' });
+    }
+
+    // 3. Generate codes
+    const generatedCodes = [];
+    for (const ref of referrals) {
+      const randomAmount = Math.floor(Math.random() * 451) + 50; // ₦50 to ₦500
+      const code = generateGiftCode();
+
+      // Determine percentage for frontend display
+      const percentages = { 'M2': '5%', 'M3': '8%', 'M4': '12%', 'M5': '15%', 'M6': '18%', 'M7': '20%' };
+      const percentage = percentages[ref.vip_level] || '5%';
+
+      const { error: insertError } = await supabaseAdmin.from('gift_codes').insert({
+        code, 
+        amount: randomAmount, 
+        max_uses: 1, 
+        used_count: 0, 
+        is_active: true, 
+        created_by: user.id, 
+        expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+        description: `Gift for ${ref.vip_level} referral: ${ref.full_name || ref.email}` // Added description
+      });
+
+      if (insertError) {
+        console.error('Failed to insert gift code:', insertError);
+        return res.status(500).json({ error: `Database error: ${insertError.message}` });
+      }
+
+      generatedCodes.push({ 
+        code, 
+        referral: ref.full_name || ref.email, 
+        tier: ref.vip_level, 
+        amount: randomAmount,
+        percentage: percentage
+      });
+    }
+
+    // 4. Decrement generations available
+    const { error: updateError } = await supabaseAdmin
+      .from('profiles')
+      .update({ gift_code_generations_available: availableGenerations - 1 })
+      .eq('id', user.id);
+
+    if (updateError) {
+      console.error('Failed to update generations count:', updateError);
+    }
+
+    return res.status(200).json({ 
+      success: true, 
+      codes: generatedCodes, 
+      remaining_generations: availableGenerations - 1 
     });
 
-    generatedCodes.push({ code, referral: ref.full_name || ref.email, tier: ref.vip_level, amount: randomAmount });
+  } catch (err) {
+    console.error('Generate Gift Codes Critical Error:', err);
+    return res.status(500).json({ error: err.message || 'Internal server error' });
   }
-
-  await supabaseAdmin.from('profiles').update({ gift_code_generations_available: availableGenerations - 1 }).eq('id', user.id);
-  return res.status(200).json({ success: true, codes: generatedCodes, remaining_generations: availableGenerations - 1 });
-}
-
-async function getMyGiftCodes(req, res) {
-  const user = await verifyUser(req);
-  if (!user) return res.status(401).json({ error: 'Unauthorized' });
-  const { data: codes } = await supabaseAdmin.from('gift_codes').select('*').eq('created_by', user.id).order('created_at', { ascending: false }).limit(20);
-  return res.status(200).json({ codes: codes || [] });
-}
-
-async function redeemGiftCode(req, res) {
-  const user = await verifyUser(req);
-  if (!user) return res.status(401).json({ error: 'Unauthorized' });
-
-  const { code } = req.body;
-  if (!code) return res.status(400).json({ error: 'Code required' });
-
-  const { data: giftCode, error: findError } = await supabaseAdmin.from('gift_codes').select('*').eq('code', code.toUpperCase().trim()).single();
-  if (findError || !giftCode) return res.status(404).json({ error: 'Invalid gift code' });
-  if (!giftCode.is_active) return res.status(400).json({ error: 'This gift code has already been used' });
-  if (giftCode.expires_at && new Date(giftCode.expires_at) < new Date()) return res.status(400).json({ error: 'This gift code has expired' });
-  if (giftCode.created_by === user.id) return res.status(400).json({ error: 'You cannot redeem your own generated gift code' });
-
-  const { data: wallet } = await supabaseAdmin.from('wallets').select('balance').eq('user_id', user.id).single();
-  const newBalance = (wallet?.balance || 0) + Number(giftCode.amount);
-
-  await supabaseAdmin.from('wallets').update({ balance: newBalance, updated_at: new Date() }).eq('user_id', user.id);
-  await supabaseAdmin.from('gift_codes').update({ is_active: false, used_count: 1, used_by: user.id }).eq('id', giftCode.id);
-  await supabaseAdmin.from('transactions').insert({ user_id: user.id, type: 'gift_code', amount: giftCode.amount, status: 'approved', reference: `gift_redeem_${Date.now()}`, description: `Redeemed Gift Code: ${code}` });
-
-  return res.status(200).json({ success: true, amount: giftCode.amount, new_balance: newBalance, message: `Success! ₦${giftCode.amount.toLocaleString()} added to your wallet.` });
 }
