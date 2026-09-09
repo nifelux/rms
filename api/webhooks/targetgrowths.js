@@ -69,124 +69,48 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: 'Amount mismatch' });
       }
 
-      // --- FIXED WALLET LOGIC ---
-      // 1. Check if wallet exists
-      const { data: wallet, error: walletSelectError } = await supabaseAdmin
-        .from('wallets')
-        .select('balance')
-        .eq('user_id', deposit.user_id)
-        .single();
+      // Credit the depositor, pay one referral commission, record the
+      // transaction, and complete the deposit in one database transaction.
+      // Duplicate webhook deliveries become a safe no-op.
+      const { data: completion, error: completionError } =
+        await supabaseAdmin.rpc('complete_deposit_and_pay_referral', {
+          p_deposit_id: deposit.id,
+          p_provider_status: 'success',
+          p_provider_response: payload,
+          p_identifier: identifier
+        });
 
-      if (walletSelectError && walletSelectError.code !== 'PGRST116') {
-        console.error('[TG-WEBHOOK] Error fetching wallet:', walletSelectError);
+      if (completionError) {
+        console.error('[TG-WEBHOOK] ❌ Atomic deposit/referral completion failed:', {
+          depositId: deposit.id,
+          identifier,
+          error: completionError
+        });
+        return res.status(500).json({
+          error: 'Deposit completion failed; provider should retry'
+        });
       }
 
-      const currentBalance = Number(wallet?.balance || 0);
-      const newBalance = currentBalance + Number(deposit.amount);
-      
-      console.log(`[TG-WEBHOOK] Current Balance: ${currentBalance} | Adding: ${deposit.amount} | New Balance: ${newBalance}`);
+      const result = Array.isArray(completion) ? completion[0] : completion;
 
-      let walletError = null;
-
-      // 2. Update or Create Wallet
-      if (wallet) {
-        // Wallet exists, update it
-        const { error } = await supabaseAdmin
-          .from('wallets')
-          .update({ 
-            balance: newBalance, 
-            updated_at: new Date().toISOString() 
-          })
-          .eq('user_id', deposit.user_id);
-        walletError = error;
-      } else {
-        // Wallet doesn't exist, create it (upsert)
-        console.log('[TG-WEBHOOK] Wallet not found, creating new wallet record...');
-        const { error } = await supabaseAdmin
-          .from('wallets')
-          .upsert({ 
-            user_id: deposit.user_id, 
-            balance: newBalance, 
-            updated_at: new Date().toISOString() 
-          });
-        walletError = error;
+      if (!result?.applied) {
+        console.log('[TG-WEBHOOK] Duplicate completion ignored:', deposit.id);
+        return res.status(200).json({ message: 'Already processed' });
       }
 
-      if (walletError) {
-        console.error('[TG-WEBHOOK] ❌ Wallet save failed:', walletError.message);
-        // We continue to record the transaction anyway so we don't lose the record
-      } else {
-        console.log(`[TG-WEBHOOK] ✅ Wallet updated successfully to ${newBalance}`);
-      }
-      // --------------------------
-      // 6. HANDLE REFERRAL COMMISSION (10% of deposit)
-const { data: depositingUser } = await supabaseAdmin
-  .from('profiles')
-  .select('referred_by')
-  .eq('id', deposit.user_id)
-  .single();
-
-if (depositingUser?.referred_by) {
-  const commissionAmount = Number(deposit.amount) * 0.10; // 10% commission
-  
-  // Check current balance (defaults to 0 if wallet doesn't exist yet)
-  const { data: referrerWallet } = await supabaseAdmin
-    .from('wallets')
-    .select('balance')
-    .eq('user_id', depositingUser.referred_by)
-    .single();
-  
-  const currentBalance = Number(referrerWallet?.balance || 0);
-  const newReferrerBalance = currentBalance + commissionAmount;
-  
-  // ✅ Use .upsert() to guarantee the row is created or updated
-  await supabaseAdmin
-    .from('wallets')
-    .upsert({ 
-      user_id: depositingUser.referred_by, 
-      balance: newReferrerBalance, 
-      updated_at: new Date().toISOString() 
-    });
-  
-  // Record the commission
-  await supabaseAdmin.from('referral_commissions').insert({
-    referrer_id: depositingUser.referred_by,
-    referred_user_id: deposit.user_id,
-    deposit_id: deposit.id,
-    commission_amount: commissionAmount,
-    status: 'paid',
-    created_at: new Date().toISOString()
-  });
-  
-  console.log('[WEBHOOK] ✅ Referral commission:', commissionAmount, 'paid to', depositingUser.referred_by);
-}
-      // Record transaction
-      await supabaseAdmin.from('transactions').insert({
-        user_id: deposit.user_id,
-        type: 'deposit',
-        amount: Number(deposit.amount),
-        status: 'approved',
-        reference: deposit.reference,
-        description: `Target Growth Deposit (${identifier})`
+      console.log('[TG-WEBHOOK] ✅ Deposit completed atomically:', {
+        depositId: deposit.id,
+        creditedAmount: result.credited_amount,
+        referralAmount: result.referral_amount,
+        referrerId: result.referrer_id,
+        newStatus: result.deposit_status
       });
 
-      // Mark as completed
-      const { error: updateError } = await supabaseAdmin.from('deposits').update({
-        status: 'completed',
-        provider_status: 'success',
-        provider_response: payload,
-        paid_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      }).eq('id', deposit.id);
-
-      if (updateError) {
-        console.error('[TG-WEBHOOK] ❌ Failed to update deposit status:', updateError.message);
-      } else {
-        console.log('[TG-WEBHOOK] ✅ Deposit marked as completed');
-      }
-
-      console.log(`[TG-DEPOSIT] ✅ Successfully credited ₦${deposit.amount} to user ${deposit.user_id}`);
-      return res.status(200).json({ success: true });
+      return res.status(200).json({
+        success: true,
+        referral_amount: result.referral_amount,
+        referrer_id: result.referrer_id
+      });
 
     } else if (isFailedStatus(status)) {
       // Payment failed
