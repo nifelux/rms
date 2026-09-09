@@ -185,13 +185,17 @@ async function adminGenerateGiftCode(req, res) {
   const expiresAt = new Date();
   expiresAt.setDate(expiresAt.getDate() + Number(expires_in_days || 30));
   const { error } = await supabaseAdmin.from('gift_codes').insert({
-    code, amount: Number(amount), max_uses: Number(max_uses), used_count: 0,
-    is_active: true, created_by: 'admin', expires_at: expiresAt.toISOString()
+    code, 
+    amount: Number(amount), 
+    max_uses: Number(max_uses), 
+    used_count: 0,
+    is_active: true, 
+    created_by: null,  // ✅ FIXED: Use NULL instead of 'admin'
+    expires_at: expiresAt.toISOString()
   });
   if (error) return res.status(500).json({ error: error.message });
   return res.json({ ok: true, code });
 }
-
 // ==========================================
 // MESSAGES
 // ==========================================
