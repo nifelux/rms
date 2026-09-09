@@ -511,7 +511,7 @@ async function redeemGiftCode(req, res) {
   if (findError || !giftCode) return res.status(404).json({ error: 'Invalid gift code' });
   if (!giftCode.is_active) return res.status(400).json({ error: 'This gift code has already been used' });
   if (giftCode.expires_at && new Date(giftCode.expires_at) < new Date()) return res.status(400).json({ error: 'This gift code has expired' });
-  if (giftCode.created_by === user.id) return res.status(400).json({ error: 'You cannot redeem your own generated gift code' });
+  //if (giftCode.created_by === user.id) return res.status(400).json({ error: 'You cannot redeem your own generated gift code' });
 
   const { data: wallet } = await supabaseAdmin.from('wallets').select('balance').eq('user_id', user.id).single();
   const newBalance = (wallet?.balance || 0) + Number(giftCode.amount);
