@@ -115,9 +115,10 @@
       <h2 class="section-title"><i class="fa-solid fa-chart-line"></i> Overview</h2>
       <div class="stats-grid">
         <div class="stat-card"><div class="stat-header"><div><div class="stat-label">Total Users</div><div class="stat-value" id="stat-users">0</div></div><div class="stat-icon blue"><i class="fa-solid fa-users"></i></div></div></div>
-        <div class="stat-card"><div class="stat-header"><div><div class="stat-label">Total Deposits</div><div class="stat-value" id="stat-deposits">₦0</div></div><div class="stat-icon green"><i class="fa-solid fa-arrow-down"></i></div></div></div>
-        <div class="stat-card"><div class="stat-header"><div><div class="stat-label">Total Withdrawals</div><div class="stat-value" id="stat-withdrawals">₦0</div></div><div class="stat-icon yellow"><i class="fa-solid fa-arrow-up"></i></div></div></div>
-        <div class="stat-card"><div class="stat-header"><div><div class="stat-label">Pending Withdrawals</div><div class="stat-value" id="stat-pending">0</div></div><div class="stat-icon red"><i class="fa-solid fa-clock"></i></div></div></div>
+        <div class="stat-card"><div class="stat-header"><div><div class="stat-label">Completed Deposits</div><div class="stat-value" id="stat-deposits">₦0</div></div><div class="stat-icon green"><i class="fa-solid fa-arrow-down"></i></div></div></div>
+        <div class="stat-card"><div class="stat-header"><div><div class="stat-label">Pending Deposits</div><div class="stat-value" id="stat-pending-deposits">0</div></div><div class="stat-icon yellow"><i class="fa-solid fa-clock"></i></div></div></div>
+        <div class="stat-card"><div class="stat-header"><div><div class="stat-label">Completed Withdrawals</div><div class="stat-value" id="stat-withdrawals">₦0</div></div><div class="stat-icon blue"><i class="fa-solid fa-arrow-up"></i></div></div></div>
+        <div class="stat-card"><div class="stat-header"><div><div class="stat-label">Pending Withdrawals</div><div class="stat-value" id="stat-pending-withdrawals">0</div></div><div class="stat-icon red"><i class="fa-solid fa-clock"></i></div></div></div>
       </div>
     </section>
 
@@ -338,15 +339,44 @@
     window.logout = async () => { await supabase.auth.signOut(); window.location.href = '/login.html'; };
 
     async function loadDashboard() {
-      const { count } = await supabase.from('profiles').select('*', { count: 'exact', head: true });
-      document.getElementById('stat-users').textContent = count || 0;
-      const { data: deposits } = await supabase.from('deposits').select('amount, status');
-      const { data: withdrawals } = await supabase.from('withdrawals').select('amount, status');
-      const totalDeposits = deposits?.filter(d => d.status === 'completed').reduce((s, d) => s + Number(d.amount), 0) || 0;
-      const totalWithdrawals = withdrawals?.filter(w => w.status === 'completed').reduce((s, w) => s + Number(w.amount), 0) || 0;
-      document.getElementById('stat-deposits').textContent = '₦' + totalDeposits.toLocaleString();
-      document.getElementById('stat-withdrawals').textContent = '₦' + totalWithdrawals.toLocaleString();
-      document.getElementById('stat-pending').textContent = withdrawals?.filter(w => w.status === 'pending').length || 0;
+      const resetStats = () => {
+        document.getElementById('stat-users').textContent = '0';
+        document.getElementById('stat-deposits').textContent = '₦0';
+        document.getElementById('stat-pending-deposits').textContent = '0';
+        document.getElementById('stat-withdrawals').textContent = '₦0';
+        document.getElementById('stat-pending-withdrawals').textContent = '0';
+      };
+
+      try {
+        const token = await getToken();
+        const response = await fetch('/api/admin?action=get-dashboard-stats', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const stats = await response.json();
+
+        if (!response.ok) {
+          throw new Error(stats.error || 'Failed to load dashboard statistics');
+        }
+
+        document.getElementById('stat-users').textContent =
+          Number(stats.users || 0).toLocaleString();
+        document.getElementById('stat-deposits').textContent =
+          `₦${Number(stats.totalDeposits || 0).toLocaleString()}`;
+        document.getElementById('stat-pending-deposits').textContent =
+          Number(stats.pendingDeposits || 0).toLocaleString();
+        document.getElementById('stat-withdrawals').textContent =
+          `₦${Number(stats.totalWithdrawals || 0).toLocaleString()}`;
+        document.getElementById('stat-pending-withdrawals').textContent =
+          Number(stats.pendingWithdrawals || 0).toLocaleString();
+
+        console.log('[ADMIN] Dashboard statistics:', stats);
+      } catch (error) {
+        console.error('[ADMIN] Dashboard statistics failed:', error);
+        resetStats();
+        if (typeof showToast === 'function') {
+          showToast('Failed to load dashboard statistics', 'error');
+        }
+      }
     }
 
     window.loadDeposits = async function () {
@@ -367,33 +397,54 @@
 
     window.loadWithdrawals = async function () {
       const status = document.getElementById('withdrawal-filter').value;
-      const res = await fetch(`/api/admin?action=get-withdrawals&status=${status}`, { headers: { 'Authorization': `Bearer ${await getToken()}` } });
+      const res = await fetch(`/api/admin?action=get-withdrawals&status=${encodeURIComponent(status)}`, {
+        headers: { Authorization: `Bearer ${await getToken()}` }
+      });
       const data = await res.json();
       const tbody = document.getElementById('withdrawals-table');
-      if (!data.withdrawals || !data.withdrawals.length) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:40px;color:rgba(255,255,255,0.5);">No withdrawals found</td></tr>'; return; }
+      if (!res.ok) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--danger);">${data.error || 'Failed to load withdrawals'}</td></tr>`;
+        return;
+      }
+      if (!data.withdrawals || !data.withdrawals.length) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:40px;color:rgba(255,255,255,0.5);">No withdrawals found</td></tr>';
+        return;
+      }
       tbody.innerHTML = data.withdrawals.map(w => `
         <tr>
-          <td><div style="font-weight:700;">${w.profiles?.full_name || 'User'}</div><div style="font-size:0.75rem;color:rgba(255,255,255,0.6);">${w.profiles?.email}</div></td>
-          <td style="font-weight:800;color:var(--warning);">₦${Number(w.amount).toLocaleString()}</td>
-          <td>${w.bank_name}</td><td>${w.account_number}</td>
-          <td><span class="status-badge ${w.status}">${w.status}</span></td>
+          <td><div style="font-weight:700;">${w.profiles?.full_name || 'User'}</div><div style="font-size:0.75rem;color:rgba(255,255,255,0.6);">${w.profiles?.email || ''}</div></td>
+          <td style="font-weight:800;color:var(--warning);">₦${Number(w.amount || 0).toLocaleString()}</td>
+          <td>${w.bank_name || '-'}</td><td>${w.account_number || '-'}</td>
+          <td><span class="status-badge ${w.status}">${w.status}</span><div style="font-size:0.72rem;color:rgba(255,255,255,0.55);">${w.provider_status || ''}</div></td>
           <td>${w.status === 'pending' ? `
-            <button class="btn btn-success btn-sm" onclick="processWithdrawal('${w.id}', 'approve')"><i class="fa-solid fa-check"></i> Pay</button>
-            <button class="btn btn-danger btn-sm" onclick="processWithdrawal('${w.id}', 'reject')"><i class="fa-solid fa-xmark"></i></button>
+            <button class="btn btn-success btn-sm" onclick="processWithdrawal('${w.id}', 'approve', this)"><i class="fa-solid fa-check"></i> Pay</button>
+            <button class="btn btn-danger btn-sm" onclick="processWithdrawal('${w.id}', 'reject', this)"><i class="fa-solid fa-xmark"></i></button>
           ` : '-'}</td>
         </tr>`).join('');
     };
 
-    window.processWithdrawal = async (id, act) => {
+    window.processWithdrawal = async (id, act, button) => {
       if (!confirm(`Are you sure you want to ${act} this withdrawal?`)) return;
+      if (button) {
+        button.disabled = true;
+        button.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Processing';
+      }
       const res = await fetch('/api/admin?action=process-withdrawal', {
-        method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${await getToken()}` },
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${await getToken()}` },
         body: JSON.stringify({ withdrawal_id: id, act })
       });
       const data = await res.json();
-      if (!res.ok) return alert(data.error);
+      if (!res.ok) {
+        if (button) button.disabled = false;
+        alert(data.error || 'Withdrawal processing failed');
+        await loadWithdrawals();
+        return;
+      }
       showToast(`Withdrawal ${act}d! (Net sent: ₦${Number(data.netAmount || 0).toLocaleString()})`, 'success');
-      loadWithdrawals(); loadDashboard();
+      // The default Pending filter reloads without the approved row.
+      await loadWithdrawals();
+      await loadDashboard();
     };
 
     // ===== USERS + FIXED SEARCH =====
