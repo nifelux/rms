@@ -598,13 +598,17 @@
       }
     }
 
+    // Make functions globally accessible
     window.claimGiftCodes = async () => {
+      console.log('[GIFT-CODE-UI] Starting gift code generation...');
       const btn = document.getElementById('claim-gift-btn');
       btn.disabled = true;
       btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Generating...';
 
       try {
         const token = (await supabase.auth.getSession()).data.session.access_token;
+        console.log('[GIFT-CODE-UI] Fetching API...');
+        
         const res = await fetch('/api/finance?action=generateGiftCodes', {
           method: 'POST',
           headers: { 
@@ -613,6 +617,8 @@
           }
         });
 
+        console.log('[GIFT-CODE-UI] Response status:', res.status);
+
         // Check if response is JSON
         const contentType = res.headers.get("content-type");
         if (!contentType || contentType.indexOf("application/json") === -1) {
@@ -620,11 +626,13 @@
         }
 
         const data = await res.json();
+        console.log('[GIFT-CODE-UI] Response data:', data);
         
         if (!res.ok) {
           throw new Error(data.error || 'Failed to generate codes');
         }
 
+        console.log('[GIFT-CODE-UI] Showing modal...');
         // Show generated codes in modal
         showGeneratedCodesModal(data.codes);
         
@@ -634,16 +642,23 @@
         }, 1000);
         
       } catch (err) {
-        console.error('Gift code generation error:', err);
+        console.error('[GIFT-CODE-UI] Error:', err);
         showToast(err.message || 'Failed to generate gift codes', 'error');
         btn.disabled = false;
         btn.innerHTML = '<i class="fa-solid fa-ticket"></i> Generate Gift Codes';
       }
     };
 
-    function showGeneratedCodesModal(codes) {
+    // Make this globally accessible
+    window.showGeneratedCodesModal = (codes) => {
+      console.log('[MODAL] Showing modal with', codes.length, 'codes');
       const modal = document.getElementById('gift-code-modal');
       const content = document.getElementById('gift-code-modal-content');
+      
+      if (!modal || !content) {
+        console.error('[MODAL] Modal elements not found!');
+        return;
+      }
       
       content.innerHTML = `
         <div style="text-align: center; margin-bottom: 24px;">
@@ -675,9 +690,11 @@
       
       // Show the modal
       modal.style.display = 'flex';
-    }
+      console.log('[MODAL] Display set to flex');
+    };
 
     window.closeGiftModal = () => {
+      console.log('[MODAL] Closing modal');
       document.getElementById('gift-code-modal').style.display = 'none';
     };
 
