@@ -327,7 +327,7 @@
     .empty-team p { font-size: 0.95rem; margin-bottom: 8px; }
     .empty-team small { font-size: 0.8rem; }
 
-    /* Modal Styles */
+    /* Modal Styles - FIXED WITH HIGHER Z-INDEX */
     .modal-overlay {
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
@@ -336,7 +336,7 @@
       display: none;
       align-items: center;
       justify-content: center;
-      z-index: 99999;
+      z-index: 999999 !important;
       padding: 20px;
     }
     .modal-content {
@@ -350,6 +350,8 @@
       overflow-y: auto;
       box-shadow: 0 20px 60px rgba(0,0,0,0.5);
       animation: popIn 0.3s ease;
+      position: relative;
+      z-index: 1000000 !important;
     }
     @keyframes popIn {
       from { transform: scale(0.9); opacity: 0; }
@@ -651,51 +653,81 @@
 
     // Make this globally accessible
     window.showGeneratedCodesModal = (codes) => {
-      console.log('[MODAL] Showing modal with', codes.length, 'codes');
+      console.log('[MODAL] Function called with', codes.length, 'codes');
+      
       const modal = document.getElementById('gift-code-modal');
       const content = document.getElementById('gift-code-modal-content');
       
-      if (!modal || !content) {
-        console.error('[MODAL] Modal elements not found!');
+      if (!modal) {
+        console.error('[MODAL] Modal element NOT found!');
+        alert('Error: Modal not found in page');
         return;
       }
+      
+      if (!content) {
+        console.error('[MODAL] Modal content element NOT found!');
+        alert('Error: Modal content not found');
+        return;
+      }
+      
+      console.log('[MODAL] Elements found, building content...');
+      
+      // Build the content
+      const codesHTML = codes.map(c => `
+        <div style="background: rgba(255,215,0,0.05); border: 1px solid rgba(255,215,0,0.3); border-radius: 12px; padding: 16px; margin-bottom: 12px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <span style="color: white; font-weight: 600;">${c.referral}</span>
+            <span style="color: #00ff88; font-weight: 700;">${c.tier} (${c.percentage})</span>
+          </div>
+          <div style="background: rgba(0,0,0,0.4); padding: 12px; border-radius: 8px; text-align: center; font-family: monospace; font-size: 1.1rem; font-weight: 800; color: #ffd700; letter-spacing: 2px; margin-bottom: 8px; word-break: break-all;">${c.code}</div>
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="color: rgba(255,255,255,0.6); font-size: 0.85rem;">Value: ₦${c.amount.toLocaleString()}</span>
+            <button onclick="navigator.clipboard.writeText('${c.code}'); showToast('Code copied!', 'success')" style="background: rgba(255,215,0,0.2); border: 1px solid #ffd700; color: #ffd700; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 0.8rem; font-weight: 600;">
+              <i class="fa-regular fa-copy"></i> Copy
+            </button>
+          </div>
+        </div>
+      `).join('');
       
       content.innerHTML = `
         <div style="text-align: center; margin-bottom: 24px;">
           <div style="font-size: 3rem; margin-bottom: 12px;"></div>
           <h3 style="color: #ffd700; margin: 0 0 8px 0; font-size: 1.5rem; font-weight: 800;">Gift Codes Generated!</h3>
-          <p style="color: rgba(255,255,255,0.7); font-size: 0.9rem;">Share these codes with your referrals</p>
+          <p style="color: rgba(255,255,255,0.7); font-size: 0.9rem;">${codes.length} code(s) created</p>
         </div>
         
-        <div style="display: flex; flex-direction: column; gap: 12px;">
-          ${codes.map(c => `
-            <div style="background: rgba(255,215,0,0.05); border: 1px solid rgba(255,215,0,0.3); border-radius: 12px; padding: 16px;">
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                <span style="color: white; font-weight: 600;">${c.referral}</span>
-                <span style="color: #00ff88; font-weight: 700;">${c.tier} (${c.percentage})</span>
-              </div>
-              <div style="background: rgba(0,0,0,0.4); padding: 12px; border-radius: 8px; text-align: center; font-family: monospace; font-size: 1.2rem; font-weight: 800; color: #ffd700; letter-spacing: 2px; margin-bottom: 8px;">${c.code}</div>
-              <div style="display: flex; justify-content: space-between; align-items: center;">
-                <span style="color: rgba(255,255,255,0.6); font-size: 0.85rem;">Value: ₦${c.amount.toLocaleString()}</span>
-                <button onclick="window.copyCode('${c.code}')" style="background: rgba(255,215,0,0.2); border: 1px solid #ffd700; color: #ffd700; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 0.8rem; font-weight: 600;">
-                  <i class="fa-regular fa-copy"></i> Copy
-                </button>
-              </div>
-            </div>
-          `).join('')}
+        <div style="max-height: 60vh; overflow-y: auto; padding-right: 10px;">
+          ${codesHTML}
         </div>
         
-        <button onclick="window.closeGiftModal()" style="width: 100%; margin-top: 24px; padding: 14px; background: linear-gradient(135deg, #ffd700, #e6c200); border: none; border-radius: 12px; font-weight: 800; font-size: 1rem; color: #0a0e27; cursor: pointer;">Close</button>
+        <button onclick="window.closeGiftModal()" style="width: 100%; margin-top: 24px; padding: 14px; background: linear-gradient(135deg, #ffd700, #e6c200); border: none; border-radius: 12px; font-weight: 800; font-size: 1rem; color: #0a0e27; cursor: pointer; box-shadow: 0 4px 12px rgba(255,215,0,0.4);">
+          Close
+        </button>
       `;
       
-      // Show the modal
+      console.log('[MODAL] Content injected, showing modal...');
+      
+      // Force show the modal
       modal.style.display = 'flex';
-      console.log('[MODAL] Display set to flex');
+      modal.style.zIndex = '99999';
+      
+      // Verify it's visible
+      setTimeout(() => {
+        const isVisible = window.getComputedStyle(modal).display;
+        console.log('[MODAL] Display is now:', isVisible);
+        if (isVisible !== 'flex') {
+          console.error('[MODAL] Modal failed to display!');
+          alert('Modal display issue. Check console.');
+        }
+      }, 100);
     };
 
     window.closeGiftModal = () => {
       console.log('[MODAL] Closing modal');
-      document.getElementById('gift-code-modal').style.display = 'none';
+      const modal = document.getElementById('gift-code-modal');
+      if (modal) {
+        modal.style.display = 'none';
+      }
     };
 
     window.copyCode = (code) => {
