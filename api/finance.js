@@ -469,6 +469,63 @@ async function generateGiftCodes(req, res) {
         used_count: 0, 
         is_active: true, 
         created_by: user.id, 
+        expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+        // Removed description field
+      });
+
+      if (insertError) {
+        console.error('Failed to insert gift code:', insertError);
+        return res.status(500).json({ error: `Database error: ${insertError.message}` });
+      }
+
+      generatedCodes.push({ 
+        code, 
+        referral: ref.full_name || ref.email, 
+        tier: ref.vip_level, 
+        amount: randomAmount,
+        percentage: percentage
+      });
+    }
+
+    // 4. Decrement generations available
+    const { error: updateError } = await supabaseAdmin
+      .from('profiles')
+      .update({ gift_code_generations_available: availableGenerations - 1 })
+      .eq('id', user.id);
+
+    if (updateError) {
+      console.error('Failed to update generations count:', updateError);
+    }
+
+    return res.status(200).json({ 
+      success: true, 
+      codes: generatedCodes, 
+      remaining_generations: availableGenerations - 1 
+    });
+
+  } catch (err) {
+    console.error('Generate Gift Codes Critical Error:', err);
+    return res.status(500).json({ error: err.message || 'Internal server error' });
+  }
+}
+
+    // 3. Generate codes
+    const generatedCodes = [];
+    for (const ref of referrals) {
+      const randomAmount = Math.floor(Math.random() * 451) + 50; // ₦50 to ₦500
+      const code = generateGiftCode();
+
+      // Determine percentage for frontend display
+      const percentages = { 'M2': '5%', 'M3': '8%', 'M4': '12%', 'M5': '15%', 'M6': '18%', 'M7': '20%' };
+      const percentage = percentages[ref.vip_level] || '5%';
+
+      const { error: insertError } = await supabaseAdmin.from('gift_codes').insert({
+        code, 
+        amount: randomAmount, 
+        max_uses: 1, 
+        used_count: 0, 
+        is_active: true, 
+        created_by: user.id, 
         expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
         description: `Gift for ${ref.vip_level} referral: ${ref.full_name || ref.email}` // Added description
       });
