@@ -438,7 +438,7 @@
     </div>
   </div>
 
-  <!-- Hardcoded Modal Container -->
+  <!-- Modal Container -->
   <div id="gift-code-modal" class="modal-overlay">
     <div id="gift-code-modal-content" class="modal-content">
       <!-- Content will be injected here by JavaScript -->
@@ -613,8 +613,17 @@
           }
         });
 
+        // Check if response is JSON
+        const contentType = res.headers.get("content-type");
+        if (!contentType || contentType.indexOf("application/json") === -1) {
+          throw new Error('Server error. Please try again later.');
+        }
+
         const data = await res.json();
-        if (!res.ok) throw new Error(data.error);
+        
+        if (!res.ok) {
+          throw new Error(data.error || 'Failed to generate codes');
+        }
 
         // Show generated codes in modal
         showGeneratedCodesModal(data.codes);
@@ -625,7 +634,8 @@
         }, 1000);
         
       } catch (err) {
-        showToast(err.message, 'error');
+        console.error('Gift code generation error:', err);
+        showToast(err.message || 'Failed to generate gift codes', 'error');
         btn.disabled = false;
         btn.innerHTML = '<i class="fa-solid fa-ticket"></i> Generate Gift Codes';
       }
@@ -637,7 +647,7 @@
       
       content.innerHTML = `
         <div style="text-align: center; margin-bottom: 24px;">
-          <div style="font-size: 3rem; margin-bottom: 12px;">🎁</div>
+          <div style="font-size: 3rem; margin-bottom: 12px;"></div>
           <h3 style="color: #ffd700; margin: 0 0 8px 0; font-size: 1.5rem; font-weight: 800;">Gift Codes Generated!</h3>
           <p style="color: rgba(255,255,255,0.7); font-size: 0.9rem;">Share these codes with your referrals</p>
         </div>
@@ -647,7 +657,7 @@
             <div style="background: rgba(255,215,0,0.05); border: 1px solid rgba(255,215,0,0.3); border-radius: 12px; padding: 16px;">
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                 <span style="color: white; font-weight: 600;">${c.referral}</span>
-                <span style="color: #00ff88; font-weight: 700;">${c.tier} (${c.percentage}%)</span>
+                <span style="color: #00ff88; font-weight: 700;">${c.tier} (${c.percentage})</span>
               </div>
               <div style="background: rgba(0,0,0,0.4); padding: 12px; border-radius: 8px; text-align: center; font-family: monospace; font-size: 1.2rem; font-weight: 800; color: #ffd700; letter-spacing: 2px; margin-bottom: 8px;">${c.code}</div>
               <div style="display: flex; justify-content: space-between; align-items: center;">
