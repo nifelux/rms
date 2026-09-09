@@ -1,282 +1,683 @@
-import supabaseAdmin from '../lib/supabase.js';
-import { verifyUser } from '../lib/auth.js';
-import { initiateTransfer } from '../lib/targetgrowths.js';
-
-export default async function handler(req, res) {
-  const action = req.query.action;
-  try {
-    if (action === 'get-settings') return await getSettings(req, res);
-
-    const user = await verifyUser(req);
-    if (!user) return res.status(401).json({ error: 'Unauthorized' });
-    const { data: profile } = await supabaseAdmin.from('profiles').select('is_admin').eq('id', user.id).single();
-    if (!profile?.is_admin) return res.status(403).json({ error: 'Admin access required' });
-
-    switch (action) {
-      case 'get-deposits': return await getDeposits(req, res);
-      case 'get-withdrawals': return await getWithdrawals(req, res);
-      case 'process-withdrawal': return await processWithdrawal(req, res);
-      case 'get-users': return await getUsers(req, res);
-      case 'update-user': return await updateUser(req, res);
-      case 'adjust-balance': return await adjustBalance(req, res);
-      case 'save-setting': return await saveSetting(req, res);
-      case 'save-support-links': return await saveSupportLinks(req, res);
-      case 'update-tier': return await updateTier(req, res);
-      case 'admin-generate-gift-code': return await adminGenerateGiftCode(req, res);
-      case 'send-message': return await sendMessage(req, res);
-      case 'get-wealth-packages': return await getWealthPackages(req, res);
-      case 'create-wealth-package': return await createWealthPackage(req, res);
-      case 'update-wealth-package': return await updateWealthPackage(req, res);
-      case 'delete-wealth-package': return await deleteWealthPackage(req, res);
-      default: return res.status(400).json({ error: 'Invalid action' });
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>RMS — Admin Dashboard</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <meta name="theme-color" content="#0a0e27">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+    :root { --primary: #00d4ff; --secondary: #ffd700; --success: #00ff88; --danger: #ff4444; --warning: #ffa500; --dark: #0a0e27; --card: rgba(17,22,58,0.8); }
+    body { background: linear-gradient(135deg, #0a0e27 0%, #1a1f4e 100%); min-height: 100vh; color: white; padding-bottom: 40px; }
+    .admin-header { background: rgba(10,14,39,0.95); border-bottom: 1px solid rgba(255,215,0,0.2); padding: 16px 20px; position: sticky; top: 0; z-index: 100; backdrop-filter: blur(10px); }
+    .header-content { max-width: 1400px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
+    .logo { display: flex; align-items: center; gap: 10px; font-size: 1.3rem; font-weight: 900; color: var(--secondary); }
+    .admin-info { display: flex; align-items: center; gap: 12px; }
+    .admin-badge { background: rgba(0,212,255,0.15); color: var(--primary); padding: 6px 12px; border-radius: 20px; font-weight: 700; font-size: 0.8rem; }
+    .logout-btn { background: rgba(255,68,68,0.2); border: 1px solid var(--danger); color: var(--danger); padding: 6px 12px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.85rem; }
+    .nav-tabs { background: rgba(10,14,39,0.9); border-bottom: 1px solid rgba(255,255,255,0.1); position: sticky; top: 65px; z-index: 99; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .nav-tabs::-webkit-scrollbar { display: none; }
+    .nav-content { max-width: 1400px; margin: 0 auto; display: flex; gap: 4px; padding: 0 16px; min-width: max-content; }
+    .nav-tab { padding: 14px 16px; background: transparent; border: none; color: rgba(255,255,255,0.6); font-weight: 600; cursor: pointer; border-bottom: 3px solid transparent; white-space: nowrap; font-size: 0.9rem; transition: all 0.3s; }
+    .nav-tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+    .nav-tab i { margin-right: 6px; }
+    .admin-container { max-width: 1400px; margin: 0 auto; padding: 24px 16px; }
+    .section { display: none; animation: fadeIn 0.3s ease; }
+    .section.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .section-title { font-size: 1.5rem; font-weight: 900; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+    .section-title i { color: var(--secondary); }
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 16px; margin-bottom: 24px; }
+    .stat-card { background: var(--card); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 20px; backdrop-filter: blur(10px); }
+    .stat-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+    .stat-label { color: rgba(255,255,255,0.7); font-size: 0.8rem; font-weight: 600; }
+    .stat-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
+    .stat-icon.blue { background: rgba(0,212,255,0.2); color: var(--primary); }
+    .stat-icon.green { background: rgba(0,255,136,0.2); color: var(--success); }
+    .stat-icon.yellow { background: rgba(255,215,0,0.2); color: var(--secondary); }
+    .stat-icon.red { background: rgba(255,68,68,0.2); color: var(--danger); }
+    .stat-value { font-size: 1.6rem; font-weight: 900; }
+    .card { background: var(--card); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 20px; backdrop-filter: blur(10px); margin-bottom: 20px; }
+    .table-container { overflow-x: auto; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); -webkit-overflow-scrolling: touch; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.85rem; min-width: 600px; }
+    thead { background: rgba(0,0,0,0.3); }
+    th { padding: 12px; text-align: left; font-weight: 700; color: rgba(255,255,255,0.8); border-bottom: 2px solid rgba(255,255,255,0.1); white-space: nowrap; }
+    td { padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); vertical-align: middle; }
+    tbody tr:hover { background: rgba(255,255,255,0.03); }
+    .status-badge { padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+    .status-badge::before { content: ''; width: 6px; height: 6px; border-radius: 50%; }
+    .status-badge.pending { background: rgba(255,165,0,0.2); color: var(--warning); } .status-badge.pending::before { background: var(--warning); }
+    .status-badge.completed, .status-badge.approved { background: rgba(0,255,136,0.2); color: var(--success); } .status-badge.completed::before, .status-badge.approved::before { background: var(--success); }
+    .status-badge.rejected, .status-badge.failed { background: rgba(255,68,68,0.2); color: var(--danger); } .status-badge.rejected::before, .status-badge.failed::before { background: var(--danger); }
+    .status-badge.frozen { background: rgba(255,68,68,0.2); color: var(--danger); }
+    .btn { padding: 8px 14px; border-radius: 8px; border: none; cursor: pointer; font-weight: 700; font-size: 0.8rem; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+    .btn-primary { background: var(--primary); color: var(--dark); }
+    .btn-success { background: var(--success); color: var(--dark); }
+    .btn-danger { background: var(--danger); color: white; }
+    .btn-sm { padding: 6px 10px; font-size: 0.75rem; }
+    .btn:hover { transform: translateY(-1px); opacity: 0.9; }
+    .filters { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; align-items: flex-end; }
+    .filter-select, .form-input, .form-select { padding: 10px 14px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: white; font-size: 0.9rem; width: 100%; }
+    .filter-select { width: auto; min-width: 140px; }
+    .form-input:focus, .form-select:focus { outline: none; border-color: var(--primary); }
+    .form-group { margin-bottom: 16px; }
+    .form-label { display: block; margin-bottom: 6px; font-weight: 600; color: rgba(255,255,255,0.8); font-size: 0.85rem; }
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: none; align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(5px); padding: 20px; }
+    .modal-overlay.active { display: flex; }
+    .modal { background: linear-gradient(135deg, #1a1f4e, #0a0e27); border: 1px solid rgba(255,215,0,0.3); border-radius: 20px; padding: 24px; max-width: 500px; width: 100%; max-height: 90vh; overflow-y: auto; }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .modal-title { font-size: 1.3rem; font-weight: 900; }
+    .modal-close { background: transparent; border: none; color: rgba(255,255,255,0.5); font-size: 1.3rem; cursor: pointer; }
+    .modal-close:hover { color: var(--danger); }
+    .user-info-box { background: rgba(0,0,0,0.2); padding: 14px; border-radius: 12px; margin-bottom: 16px; }
+    .user-info-row { display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 0.85rem; }
+    .user-info-row span:first-child { color: rgba(255,255,255,0.6); }
+    .user-info-row span:last-child { font-weight: 700; }
+    .loading { text-align: center; padding: 40px; color: rgba(255,255,255,0.5); }
+    .loading i { font-size: 2rem; animation: spin 1s linear infinite; color: var(--primary); }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @media (max-width: 768px) {
+      .stats-grid { grid-template-columns: 1fr 1fr; }
+      .logo span { display: none; }
+      .admin-badge { display: none; }
     }
-  } catch (err) {
-    console.error('Admin API Error:', err);
-    return res.status(500).json({ error: err.message });
-  }
-}
+  </style>
+</head>
+<body>
+  <header class="admin-header">
+    <div class="header-content">
+      <div class="logo"><i class="fa-solid fa-crown"></i><span>RMS Admin</span></div>
+      <div class="admin-info">
+        <span class="admin-badge" id="admin-email">admin@rms.com</span>
+        <button class="logout-btn" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
+      </div>
+    </div>
+  </header>
 
-// ==========================================
-// DEPOSITS
-// ==========================================
-async function getDeposits(req, res) {
-  const status = req.query.status || 'all';
-  let q = supabaseAdmin.from('deposits').select('*, profiles!user_id(full_name, email)').order('created_at', { ascending: false }).limit(100);
-  if (status !== 'all') q = q.eq('status', status);
-  const { data } = await q;
-  return res.json({ ok: true, deposits: data || [] });
-}
+  <nav class="nav-tabs">
+    <div class="nav-content">
+      <button class="nav-tab active" onclick="showSection('dashboard', this)"><i class="fa-solid fa-chart-line"></i> Dashboard</button>
+      <button class="nav-tab" onclick="showSection('deposits', this)"><i class="fa-solid fa-arrow-down"></i> Deposits</button>
+      <button class="nav-tab" onclick="showSection('withdrawals', this)"><i class="fa-solid fa-arrow-up"></i> Withdrawals</button>
+      <button class="nav-tab" onclick="showSection('users', this)"><i class="fa-solid fa-users"></i> Users</button>
+      <button class="nav-tab" onclick="showSection('tiers', this)"><i class="fa-solid fa-crown"></i> VIP Tiers</button>
+      <button class="nav-tab" onclick="showSection('wealth', this)"><i class="fa-solid fa-gem"></i> Wealth</button>
+      <button class="nav-tab" onclick="showSection('giftcodes', this)"><i class="fa-solid fa-gift"></i> Gift Codes</button>
+      <button class="nav-tab" onclick="showSection('settings', this)"><i class="fa-solid fa-gear"></i> Settings</button>
+    </div>
+  </nav>
 
-// ==========================================
-// WITHDRAWALS (Fee calculation on approval)
-// ==========================================
-async function getWithdrawals(req, res) {
-  const status = req.query.status || 'pending';
-  let q = supabaseAdmin.from('withdrawals').select('*, profiles!user_id(full_name, email)').order('created_at', { ascending: false }).limit(100);
-  if (status !== 'all') q = q.eq('status', status);
-  const { data } = await q;
-  return res.json({ ok: true, withdrawals: data || [] });
-}
+  <div class="admin-container">
+    <!-- Dashboard -->
+    <section id="dashboard" class="section active">
+      <h2 class="section-title"><i class="fa-solid fa-chart-line"></i> Overview</h2>
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-header"><div><div class="stat-label">Total Users</div><div class="stat-value" id="stat-users">0</div></div><div class="stat-icon blue"><i class="fa-solid fa-users"></i></div></div></div>
+        <div class="stat-card"><div class="stat-header"><div><div class="stat-label">Completed Deposits</div><div class="stat-value" id="stat-deposits">₦0</div></div><div class="stat-icon green"><i class="fa-solid fa-arrow-down"></i></div></div></div>
+        <div class="stat-card"><div class="stat-header"><div><div class="stat-label">Pending Deposits</div><div class="stat-value" id="stat-pending-deposits">0</div></div><div class="stat-icon yellow"><i class="fa-solid fa-clock"></i></div></div></div>
+        <div class="stat-card"><div class="stat-header"><div><div class="stat-label">Completed Withdrawals</div><div class="stat-value" id="stat-withdrawals">₦0</div></div><div class="stat-icon blue"><i class="fa-solid fa-arrow-up"></i></div></div></div>
+        <div class="stat-card"><div class="stat-header"><div><div class="stat-label">Pending Withdrawals</div><div class="stat-value" id="stat-pending-withdrawals">0</div></div><div class="stat-icon red"><i class="fa-solid fa-clock"></i></div></div></div>
+      </div>
+    </section>
 
-const TG_BANK_CODES = {
-  'access bank': 'NGR044', 'access': 'NGR044',
-  'gtbank': 'NGR058', 'guaranty trust bank': 'NGR058',
-  'zenith bank': 'NGR057', 'zenith': 'NGR057',
-  'uba': 'NGR033', 'united bank for africa': 'NGR033',
-  'first bank': 'NGR011', 'fidelity bank': 'NGR070',
-  'union bank': 'NGR032', 'sterling bank': 'NGR232',
-  'wema bank': 'NGR035', 'stanbic ibtc': 'NGR221',
-  'ecobank': 'NGR050', 'polaris bank': 'NGR076',
-  'opay': 'NGR20009', 'paycom': 'NGR999992',
-  'palmpay': 'NGR999991', 'kuda': 'NGR50211',
-  'moniepoint': 'NGR50515', 'vfd': 'NGR566'
-};
+    <!-- Deposits -->
+    <section id="deposits" class="section">
+      <h2 class="section-title"><i class="fa-solid fa-arrow-down"></i> Deposit History</h2>
+      <div class="card" style="background: rgba(0,255,136,0.1); border: 1px solid rgba(0,255,136,0.3); padding: 16px; margin-bottom: 20px; border-radius: 12px;">
+        <p style="color: var(--success); font-weight: 600; font-size: 0.9rem;"><i class="fa-solid fa-circle-check"></i> All deposits are auto-approved via Target Growth webhook.</p>
+      </div>
+      <div class="filters">
+        <select class="filter-select" id="deposit-filter" onchange="loadDeposits()">
+          <option value="all">All Status</option><option value="completed">Completed</option>
+          <option value="pending">Pending</option><option value="rejected">Rejected</option>
+        </select>
+      </div>
+      <div class="card"><div class="table-container">
+        <table><thead><tr><th>User</th><th>Amount</th><th>Method</th><th>Status</th><th>Date</th></tr></thead>
+        <tbody id="deposits-table"><tr><td colspan="5" class="loading"><i class="fa-solid fa-circle-notch fa-spin"></i></td></tr></tbody></table>
+      </div></div>
+    </section>
 
-async function processWithdrawal(req, res) {
-  const { withdrawal_id, act, note } = req.body;
-  const { data: w } = await supabaseAdmin.from('withdrawals').select('*').eq('id', withdrawal_id).single();
-  if (!w) return res.status(404).json({ error: 'Withdrawal not found' });
-  if (w.status !== 'pending') return res.status(400).json({ error: 'Already processed' });
+    <!-- Withdrawals -->
+    <section id="withdrawals" class="section">
+      <h2 class="section-title"><i class="fa-solid fa-arrow-up"></i> Withdrawal Management</h2>
+      <div class="card" style="background: rgba(255,165,0,0.1); border: 1px solid rgba(255,165,0,0.3); padding: 16px; margin-bottom: 20px; border-radius: 12px;">
+        <p style="color: var(--warning); font-weight: 600; font-size: 0.9rem;"><i class="fa-solid fa-circle-exclamation"></i> Withdrawals require admin approval. Fees are auto-calculated.</p>
+      </div>
+      <div class="filters">
+        <select class="filter-select" id="withdrawal-filter" onchange="loadWithdrawals()">
+          <option value="pending">Pending</option><option value="approved">Approved</option>
+          <option value="completed">Completed</option><option value="rejected">Rejected</option><option value="all">All</option>
+        </select>
+      </div>
+      <div class="card"><div class="table-container">
+        <table><thead><tr><th>User</th><th>Amount</th><th>Bank</th><th>Account</th><th>Status</th><th>Actions</th></tr></thead>
+        <tbody id="withdrawals-table"><tr><td colspan="6" class="loading"><i class="fa-solid fa-circle-notch fa-spin"></i></td></tr></tbody></table>
+      </div></div>
+    </section>
 
-  if (act === 'reject') {
-    const { data: wallet } = await supabaseAdmin.from('wallets').select('balance').eq('user_id', w.user_id).single();
-    await supabaseAdmin.from('wallets').update({ balance: Number(wallet.balance) + Number(w.amount) }).eq('user_id', w.user_id);
-    await supabaseAdmin.from('withdrawals').update({ status: 'rejected', note, processed_at: new Date().toISOString() }).eq('id', w.id);
-    await supabaseAdmin.from('transactions').update({ status: 'rejected' }).eq('reference', `wd_${w.id}`);
-    return res.json({ ok: true, action: 'rejected' });
-  }
+    <!-- Users (SEARCH FIXED) -->
+    <section id="users" class="section">
+      <h2 class="section-title"><i class="fa-solid fa-users"></i> User Management</h2>
+      <div class="filters">
+        <div class="form-group" style="flex: 1; max-width: 400px; margin-bottom: 0;">
+          <label class="form-label">Search Users</label>
+          <input type="text" id="user-search" class="form-input" placeholder="Search by email or name...">
+        </div>
+        <button class="btn btn-primary" onclick="searchUsers()" style="height: 42px;"><i class="fa-solid fa-magnifying-glass"></i> Search</button>
+        <button class="btn btn-success" onclick="clearSearch()" style="height: 42px;"><i class="fa-solid fa-rotate-right"></i> Reset</button>
+      </div>
+      <div class="card"><div class="table-container">
+        <table><thead><tr><th>Email</th><th>Name</th><th>Tier</th><th>Balance</th><th>Status</th><th>Actions</th></tr></thead>
+        <tbody id="users-table"><tr><td colspan="6" class="loading"><i class="fa-solid fa-circle-notch fa-spin"></i></td></tr></tbody></table>
+      </div></div>
+    </section>
 
-  if (act === 'approve') {
-    const bankId = TG_BANK_CODES[w.bank_name?.toLowerCase()] || w.bank_id;
-    if (!bankId) return res.status(400).json({ error: 'Invalid bank code for Target Growth' });
+    <!-- VIP Tiers -->
+    <section id="tiers" class="section">
+      <h2 class="section-title"><i class="fa-solid fa-crown"></i> Manage VIP Tiers</h2>
+      <div class="card"><div class="table-container">
+        <table><thead><tr><th>Tier</th><th>Upgrade Cost (₦)</th><th>Daily Boxes</th><th>Daily Earning (₦)</th><th>Action</th></tr></thead>
+        <tbody id="tiers-table"><tr><td colspan="5" class="loading"><i class="fa-solid fa-circle-notch fa-spin"></i></td></tr></tbody></table>
+      </div></div>
+    </section>
 
-    const { data: settings } = await supabaseAdmin.from('site_settings').select('key, value').eq('key', 'withdrawal_fee_percentage');
-    const feePercent = Number(settings?.[0]?.value || 0);
-    const feeAmount = Number(w.amount) * (feePercent / 100);
-    const netAmount = Number(w.amount) - feeAmount;
+    <!-- Wealth Packages -->
+    <section id="wealth" class="section">
+      <h2 class="section-title"><i class="fa-solid fa-gem"></i> Wealth Center Packages</h2>
+      <div class="card">
+        <h3 style="margin-bottom: 16px; color: var(--secondary); font-size: 1.1rem;"><i class="fa-solid fa-plus-circle"></i> Create New Package</h3>
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap:16px;">
+          <div class="form-group"><label class="form-label">Package Name</label><input type="text" id="wp-name" class="form-input" placeholder="e.g., Premium Plan"></div>
+          <div class="form-group"><label class="form-label">Investment (₦)</label><input type="number" id="wp-investment" class="form-input" placeholder="50000"></div>
+          <div class="form-group"><label class="form-label">Daily Return (₦)</label><input type="number" id="wp-daily" class="form-input" placeholder="2500"></div>
+          <div class="form-group"><label class="form-label">Duration (Days)</label><input type="number" id="wp-duration" class="form-input" placeholder="30"></div>
+          <div class="form-group"><label class="form-label">Total Return (₦)</label><input type="number" id="wp-total" class="form-input" placeholder="75000"></div>
+          <div class="form-group"><label class="form-label">Start Date (optional)</label><input type="date" id="wp-start" class="form-input"></div>
+          <div class="form-group"><label class="form-label">End Date (optional)</label><input type="date" id="wp-end" class="form-input"></div>
+        </div>
+        <button class="btn btn-primary" onclick="createWealthPackage()"><i class="fa-solid fa-plus"></i> Create Package</button>
+      </div>
+      <div class="card">
+        <h3 style="margin-bottom: 16px; color: var(--secondary); font-size: 1.1rem;"><i class="fa-solid fa-list"></i> All Packages</h3>
+        <div class="table-container">
+          <table><thead><tr><th>Name</th><th>Investment</th><th>Daily</th><th>Days</th><th>Total</th><th>Availability</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody id="wealth-packages-table"><tr><td colspan="8" class="loading"><i class="fa-solid fa-circle-notch fa-spin"></i></td></tr></tbody></table>
+        </div>
+      </div>
+    </section>
 
-    const identifier = `TGW${String(w.id).replace(/-/g, '').slice(0, 12)}${Date.now().toString(36).toUpperCase()}`;
-    await supabaseAdmin.from('withdrawals').update({
-      status: 'approved', provider_identifier: identifier, provider_status: 'initiating',
-      fee_amount: feeAmount, net_amount: netAmount
-    }).eq('id', w.id);
+    <!-- Gift Codes -->
+    <section id="giftcodes" class="section">
+      <h2 class="section-title"><i class="fa-solid fa-gift"></i> Generate Gift Code</h2>
+      <div class="card">
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap:16px;">
+          <div class="form-group"><label class="form-label">Amount (₦)</label><input type="number" id="gc-amount" class="form-input" value="1000"></div>
+          <div class="form-group"><label class="form-label">Max Uses</label><input type="number" id="gc-uses" class="form-input" value="1"></div>
+          <div class="form-group"><label class="form-label">Expires In (Days)</label><input type="number" id="gc-days" class="form-input" value="30"></div>
+        </div>
+        <button class="btn btn-primary" onclick="generateAdminGiftCode()"><i class="fa-solid fa-wand-magic-sparkles"></i> Generate Code</button>
+        <div id="gc-result" style="margin-top:16px; font-weight:700; color:var(--success); font-size:1.1rem; word-break: break-all;"></div>
+      </div>
+    </section>
 
-    try {
-      const provider = await initiateTransfer({
-        identifier, amount: netAmount, bankId, recipient: w.account_number,
-        accountName: w.account_name, ipnUrl: `https://rms888.vercel.app/api/webhooks/targetgrowths`, customerEmail: 'admin@rms.com'
+    <!-- Settings -->
+    <section id="settings" class="section">
+      <h2 class="section-title"><i class="fa-solid fa-gear"></i> Site Settings</h2>
+      <div class="card">
+        <h3 style="margin-bottom: 16px; color: var(--secondary); font-size: 1.1rem;"><i class="fa-solid fa-percent"></i> Withdrawal Fee</h3>
+        <div class="form-group" style="max-width: 300px;"><label class="form-label">Fee Percentage (%)</label><input type="number" id="withdrawal-fee" class="form-input" placeholder="e.g., 10 for 10%"></div>
+        <button class="btn btn-primary" onclick="saveWithdrawalFee()"><i class="fa-solid fa-save"></i> Save Fee</button>
+      </div>
+      <div class="card">
+        <h3 style="margin-bottom: 16px; color: var(--secondary); font-size: 1.1rem;"><i class="fa-solid fa-headset"></i> Support Links</h3>
+        <div class="form-group"><label class="form-label">Telegram Link</label><input type="text" id="link-telegram" class="form-input" placeholder="https://t.me/yourchannel"></div>
+        <div class="form-group"><label class="form-label">WhatsApp Link</label><input type="text" id="link-whatsapp" class="form-input" placeholder="https://wa.me/1234567890"></div>
+        <div class="form-group"><label class="form-label">Customer Service / Email</label><input type="text" id="link-support" class="form-input" placeholder="support@rms.com"></div>
+        <button class="btn btn-primary" onclick="saveSupportLinks()"><i class="fa-solid fa-save"></i> Save Support Links</button>
+      </div>
+    </section>
+  </div>
+
+  <!-- User Modal -->
+  <div class="modal-overlay" id="user-modal">
+    <div class="modal">
+      <div class="modal-header"><h3 class="modal-title">Manage User</h3><button class="modal-close" onclick="closeModal('user-modal')"><i class="fa-solid fa-xmark"></i></button></div>
+      <div class="user-info-box">
+        <div class="user-info-row"><span>Email:</span><span id="m-email">-</span></div>
+        <div class="user-info-row"><span>Current Balance:</span><span id="m-balance">₦0</span></div>
+        <div class="user-info-row"><span>Current Tier:</span><span id="m-tier">-</span></div>
+        <div class="user-info-row"><span>Status:</span><span id="m-status">Active</span></div>
+      </div>
+      <div class="form-group"><label class="form-label">Change VIP Tier</label>
+        <select id="m-tier-select" class="form-select"><option value="newbie">Newbie</option><option value="M1">M1</option><option value="M2">M2</option><option value="M3">M3</option><option value="M4">M4</option><option value="M5">M5</option><option value="M6">M6</option><option value="M7">M7</option></select>
+      </div>
+      <div class="form-group"><label class="form-label">Account Status</label>
+        <select id="m-freeze-select" class="form-select"><option value="false">Active (Unfrozen)</option><option value="true">Frozen (Blocked)</option></select>
+      </div>
+      <div class="form-group"><label class="form-label">Adjust Balance</label>
+        <div style="display:flex; gap:8px;">
+          <input type="number" id="m-amount" class="form-input" placeholder="Amount">
+          <button class="btn btn-success" onclick="adjustBalance('credit')">Credit</button>
+          <button class="btn btn-danger" onclick="adjustBalance('debit')">Debit</button>
+        </div>
+        <input type="text" id="m-reason" class="form-input" placeholder="Reason (e.g., Bonus)" style="margin-top:8px;">
+      </div>
+      <button class="btn btn-primary" style="width:100%; justify-content:center;" onclick="saveUserUpdates()"><i class="fa-solid fa-save"></i> Save Changes</button>
+    </div>
+  </div>
+
+  <!-- Message Modal -->
+  <div class="modal-overlay" id="message-modal">
+    <div class="modal">
+      <div class="modal-header"><h3 class="modal-title">Send Message</h3><button class="modal-close" onclick="closeModal('message-modal')"><i class="fa-solid fa-xmark"></i></button></div>
+      <input type="hidden" id="msg-user-id">
+      <div class="form-group"><label class="form-label">To: <span id="msg-user-email" style="color: var(--primary);"></span></label></div>
+      <div class="form-group"><label class="form-label">Title</label><input type="text" id="msg-title" class="form-input" placeholder="e.g., Account Update"></div>
+      <div class="form-group"><label class="form-label">Message</label><textarea id="msg-body" class="form-input" rows="4" placeholder="Type your message here..."></textarea></div>
+      <button class="btn btn-primary" style="width:100%; justify-content:center;" onclick="sendMessageToUser()"><i class="fa-solid fa-paper-plane"></i> Send Message</button>
+    </div>
+  </div>
+
+  <!-- Wealth Edit Modal -->
+  <div class="modal-overlay" id="wealth-modal">
+    <div class="modal">
+      <div class="modal-header"><h3 class="modal-title">Edit Package</h3><button class="modal-close" onclick="closeModal('wealth-modal')"><i class="fa-solid fa-xmark"></i></button></div>
+      <input type="hidden" id="w-edit-id">
+      <div class="form-group"><label class="form-label">Package Name</label><input type="text" id="w-edit-name" class="form-input"></div>
+      <div class="form-group"><label class="form-label">Investment (₦)</label><input type="number" id="w-edit-investment" class="form-input"></div>
+      <div class="form-group"><label class="form-label">Daily Return (₦)</label><input type="number" id="w-edit-daily" class="form-input"></div>
+      <div class="form-group"><label class="form-label">Duration (Days)</label><input type="number" id="w-edit-duration" class="form-input"></div>
+      <div class="form-group"><label class="form-label">Total Return (₦)</label><input type="number" id="w-edit-total" class="form-input"></div>
+      <div class="form-group"><label class="form-label">Start Date</label><input type="date" id="w-edit-start" class="form-input"></div>
+      <div class="form-group"><label class="form-label">End Date</label><input type="date" id="w-edit-end" class="form-input"></div>
+      <div class="form-group"><label class="form-label">Status</label>
+        <select id="w-edit-active" class="form-select"><option value="true">Active</option><option value="false">Inactive</option></select>
+      </div>
+      <button class="btn btn-primary" style="width:100%; justify-content:center;" onclick="saveWealthEdit()"><i class="fa-solid fa-save"></i> Save Changes</button>
+    </div>
+  </div>
+
+  <script src="/assets/js/notifications.js"></script>
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+    const supabase = createClient('https://ofysznsajwxnjqaumwch.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9meXN6bnNhand4bmpxYXVtd2NoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgyMzM4NDgsImV4cCI6MjEwMzgwOTg0OH0.XaHkP5WZ2nJVJXVdbG-D13rrD63g_09HxmJoZn7ZoWA');
+    window.supabase = supabase;
+
+    let currentUserId = null;
+    let wealthPackages = [];
+
+    async function getToken() {
+      return (await supabase.auth.getSession()).data.session.access_token;
+    }
+
+    async function checkAuth() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return window.location.href = '/login.html';
+      const { data: profile } = await supabase.from('profiles').select('is_admin').eq('id', user.id).single();
+      if (!profile?.is_admin) { alert('Access denied.'); window.location.href = '/dashboard.html'; return; }
+      document.getElementById('admin-email').textContent = user.email;
+      loadDashboard();
+      loadSettings();
+    }
+
+    window.showSection = (section, btn) => {
+      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+      document.getElementById(section).classList.add('active');
+      btn.classList.add('active');
+      if (section === 'deposits') loadDeposits();
+      if (section === 'withdrawals') loadWithdrawals();
+      if (section === 'users') loadUsers();
+      if (section === 'tiers') loadTiers();
+      if (section === 'wealth') loadWealthPackages();
+    };
+
+    window.closeModal = (id) => document.getElementById(id).classList.remove('active');
+    window.logout = async () => { await supabase.auth.signOut(); window.location.href = '/login.html'; };
+
+    async function loadDashboard() {
+      const resetStats = () => {
+        document.getElementById('stat-users').textContent = '0';
+        document.getElementById('stat-deposits').textContent = '₦0';
+        document.getElementById('stat-pending-deposits').textContent = '0';
+        document.getElementById('stat-withdrawals').textContent = '₦0';
+        document.getElementById('stat-pending-withdrawals').textContent = '0';
+      };
+
+      try {
+        const token = await getToken();
+        const response = await fetch('/api/admin?action=get-dashboard-stats', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const stats = await response.json();
+
+        if (!response.ok) {
+          throw new Error(stats.error || 'Failed to load dashboard statistics');
+        }
+
+        document.getElementById('stat-users').textContent =
+          Number(stats.users || 0).toLocaleString();
+        document.getElementById('stat-deposits').textContent =
+          `₦${Number(stats.totalDeposits || 0).toLocaleString()}`;
+        document.getElementById('stat-pending-deposits').textContent =
+          Number(stats.pendingDeposits || 0).toLocaleString();
+        document.getElementById('stat-withdrawals').textContent =
+          `₦${Number(stats.totalWithdrawals || 0).toLocaleString()}`;
+        document.getElementById('stat-pending-withdrawals').textContent =
+          Number(stats.pendingWithdrawals || 0).toLocaleString();
+
+        console.log('[ADMIN] Dashboard statistics:', stats);
+      } catch (error) {
+        console.error('[ADMIN] Dashboard statistics failed:', error);
+        resetStats();
+        if (typeof showToast === 'function') {
+          showToast('Failed to load dashboard statistics', 'error');
+        }
+      }
+    }
+
+    window.loadDeposits = async function () {
+      const status = document.getElementById('deposit-filter').value;
+      const res = await fetch(`/api/admin?action=get-deposits&status=${status}`, { headers: { 'Authorization': `Bearer ${await getToken()}` } });
+      const data = await res.json();
+      const tbody = document.getElementById('deposits-table');
+      if (!data.deposits || !data.deposits.length) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:40px;color:rgba(255,255,255,0.5);">No deposits found</td></tr>'; return; }
+      tbody.innerHTML = data.deposits.map(d => `
+        <tr>
+          <td><div style="font-weight:700;">${d.profiles?.full_name || 'User'}</div><div style="font-size:0.75rem;color:rgba(255,255,255,0.6);">${d.profiles?.email}</div></td>
+          <td style="font-weight:800;color:var(--success);">₦${Number(d.amount).toLocaleString()}</td>
+          <td>${d.method || 'targetgrowths'}</td>
+          <td><span class="status-badge ${d.status}">${d.status}</span></td>
+          <td>${new Date(d.created_at).toLocaleDateString()}</td>
+        </tr>`).join('');
+    };
+
+    window.loadWithdrawals = async function () {
+      const status = document.getElementById('withdrawal-filter').value;
+      const res = await fetch(`/api/admin?action=get-withdrawals&status=${encodeURIComponent(status)}`, {
+        headers: { Authorization: `Bearer ${await getToken()}` }
       });
-      await supabaseAdmin.from('withdrawals').update({
-        provider_reference: provider?.transaction_ref, provider_status: 'provider_pending', provider_response: provider
-      }).eq('id', w.id);
-      await supabaseAdmin.from('transactions').update({ status: 'approved' }).eq('reference', `wd_${w.id}`);
-      return res.json({ ok: true, action: 'approved', status: 'provider_pending', netAmount });
-    } catch (e) {
-      await supabaseAdmin.from('withdrawals').update({ status: 'pending', provider_status: 'failed' }).eq('id', w.id);
-      return res.status(502).json({ error: e.message });
+      const data = await res.json();
+      const tbody = document.getElementById('withdrawals-table');
+      if (!res.ok) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--danger);">${data.error || 'Failed to load withdrawals'}</td></tr>`;
+        return;
+      }
+      if (!data.withdrawals || !data.withdrawals.length) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:40px;color:rgba(255,255,255,0.5);">No withdrawals found</td></tr>';
+        return;
+      }
+      tbody.innerHTML = data.withdrawals.map(w => `
+        <tr>
+          <td><div style="font-weight:700;">${w.profiles?.full_name || 'User'}</div><div style="font-size:0.75rem;color:rgba(255,255,255,0.6);">${w.profiles?.email || ''}</div></td>
+          <td style="font-weight:800;color:var(--warning);">₦${Number(w.amount || 0).toLocaleString()}</td>
+          <td>${w.bank_name || '-'}</td><td>${w.account_number || '-'}</td>
+          <td><span class="status-badge ${w.status}">${w.status}</span><div style="font-size:0.72rem;color:rgba(255,255,255,0.55);">${w.provider_status || ''}</div></td>
+          <td>${w.status === 'pending' ? `
+            <button class="btn btn-success btn-sm" onclick="processWithdrawal('${w.id}', 'approve', this)"><i class="fa-solid fa-check"></i> Pay</button>
+            <button class="btn btn-danger btn-sm" onclick="processWithdrawal('${w.id}', 'reject', this)"><i class="fa-solid fa-xmark"></i></button>
+          ` : '-'}</td>
+        </tr>`).join('');
+    };
+
+    window.processWithdrawal = async (id, act, button) => {
+      if (!confirm(`Are you sure you want to ${act} this withdrawal?`)) return;
+      if (button) {
+        button.disabled = true;
+        button.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Processing';
+      }
+      const res = await fetch('/api/admin?action=process-withdrawal', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${await getToken()}` },
+        body: JSON.stringify({ withdrawal_id: id, act })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        if (button) button.disabled = false;
+        alert(data.error || 'Withdrawal processing failed');
+        await loadWithdrawals();
+        return;
+      }
+      showToast(`Withdrawal ${act}d! (Net sent: ₦${Number(data.netAmount || 0).toLocaleString()})`, 'success');
+      // The default Pending filter reloads without the approved row.
+      await loadWithdrawals();
+      await loadDashboard();
+    };
+
+    // ===== USERS + FIXED SEARCH =====
+    window.loadUsers = async function () {
+      const search = (document.getElementById('user-search').value || '').trim();
+      const tbody = document.getElementById('users-table');
+      tbody.innerHTML = '<tr><td colspan="6" class="loading"><i class="fa-solid fa-circle-notch fa-spin"></i></td></tr>';
+      const res = await fetch(`/api/admin?action=get-users&search=${encodeURIComponent(search)}`, { headers: { 'Authorization': `Bearer ${await getToken()}` } });
+      const data = await res.json();
+      if (!data.users || !data.users.length) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:40px;color:rgba(255,255,255,0.5);">No users found${search ? ` matching "${search}"` : ''}</td></tr>`;
+        return;
+      }
+      tbody.innerHTML = data.users.map(u => {
+        const isFrozen = u.is_frozen ? '<span class="status-badge frozen">Frozen</span>' : '<span class="status-badge approved">Active</span>';
+        return `<tr>
+          <td>${u.email}</td><td>${u.full_name || '-'}</td>
+          <td><span class="status-badge" style="background:rgba(0,212,255,0.2);color:var(--primary);">${u.vip_level || 'newbie'}</span></td>
+          <td style="font-weight:700;">₦${Number(u.wallets?.[0]?.balance || 0).toLocaleString()}</td>
+          <td>${isFrozen}</td>
+          <td style="white-space:nowrap;">
+            <button class="btn btn-primary btn-sm" onclick="openUserModal('${u.id}', '${u.email}', ${u.wallets?.[0]?.balance || 0}, '${u.vip_level || 'newbie'}', ${u.is_frozen})"><i class="fa-solid fa-user-gear"></i> Manage</button>
+            <button class="btn btn-success btn-sm" onclick="openMessageModal('${u.id}', '${u.email}')"><i class="fa-solid fa-envelope"></i></button>
+          </td>
+        </tr>`;
+      }).join('');
+    };
+
+    window.searchUsers = () => loadUsers();
+    window.clearSearch = () => { document.getElementById('user-search').value = ''; loadUsers(); };
+
+    // Enter key triggers search
+    document.getElementById('user-search').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') loadUsers();
+    });
+
+    window.openUserModal = (id, email, balance, tier, isFrozen) => {
+      currentUserId = id;
+      document.getElementById('m-email').textContent = email;
+      document.getElementById('m-balance').textContent = '₦' + Number(balance).toLocaleString();
+      document.getElementById('m-tier').textContent = tier.toUpperCase();
+      document.getElementById('m-status').textContent = isFrozen ? 'FROZEN' : 'Active';
+      document.getElementById('m-tier-select').value = tier;
+      document.getElementById('m-freeze-select').value = isFrozen ? 'true' : 'false';
+      document.getElementById('user-modal').classList.add('active');
+    };
+
+    window.saveUserUpdates = async () => {
+      const res = await fetch('/api/admin?action=update-user', {
+        method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${await getToken()}` },
+        body: JSON.stringify({ user_id: currentUserId, vip_level: document.getElementById('m-tier-select').value, is_frozen: document.getElementById('m-freeze-select').value === 'true' })
+      });
+      if (res.ok) { showToast('User updated!', 'success'); closeModal('user-modal'); loadUsers(); }
+      else alert((await res.json()).error);
+    };
+
+    window.adjustBalance = async (type) => {
+      const amount = document.getElementById('m-amount').value;
+      const reason = document.getElementById('m-reason').value;
+      if (!amount) return alert('Enter an amount');
+      const res = await fetch('/api/admin?action=adjust-balance', {
+        method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${await getToken()}` },
+        body: JSON.stringify({ user_id: currentUserId, amount, type, reason })
+      });
+      if (res.ok) { showToast(`Successfully ${type}ed ₦${amount}!`, 'success'); document.getElementById('m-amount').value = ''; document.getElementById('m-reason').value = ''; loadUsers(); }
+      else alert((await res.json()).error);
+    };
+
+    // ===== TIERS =====
+    window.loadTiers = async function () {
+      const { data: tiers } = await supabase.from('rms_tiers').select('*').order('upgrade_cost', { ascending: true });
+      document.getElementById('tiers-table').innerHTML = tiers.map(t => `
+        <tr>
+          <td style="font-weight:700;">${t.tier}</td>
+          <td><input type="number" class="form-input" id="cost-${t.tier}" value="${t.upgrade_cost}" style="width:100px; padding:6px;"></td>
+          <td><input type="number" class="form-input" id="boxes-${t.tier}" value="${t.daily_boxes}" style="width:70px; padding:6px;"></td>
+          <td><input type="number" class="form-input" id="earn-${t.tier}" value="${t.daily_earning}" style="width:100px; padding:6px;"></td>
+          <td><button class="btn btn-success btn-sm" onclick="saveTier('${t.tier}')"><i class="fa-solid fa-save"></i></button></td>
+        </tr>`).join('');
+    };
+
+    window.saveTier = async (tier) => {
+      const res = await fetch('/api/admin?action=update-tier', {
+        method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${await getToken()}` },
+        body: JSON.stringify({ tier, upgrade_cost: document.getElementById(`cost-${tier}`).value, daily_boxes: document.getElementById(`boxes-${tier}`).value, daily_earning: document.getElementById(`earn-${tier}`).value })
+      });
+      if (res.ok) showToast('Tier updated!', 'success');
+    };
+
+    // ===== WEALTH PACKAGES =====
+    window.loadWealthPackages = async function () {
+      const tbody = document.getElementById('wealth-packages-table');
+      tbody.innerHTML = '<tr><td colspan="8" class="loading"><i class="fa-solid fa-circle-notch fa-spin"></i></td></tr>';
+      const res = await fetch('/api/admin?action=get-wealth-packages', { headers: { 'Authorization': `Bearer ${await getToken()}` } });
+      const data = await res.json();
+      wealthPackages = data.packages || [];
+      if (!wealthPackages.length) { tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:40px;color:rgba(255,255,255,0.5);">No packages yet</td></tr>'; return; }
+      tbody.innerHTML = wealthPackages.map(p => {
+        const avail = (p.start_date || p.end_date) ? `${p.start_date ? p.start_date.slice(0,10) : 'Any'} → ${p.end_date ? p.end_date.slice(0,10) : 'Any'}` : 'Always';
+        return `<tr>
+          <td style="font-weight:700;">${p.name}</td>
+          <td style="color:var(--warning);">₦${Number(p.investment_amount).toLocaleString()}</td>
+          <td style="color:var(--success);">₦${Number(p.daily_return).toLocaleString()}</td>
+          <td>${p.duration_days}</td>
+          <td style="color:var(--primary);">₦${Number(p.total_return).toLocaleString()}</td>
+          <td style="font-size:0.75rem;">${avail}</td>
+          <td><span class="status-badge ${p.is_active ? 'approved' : 'rejected'}">${p.is_active ? 'Active' : 'Inactive'}</span></td>
+          <td style="white-space:nowrap;">
+            <button class="btn btn-primary btn-sm" onclick="openWealthEdit('${p.id}')"><i class="fa-solid fa-edit"></i></button>
+            <button class="btn btn-danger btn-sm" onclick="deleteWealthPackage('${p.id}')"><i class="fa-solid fa-trash"></i></button>
+          </td>
+        </tr>`;
+      }).join('');
+    };
+
+    window.createWealthPackage = async () => {
+      const payload = {
+        name: document.getElementById('wp-name').value,
+        investment_amount: document.getElementById('wp-investment').value,
+        daily_return: document.getElementById('wp-daily').value,
+        duration_days: document.getElementById('wp-duration').value,
+        total_return: document.getElementById('wp-total').value,
+        start_date: document.getElementById('wp-start').value || null,
+        end_date: document.getElementById('wp-end').value || null
+      };
+      if (!payload.name || !payload.investment_amount || !payload.daily_return || !payload.duration_days || !payload.total_return) {
+        return alert('Please fill all required fields');
+      }
+      const res = await fetch('/api/admin?action=create-wealth-package', {
+        method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${await getToken()}` },
+        body: JSON.stringify(payload)
+      });
+      if (res.ok) {
+        showToast('Package created!', 'success');
+        ['wp-name','wp-investment','wp-daily','wp-duration','wp-total','wp-start','wp-end'].forEach(id => document.getElementById(id).value = '');
+        loadWealthPackages();
+      } else alert((await res.json()).error);
+    };
+
+    window.openWealthEdit = (id) => {
+      const p = wealthPackages.find(x => x.id === id);
+      if (!p) return;
+      document.getElementById('w-edit-id').value = p.id;
+      document.getElementById('w-edit-name').value = p.name;
+      document.getElementById('w-edit-investment').value = p.investment_amount;
+      document.getElementById('w-edit-daily').value = p.daily_return;
+      document.getElementById('w-edit-duration').value = p.duration_days;
+      document.getElementById('w-edit-total').value = p.total_return;
+      document.getElementById('w-edit-start').value = p.start_date ? p.start_date.slice(0,10) : '';
+      document.getElementById('w-edit-end').value = p.end_date ? p.end_date.slice(0,10) : '';
+      document.getElementById('w-edit-active').value = p.is_active ? 'true' : 'false';
+      document.getElementById('wealth-modal').classList.add('active');
+    };
+
+    window.saveWealthEdit = async () => {
+      const res = await fetch('/api/admin?action=update-wealth-package', {
+        method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${await getToken()}` },
+        body: JSON.stringify({
+          id: document.getElementById('w-edit-id').value,
+          name: document.getElementById('w-edit-name').value,
+          investment_amount: document.getElementById('w-edit-investment').value,
+          daily_return: document.getElementById('w-edit-daily').value,
+          duration_days: document.getElementById('w-edit-duration').value,
+          total_return: document.getElementById('w-edit-total').value,
+          start_date: document.getElementById('w-edit-start').value || null,
+          end_date: document.getElementById('w-edit-end').value || null,
+          is_active: document.getElementById('w-edit-active').value === 'true'
+        })
+      });
+      if (res.ok) { showToast('Package updated!', 'success'); closeModal('wealth-modal'); loadWealthPackages(); }
+      else alert((await res.json()).error);
+    };
+
+    window.deleteWealthPackage = async (id) => {
+      if (!confirm('Delete this package permanently?')) return;
+      const res = await fetch('/api/admin?action=delete-wealth-package', {
+        method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${await getToken()}` },
+        body: JSON.stringify({ id })
+      });
+      if (res.ok) { showToast('Package deleted!', 'success'); loadWealthPackages(); }
+      else alert((await res.json()).error);
+    };
+
+    // ===== GIFT CODES =====
+    window.generateAdminGiftCode = async () => {
+      const res = await fetch('/api/admin?action=admin-generate-gift-code', {
+        method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${await getToken()}` },
+        body: JSON.stringify({ amount: document.getElementById('gc-amount').value, max_uses: document.getElementById('gc-uses').value, expires_in_days: document.getElementById('gc-days').value })
+      });
+      const data = await res.json();
+      if (res.ok) document.getElementById('gc-result').textContent = `Generated: ${data.code}`;
+      else alert(data.error);
+    };
+
+    // ===== MESSAGES =====
+    window.openMessageModal = (userId, email) => {
+      document.getElementById('msg-user-id').value = userId;
+      document.getElementById('msg-user-email').textContent = email;
+      document.getElementById('message-modal').classList.add('active');
+    };
+
+    window.sendMessageToUser = async () => {
+      const res = await fetch('/api/admin?action=send-message', {
+        method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${await getToken()}` },
+        body: JSON.stringify({ user_id: document.getElementById('msg-user-id').value, title: document.getElementById('msg-title').value, body: document.getElementById('msg-body').value })
+      });
+      if (res.ok) { showToast('Message sent!', 'success'); closeModal('message-modal'); document.getElementById('msg-title').value = ''; document.getElementById('msg-body').value = ''; }
+      else alert((await res.json()).error);
+    };
+
+    // ===== SETTINGS =====
+    async function loadSettings() {
+      const res = await fetch('/api/admin?action=get-settings', { headers: { 'Authorization': `Bearer ${await getToken()}` } });
+      const data = await res.json();
+      if (data.settings) {
+        document.getElementById('link-telegram').value = data.settings.telegram_link || '';
+        document.getElementById('link-whatsapp').value = data.settings.whatsapp_link || '';
+        document.getElementById('link-support').value = data.settings.support_link || '';
+        document.getElementById('withdrawal-fee').value = data.settings.withdrawal_fee_percentage || '0';
+      }
     }
-  }
-}
 
-// ==========================================
-// USERS (Search fixed)
-// ==========================================
-async function getUsers(req, res) {
-  const search = (req.query.search || '').trim();
-  let q = supabaseAdmin.from('profiles')
-    .select('id, email, full_name, vip_level, is_frozen, created_at, wallets!left(balance)')
-    .order('created_at', { ascending: false })
-    .limit(1000);
-  if (search) q = q.or(`email.ilike.%${search}%,full_name.ilike.%${search}%`);
-  const { data } = await q;
-  return res.json({ ok: true, users: data || [] });
-}
+    window.saveSupportLinks = async () => {
+      await fetch('/api/admin?action=save-support-links', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${await getToken()}` }, body: JSON.stringify({ telegram: document.getElementById('link-telegram').value, whatsapp: document.getElementById('link-whatsapp').value, support: document.getElementById('link-support').value }) });
+      showToast('Support links saved!', 'success');
+    };
 
-async function updateUser(req, res) {
-  const { user_id, vip_level, is_frozen } = req.body;
-  const updates = {};
-  if (vip_level !== undefined) updates.vip_level = vip_level;
-  if (is_frozen !== undefined) updates.is_frozen = is_frozen;
-  const { error } = await supabaseAdmin.from('profiles').update(updates).eq('id', user_id);
-  if (error) return res.status(500).json({ error: error.message });
-  return res.json({ ok: true });
-}
+    window.saveWithdrawalFee = async () => {
+      await fetch('/api/admin?action=save-support-links', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${await getToken()}` }, body: JSON.stringify({ withdrawal_fee_percentage: document.getElementById('withdrawal-fee').value }) });
+      showToast('Withdrawal fee saved!', 'success');
+    };
 
-async function adjustBalance(req, res) {
-  const { user_id, amount, type, reason } = req.body;
-  const numAmount = Number(amount);
-  if (!numAmount || numAmount <= 0) return res.status(400).json({ error: 'Invalid amount' });
-  const { data: wallet } = await supabaseAdmin.from('wallets').select('balance').eq('user_id', user_id).single();
-  if (!wallet) return res.status(400).json({ error: 'User wallet not found' });
-  let newBalance = wallet.balance;
-  if (type === 'credit') newBalance += numAmount;
-  else if (type === 'debit') {
-    if (wallet.balance < numAmount) return res.status(400).json({ error: 'Insufficient balance for debit' });
-    newBalance -= numAmount;
-  } else return res.status(400).json({ error: 'Invalid type' });
-  await supabaseAdmin.from('wallets').update({ balance: newBalance, updated_at: new Date().toISOString() }).eq('user_id', user_id);
-  await supabaseAdmin.from('transactions').insert({
-    user_id, type: type === 'credit' ? 'admin_credit' : 'admin_debit', amount: numAmount,
-    status: 'approved', reference: `admin_adj_${Date.now()}`, description: `Admin ${type}: ${reason || 'Manual adjustment'}`
-  });
-  return res.json({ ok: true, new_balance: newBalance });
-}
-
-// ==========================================
-// VIP TIERS
-// ==========================================
-async function updateTier(req, res) {
-  const { tier, upgrade_cost, daily_boxes, daily_earning } = req.body;
-  const { error } = await supabaseAdmin.from('rms_tiers').update({
-    upgrade_cost: Number(upgrade_cost), daily_boxes: Number(daily_boxes), daily_earning: Number(daily_earning)
-  }).eq('tier', tier);
-  if (error) return res.status(500).json({ error: error.message });
-  return res.json({ ok: true });
-}
-
-// ==========================================
-// GIFT CODES
-// ==========================================
-async function adminGenerateGiftCode(req, res) {
-  const { amount, max_uses, expires_in_days } = req.body;
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-  let code = 'ADMIN-';
-  for (let i = 0; i < 8; i++) code += chars.charAt(Math.floor(Math.random() * chars.length));
-  const expiresAt = new Date();
-  expiresAt.setDate(expiresAt.getDate() + Number(expires_in_days || 30));
-  const { error } = await supabaseAdmin.from('gift_codes').insert({
-    code, 
-    amount: Number(amount), 
-    max_uses: Number(max_uses), 
-    used_count: 0,
-    is_active: true, 
-    created_by: null,  // ✅ FIXED: Use NULL instead of 'admin'
-    expires_at: expiresAt.toISOString()
-  });
-  if (error) return res.status(500).json({ error: error.message });
-  return res.json({ ok: true, code });
-}
-// ==========================================
-// MESSAGES
-// ==========================================
-async function sendMessage(req, res) {
-  const { user_id, title, body } = req.body;
-  const { error } = await supabaseAdmin.from('messages').insert({ user_id, title, body, is_read: false, created_at: new Date().toISOString() });
-  if (error) return res.status(500).json({ error: error.message });
-  return res.json({ ok: true });
-}
-
-// ==========================================
-// WEALTH PACKAGES (CRUD + Dates)
-// ==========================================
-async function getWealthPackages(req, res) {
-  const { data } = await supabaseAdmin.from('wealth_packages').select('*').order('investment_amount', { ascending: true });
-  return res.json({ ok: true, packages: data || [] });
-}
-
-async function createWealthPackage(req, res) {
-  const { name, investment_amount, daily_return, duration_days, total_return, start_date, end_date } = req.body;
-  if (!name || !investment_amount || !daily_return || !duration_days || !total_return) {
-    return res.status(400).json({ error: 'All fields are required' });
-  }
-  const { data, error } = await supabaseAdmin.from('wealth_packages').insert({
-    name,
-    investment_amount: Number(investment_amount),
-    daily_return: Number(daily_return),
-    duration_days: Number(duration_days),
-    total_return: Number(total_return),
-    start_date: start_date || null,
-    end_date: end_date || null,
-    is_active: true
-  }).select().single();
-  if (error) return res.status(500).json({ error: error.message });
-  return res.json({ ok: true, package: data });
-}
-
-async function updateWealthPackage(req, res) {
-  const { id, name, investment_amount, daily_return, duration_days, total_return, is_active, start_date, end_date } = req.body;
-  const updates = { updated_at: new Date().toISOString() };
-  if (name !== undefined) updates.name = name;
-  if (investment_amount !== undefined) updates.investment_amount = Number(investment_amount);
-  if (daily_return !== undefined) updates.daily_return = Number(daily_return);
-  if (duration_days !== undefined) updates.duration_days = Number(duration_days);
-  if (total_return !== undefined) updates.total_return = Number(total_return);
-  if (is_active !== undefined) updates.is_active = is_active;
-  if (start_date !== undefined) updates.start_date = start_date || null;
-  if (end_date !== undefined) updates.end_date = end_date || null;
-  const { error } = await supabaseAdmin.from('wealth_packages').update(updates).eq('id', id);
-  if (error) return res.status(500).json({ error: error.message });
-  return res.json({ ok: true });
-}
-
-async function deleteWealthPackage(req, res) {
-  const { id } = req.body;
-  const { error } = await supabaseAdmin.from('wealth_packages').delete().eq('id', id);
-  if (error) return res.status(500).json({ error: error.message });
-  return res.json({ ok: true });
-}
-
-// ==========================================
-// SETTINGS
-// ==========================================
-async function getSettings(req, res) {
-  const { data } = await supabaseAdmin.from('site_settings').select('key, value');
-  const settings = {};
-  (data || []).forEach(row => { settings[row.key] = row.value; });
-  return res.json({ ok: true, settings });
-}
-
-async function saveSetting(req, res) {
-  const { key, value } = req.body;
-  await supabaseAdmin.from('site_settings').upsert({ key, value: String(value) });
-  return res.json({ ok: true });
-}
-
-async function saveSupportLinks(req, res) {
-  const { telegram, whatsapp, support, withdrawal_fee_percentage } = req.body;
-  if (telegram) await supabaseAdmin.from('site_settings').upsert({ key: 'telegram_link', value: telegram });
-  if (whatsapp) await supabaseAdmin.from('site_settings').upsert({ key: 'whatsapp_link', value: whatsapp });
-  if (support) await supabaseAdmin.from('site_settings').upsert({ key: 'support_link', value: support });
-  if (withdrawal_fee_percentage !== undefined) await supabaseAdmin.from('site_settings').upsert({ key: 'withdrawal_fee_percentage', value: String(withdrawal_fee_percentage) });
-  return res.json({ ok: true });
-}
+    checkAuth();
+  </script>
+</body>
+</html>
