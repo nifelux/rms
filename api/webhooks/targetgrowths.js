@@ -119,7 +119,46 @@ export default async function handler(req, res) {
         console.log(`[TG-WEBHOOK] ✅ Wallet updated successfully to ${newBalance}`);
       }
       // --------------------------
+      // AFTER crediting the wallet in the webhook, add this:
 
+// 6. HANDLE REFERRAL COMMISSION (10% of deposit)
+const { data: depositingUser } = await supabaseAdmin
+  .from('profiles')
+  .select('referred_by')
+  .eq('id', deposit.user_id)
+  .single();
+
+if (depositingUser?.referred_by) {
+  const commissionAmount = Number(deposit.amount) * 0.10; // 10% commission
+  
+  // Credit referrer's wallet
+  const { data: referrerWallet } = await supabaseAdmin
+    .from('wallets')
+    .select('balance')
+    .eq('user_id', depositingUser.referred_by)
+    .single();
+  
+  if (referrerWallet) {
+    const newReferrerBalance = Number(referrerWallet.balance) + commissionAmount;
+    
+    await supabaseAdmin
+      .from('wallets')
+      .update({ balance: newReferrerBalance, updated_at: new Date().toISOString() })
+      .eq('user_id', depositingUser.referred_by);
+    
+    // Record the commission
+    await supabaseAdmin.from('referral_commissions').insert({
+      referrer_id: depositingUser.referred_by,
+      referred_user_id: deposit.user_id,
+      deposit_id: deposit.id,
+      commission_amount: commissionAmount,
+      status: 'paid',
+      created_at: new Date().toISOString()
+    });
+    
+    console.log('[WEBHOOK] Referral commission:', commissionAmount, 'paid to', depositingUser.referred_by);
+  }
+}
       // Record transaction
       await supabaseAdmin.from('transactions').insert({
         user_id: deposit.user_id,
