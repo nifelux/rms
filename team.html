@@ -217,6 +217,56 @@
       text-align: center;
     }
     .reward-info strong { color: #ffd700; }
+    .generated-codes {
+      margin-top: 18px;
+      display: grid;
+      gap: 12px;
+    }
+    .generated-codes-title {
+      color: #ffd700;
+      font-size: 0.95rem;
+      font-weight: 800;
+      margin-bottom: 4px;
+    }
+    .generated-code-card {
+      background: rgba(0,0,0,0.22);
+      border: 1px solid rgba(255,215,0,0.25);
+      border-radius: 12px;
+      padding: 14px;
+    }
+    .generated-code-value {
+      color: #ffd700;
+      font-family: monospace;
+      font-size: 1.05rem;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      word-break: break-all;
+    }
+    .generated-code-meta {
+      color: rgba(255,255,255,0.65);
+      font-size: 0.78rem;
+      margin-top: 6px;
+      line-height: 1.5;
+    }
+    .generated-code-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .code-copy-btn {
+      background: rgba(255,215,0,0.15);
+      border: 1px solid rgba(255,215,0,0.7);
+      color: #ffd700;
+      padding: 6px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.78rem;
+      font-weight: 700;
+    }
+    .code-active { color: #00ff88; }
+    .code-used, .code-expired { color: #ff8888; }
     .no-m2-notice {
       background: rgba(255,26,26,0.1);
       border: 1px solid rgba(255,26,26,0.3);
@@ -413,6 +463,8 @@
         <i class="fa-solid fa-ticket"></i> Generate Gift Codes
       </button>
       
+      <div id="generated-gift-codes" class="generated-codes" aria-live="polite"></div>
+
       <div class="reward-info">
         <strong>Reward Tiers:</strong><br>
         M2: 5% | M3: 8% | M4: 12%<br>
@@ -531,9 +583,9 @@
               .from('deposits')
               .select('*', { count: 'exact', head: true })
               .eq('user_id', ref.id)
-              .eq('status', 'approved');
+              .in('status', ['approved', 'completed']);
             
-            const isActive = count > 0;
+            const isActive = (count || 0) > 0;
             const initials = (ref.full_name || ref.email).substring(0, 2).toUpperCase();
             const date = new Date(ref.created_at).toLocaleDateString('en-NG', { 
               month: 'short', 
@@ -566,12 +618,15 @@
           }
         }
 
-        // 6. Check Gift Code Generation Status
+        // 6. Load previously generated codes so they remain visible after refresh.
+        const savedGiftCodes = await loadMyGiftCodes();
+
+        // 7. Check Gift Code Generation Status
         const giftSection = document.getElementById('gift-reward-section');
         const noM2Notice = document.getElementById('no-m2-notice');
         const claimBtn = document.getElementById('claim-gift-btn');
         
-        if (m2Count >= 1) {
+        if (m2Count >= 1 || savedGiftCodes.length > 0) {
           giftSection.style.display = 'block';
           noM2Notice.style.display = 'none';
           document.getElementById('high-tier-count').textContent = m2Count;
@@ -598,6 +653,88 @@
         console.error('Team loading error:', err);
         showToast('Error loading team data', 'error');
       }
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function codeState(code) {
+      if (!code?.is_active) return { label: 'Used', className: 'code-used' };
+      if (code?.expires_at && new Date(code.expires_at) < new Date()) {
+        return { label: 'Expired', className: 'code-expired' };
+      }
+      return { label: 'Active', className: 'code-active' };
+    }
+
+    function renderSavedGiftCodes(codes) {
+      const container = document.getElementById('generated-gift-codes');
+      if (!container) return;
+
+      if (!codes.length) {
+        container.innerHTML = '';
+        return;
+      }
+
+      container.innerHTML = `
+        <div class="generated-codes-title">Your Generated Gift Codes</div>
+        ${codes.map(code => {
+          const state = codeState(code);
+          const amount = Number(code.amount || 0).toLocaleString();
+          const expiry = code.expires_at
+            ? new Date(code.expires_at).toLocaleDateString('en-NG')
+            : 'No expiry';
+          const safeCode = escapeHtml(code.code);
+          return `
+            <div class="generated-code-card">
+              <div class="generated-code-value">${safeCode}</div>
+              <div class="generated-code-meta">Value: ₦${amount} · Expires: ${escapeHtml(expiry)}</div>
+              <div class="generated-code-actions">
+                <span class="${state.className}">${state.label}</span>
+                <button class="code-copy-btn" type="button" data-code="${safeCode}">
+                  <i class="fa-regular fa-copy"></i> Copy
+                </button>
+              </div>
+            </div>
+          `;
+        }).join('')}
+      `;
+
+      container.querySelectorAll('.code-copy-btn').forEach(button => {
+        button.addEventListener('click', async () => {
+          const code = button.getAttribute('data-code') || '';
+          try {
+            await navigator.clipboard.writeText(code);
+            showToast('Code copied!', 'success');
+          } catch (err) {
+            console.error('[GIFT-CODE-UI] Copy failed:', err);
+            showToast('Unable to copy code', 'error');
+          }
+        });
+      });
+    }
+
+    async function loadMyGiftCodes() {
+      const session = (await supabase.auth.getSession()).data.session;
+      if (!session) return [];
+
+      const res = await fetch('/api/finance?action=getMyGiftCodes', {
+        headers: { Authorization: `Bearer ${session.access_token}` }
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to load generated gift codes');
+      }
+
+      const codes = Array.isArray(data.codes) ? data.codes : [];
+      renderSavedGiftCodes(codes);
+      return codes;
     }
 
     // Make functions globally accessible
@@ -636,7 +773,8 @@
 
         console.log('[GIFT-CODE-UI] Showing modal...');
         // Show generated codes in modal
-        showGeneratedCodesModal(data.codes);
+        showGeneratedCodesModal(data.codes || []);
+        renderSavedGiftCodes(data.codes || []);
         
         // Reload to update the button state
         setTimeout(() => {
@@ -653,6 +791,7 @@
 
     // Make this globally accessible
     window.showGeneratedCodesModal = (codes) => {
+      codes = Array.isArray(codes) ? codes : [];
       console.log('[MODAL] Function called with', codes.length, 'codes');
       
       const modal = document.getElementById('gift-code-modal');
@@ -681,7 +820,7 @@
           </div>
           <div style="background: rgba(0,0,0,0.4); padding: 12px; border-radius: 8px; text-align: center; font-family: monospace; font-size: 1.1rem; font-weight: 800; color: #ffd700; letter-spacing: 2px; margin-bottom: 8px; word-break: break-all;">${c.code}</div>
           <div style="display: flex; justify-content: space-between; align-items: center;">
-            <span style="color: rgba(255,255,255,0.6); font-size: 0.85rem;">Value: ₦${c.amount.toLocaleString()}</span>
+            <span style="color: rgba(255,255,255,0.6); font-size: 0.85rem;">Value: ₦${Number(c.amount || 0).toLocaleString()}</span>
             <button onclick="navigator.clipboard.writeText('${c.code}'); showToast('Code copied!', 'success')" style="background: rgba(255,215,0,0.2); border: 1px solid #ffd700; color: #ffd700; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 0.8rem; font-weight: 600;">
               <i class="fa-regular fa-copy"></i> Copy
             </button>
